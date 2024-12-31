@@ -1,0 +1,18 @@
+[package]
+name = "loot-and-roam"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+float-cmp = "0.9.0"
+glam = "0.29.2"
+monoio = "0.2.3"
+rayon = "1.10.0"
+slotmap = "1.0.7"
+soa_derive = "0.13.0"
+stable-vec = "0.4.1"
+vector3d = "0.2.1"
+vello = "0.3.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
