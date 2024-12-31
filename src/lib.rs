@@ -1,2 +1,2 @@
-#[feature(auto_traits)]
+#![feature(auto_traits)]
 pub mod common;

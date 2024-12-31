@@ -2,14 +2,12 @@
 
 use std::any::{Any, TypeId};
 
-use slotmap::{DefaultKey, HopSlotMap};
-
 use super::{obj::defs::ship::Ship, shipmakeup::ShipMakeup, terrain::base::Terrain};
 
 pub struct Simulation {
-    tickables: HopSlotMap<DefaultKey, Box<dyn Tickable>>,
+    tickables: Vec<Box<dyn Tickable>>,
     terrain: Terrain,
-    player_fleet: Vec<DefaultKey>,
+    player_fleet: Vec<usize>,
 }
 
 pub struct EndOfSimulation {
@@ -19,14 +17,14 @@ pub struct EndOfSimulation {
 impl Simulation {
     pub fn new(terrain: Terrain) -> Self {
         Simulation {
-            tickables: HopSlotMap::new(),
+            tickables: vec![],
             terrain,
             player_fleet: vec![],
         }
     }
 
     pub fn tick(&mut self, delta_time: f64) {
-        for (_key, tickable) in self.tickables.iter_mut() {
+        for tickable in self.tickables.iter_mut() {
             if tickable.skip_tick() {
                 continue;
             }
@@ -34,8 +32,7 @@ impl Simulation {
             tickable.tick(delta_time);
         }
 
-        self.tickables
-            .retain(|_key, tickable| !tickable.is_destroyed());
+        self.tickables.retain(|tickable| !tickable.is_destroyed());
     }
 
     pub fn finish(self) -> EndOfSimulation {
@@ -45,7 +42,7 @@ impl Simulation {
                 .player_fleet
                 .iter()
                 .filter_map(|key| {
-                    let tickable = tickables.remove(*key).unwrap();
+                    let tickable = tickables.remove(*key);
                     if tickable.type_id() != TypeId::of::<Ship>() {
                         None
                     } else {
