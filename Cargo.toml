@@ -5,8 +5,9 @@ edition = "2021"
 
 [dependencies]
 float-cmp = "0.9.0"
+itertools = "0.14.0"
 monoio = "0.2.3"
-rayon = "1.10.0"
+slotmap = "1.0.7"
 soa_derive = "0.13.0"
 ultraviolet = "0.9.2"
 
