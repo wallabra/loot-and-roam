@@ -1,6 +1,11 @@
-//! # Application entrypoint for Loot & Roam.
+//! # Server-side code.
 //!
-//! Currently a fairly thin wrapper around the app subtree.
+//! Loot & Roam uses a distributive-authoritative model, where a single instance is declared as "authoritative", and
+//! other instances try to predict it.
+//!
+//! Every instance has their own internal server. Authoritative instances run the simulation in it. All internal
+//! servers also distribute network events, on a shoot-first, ask-later basis (i.e. without keeping track of which
+//! instances already received them, but ignoring already-received packets).
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -14,7 +19,3 @@
 //
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
-
-fn main() {
-    todo!();
-}

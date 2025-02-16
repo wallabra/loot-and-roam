@@ -1,6 +1,7 @@
-//! # Application entrypoint for Loot & Roam.
+//! # The official Loot & Roam client.
 //!
-//! Currently a fairly thin wrapper around the app subtree.
+//! Contains code for displaying the game, interacting with user input,
+//! loading client-side assets, handling in-game audio, and so on.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -15,6 +16,9 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-fn main() {
-    todo!();
-}
+// [WIP] Please uncomment *only* implemented modules.
+// pub mod renderer;
+// pub mod audio;
+// pub mod resource;
+// pub mod input;
+// pub mod ui;
