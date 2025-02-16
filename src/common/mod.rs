@@ -7,3 +7,4 @@ pub mod shipmakeup;
 pub mod simul;
 pub mod terrain;
 pub mod timer;
+pub mod config;

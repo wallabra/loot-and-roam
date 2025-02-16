@@ -15,7 +15,7 @@ pub struct Timer {
 }
 
 impl Timer {
-    fn new_timeout(after: f64, action: fn() -> ()) -> Self {
+    pub fn new_timeout(after: f64, action: fn() -> ()) -> Self {
         Timer {
             elapsed: 0.0,
             threshold: after,
@@ -26,7 +26,7 @@ impl Timer {
         }
     }
 
-    fn new_interval(after: f64, action: fn() -> ()) -> Self {
+    pub fn new_interval(after: f64, action: fn() -> ()) -> Self {
         Timer {
             elapsed: 0.0,
             threshold: after,
@@ -37,15 +37,15 @@ impl Timer {
         }
     }
 
-    fn stop(&mut self) {
+    pub fn stop(&mut self) {
         self.done = true
     }
 
-    fn pause(&mut self) {
+    pub fn pause(&mut self) {
         self.paused = true
     }
 
-    fn unpause(&mut self) {
+    pub fn unpause(&mut self) {
         self.paused = false
     }
 }
