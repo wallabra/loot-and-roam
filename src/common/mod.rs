@@ -35,16 +35,16 @@
 // permitted by applicable law.  See the CNPL for details.
 
 // [WIP] Please uncomment *only* implemented modules.
-// pub mod physics;   // Object physics and collision detection
-// pub mod inventory; // Inventory items and related operations
-// pub mod makeup;    // Ship makeup and parts
-// pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
-// pub mod namegen;   // Localizable name generation for NPC ships
-// pub mod terrain;   // Terrain generation, caching, and lookup
-// pub mod ai;        // NPC ship controller
-// pub mod player;    // Player state tracking
-// pub mod spawner;   // NPC ship spawning
-// pub mod props;     // Static props (decorative, buildings, etc) and their spawning
-// pub mod town;      // Economic mechanisms, and town state tracking
-// pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
-// pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
+pub mod physics; // Object physics and collision detection
+                 // pub mod inventory; // Inventory items and related operations
+pub mod makeup; // Ship makeup and parts
+                // pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
+                // pub mod namegen;   // Localizable name generation for NPC ships
+pub mod terrain; // Terrain generation, caching, and lookup
+                 // pub mod ai;        // NPC ship controller
+                 // pub mod player;    // Player state tracking
+                 // pub mod spawner;   // NPC ship spawning
+                 // pub mod props;     // Static props (decorative, buildings, etc) and their spawning
+                 // pub mod town;      // Economic mechanisms, and town state tracking
+                 // pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
+                 // pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
