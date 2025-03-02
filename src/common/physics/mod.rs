@@ -22,6 +22,7 @@
 // pub mod collision; // Advanced collision handling for objec
 
 use bevy::{prelude::*, render::extract_component::ExtractComponent};
+use itertools::iproduct;
 use ultraviolet::Vec3;
 
 #[derive(Debug, Clone, Copy)]
