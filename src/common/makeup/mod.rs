@@ -1,6 +1,5 @@
 //! # Ship state and components.
 
-
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
 //
@@ -13,6 +12,11 @@
 //
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
+
+use bevy::prelude::*;
+use slotmap::{DefaultKey, SlotMap};
+
+use super::inventory::InventoryDef;
 
 // [WIP] Please uncomment *only* implemented modules.
 // pub mod parts; // Ship parts.
@@ -33,7 +37,7 @@ pub struct PartSlot {
     ///
     /// Par types for installation are defiend as keywords, such as "engine"
     /// or "cannon".
-    pub type: String,
+    pub part_type: String,
 
     /// The offset of the part installed on this slot.
     ///
@@ -63,13 +67,35 @@ pub struct ShipMake {
 }
 
 pub struct ShipMakeup {
-    make: ShipMake;
-    
+    /// The make of this ship.
+    make: ShipMake,
+
+    /// A vector of part installation.
+    ///
+    /// Each index corresponds to a slot. Each item, when present, is an index
+    /// into the inventory.
+    parts: Vec<Option<DefaultKey>>,
+
+    /// The inventory of this ship.
+    ship_inventory: SlotMap<DefaultKey, InventoryDef>,
 }
 
 impl ShipMakeup {
     /// Sums up the total mass of the ship,
     pub fn get_total_mass(&self) -> f32 {
-        self.make.hull_mass + 
+        self.make.hull_mass
+            + self
+                .ship_inventory
+                .iter()
+                .map(|(_, inv)| inv.mass * inv.amount)
+                .sum::<f32>()
+    }
+
+    /// Iterate on all parts and their slots.
+    pub fn part_iter(&self) -> impl Iterator<Item = (&InventoryDef, &PartSlot)> {
+        self.parts
+            .iter()
+            .filter_map(|maybe_part| maybe_part.map(|part| self.ship_inventory.get(part).unwrap()))
+            .zip(self.make.slots.iter())
     }
 }

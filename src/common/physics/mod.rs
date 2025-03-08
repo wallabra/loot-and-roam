@@ -21,7 +21,7 @@
 // pub mod volume;    // Volumes, their intersection, and volume/surface forces
 // pub mod collision; // Advanced collision handling for objec
 
-use bevy::{prelude::*, render::extract_component::ExtractComponent};
+use bevy::prelude::*;
 use itertools::iproduct;
 use ultraviolet::Vec3;
 
@@ -93,13 +93,16 @@ pub struct PointNetwork {
     pub points: Vec<PhysPoint>,
 }
 
-pub impl PointNetwork {
+impl PointNetwork {
     /// Produces a SpringNetwork connected according to some criterion.
-    pub fn make_connected_springs_whenever(
+    pub fn make_connected_springs_whenever<F>(
         &self,
         mode: SpringMode,
-        predicate: Fn(&PhysPoint, &PhysPoint) -> bool,
-    ) -> SpringNetwork {
+        predicate: F,
+    ) -> SpringNetwork
+    where
+        F: Fn(&PhysPoint, &PhysPoint) -> bool,
+    {
         let springs: Vec<Spring> = iproduct!(
             self.points.iter().enumerate(),
             self.points.iter().enumerate()
@@ -108,20 +111,21 @@ pub impl PointNetwork {
             if point_1.0 != point_2.0 && predicate(point_1.1, point_2.1) {
                 Some(Spring {
                     points: (point_1.0, point_2.0),
-                    rest_dist: (poin1_1.1.pos - point_2.1.pos).mag(),
+                    rest_dist: (point_1.1.pos - point_2.1.pos).mag(),
                     mode,
                 })
             } else {
                 None
             }
-        });
+        })
+        .collect();
 
         SpringNetwork { springs }
     }
 
     /// Produces a SpringNetwork that is fully connected.
     pub fn make_fully_connected_springs(&self, mode: SpringMode) -> SpringNetwork {
-        self.make_connected_springs_whenever(mode, || true)
+        self.make_connected_springs_whenever(mode, |_, _| true)
     }
 
     /// Produces a SpringNetwork that connects points within a max radius.
@@ -134,17 +138,20 @@ pub impl PointNetwork {
 }
 
 /// The system repsonsible for the inertia of physics points.
-pub fn point_base_physics(time: Res<Time>, mut query_points: Query<(&mut PhysPoint)>) {
-    let delta_secs = time.delta_seconds();
+pub fn point_base_physics(time: Res<Time>, mut query_points: Query<(&mut PointNetwork,)>) {
+    let delta_secs = time.delta_secs();
 
-    for (point) in query_points.itert() {
-        point.pos += point.vel * delta_secs;
+    for (mut network,) in query_points.iter_mut() {
+        for point in network.points.iter_mut() {
+            point.pos += point.vel * delta_secs;
+        }
     }
 }
 
 //---- Springs
 
 /// The parameters for a normal-mode spring.
+#[derive(Debug, Clone, Copy)]
 pub struct NormalSpring {
     /// The stiffness of the string.
     ///
@@ -190,20 +197,20 @@ pub struct SpringNetwork {
 }
 
 /// The system responsible for computing the spring system and its forces on points.
-pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PhysPoint, &SpringNetwork)>) {
-    let delta_secs = time.delta_seconds();
+pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork, &SpringNetwork)>) {
+    let delta_secs = time.delta_secs();
 
-    for (points, springs) in query.iter() {
+    for (mut points, springs) in query.iter_mut() {
         for spring in springs.springs.iter() {
-            let points: (&PhysPoint, &PhysPoint) = (
-                &points.points[spring.points.0],
-                &points.points[spring.points.1],
+            let point_data: (PhysPoint, PhysPoint) = (
+                points.points[spring.points.0].clone(),
+                points.points[spring.points.1].clone(),
             );
 
             // [NOTE] All forces are relative to point A.
             // As such, they will be applied half to point A, half to point B
             // inverted.
-            let relative = points.1.pos - points.0.pos;
+            let relative = point_data.1.pos - point_data.0.pos;
             let unit_inward = relative.normalized();
             let dist = relative.mag();
 
@@ -214,18 +221,18 @@ pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PhysPoint, &S
             match spring.mode {
                 SpringMode::Instant => {
                     let offset = unit_inward * dist_diff;
-                    let half_offset = offset / 2;
+                    let half_offset = offset * 0.5;
 
-                    points.0.pos += half_offset;
-                    points.1.pos -= half_offset;
+                    points.points[spring.points.0].pos += half_offset;
+                    points.points[spring.points.1].pos -= half_offset;
                 }
 
-                SpringMode::Normal(force) => {
-                    let force = unit_inward * dist_diff * force * delta_secs;
-                    let half_force = force / 2;
+                SpringMode::Normal(mode) => {
+                    let force = unit_inward * dist_diff * mode.stiffness * delta_secs;
+                    let half_force = force * 0.5;
 
-                    points.0.apply_instant_force(half_force);
-                    points.1.apply_instant_force(-half_force);
+                    points.points[spring.points.0].apply_instant_force(half_force);
+                    points.points[spring.points.1].apply_instant_force(-half_force);
                 }
             }
         }

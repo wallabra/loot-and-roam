@@ -23,7 +23,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use bevy::{ecs::world::DeferredWorld, prelude::*};
+use bevy::prelude::*;
 
 /// A Tokio runtime wrapped in a Bevy resource.
 #[derive(Resource)]
