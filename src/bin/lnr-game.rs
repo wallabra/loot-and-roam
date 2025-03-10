@@ -23,20 +23,26 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
+use loot_and_roam::app::{rotate, setup};
 
 /// A Tokio runtime wrapped in a Bevy resource.
 #[derive(Resource)]
 struct TokioRuntime(pub(crate) tokio::runtime::Runtime);
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .insert_resource(TokioRuntime(
-            tokio::runtime::Builder::new_multi_thread()
-                .enable_all()
-                .build()
-                .unwrap(),
-        ))
-        .run();
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins);
+    app.add_plugins(FrameTimeDiagnosticsPlugin::default());
+    app.add_systems(Startup, setup);
+    app.add_systems(Update, rotate);
+    app.insert_resource(TokioRuntime(
+        tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+            .unwrap(),
+    ));
+    app.add_plugins(LogDiagnosticsPlugin::default());
+    app.run();
 }
