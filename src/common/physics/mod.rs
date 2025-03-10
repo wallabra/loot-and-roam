@@ -17,7 +17,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-// [WIP] Please uncomment *only* implemented modules.
+// [TODO] Please uncomment *only* implemented modules.
 // pub mod volume;    // Volumes, their intersection, and volume/surface forces
 // pub mod collision; // Advanced collision handling for objec
 

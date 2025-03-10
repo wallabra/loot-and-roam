@@ -34,7 +34,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-// [WIP] Please uncomment *only* implemented modules.
+// [TODO] Please uncomment *only* implemented modules.
 pub mod inventory; // Inventory items and related operations
 pub mod makeup;
 pub mod physics; // Object physics and collision detection // Ship makeup and parts

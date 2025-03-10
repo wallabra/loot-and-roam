@@ -18,7 +18,7 @@ use slotmap::{DefaultKey, SlotMap};
 
 use super::inventory::InventoryDef;
 
-// [WIP] Please uncomment *only* implemented modules.
+// [TODO] Please uncomment *only* implemented modules.
 // pub mod parts; // Ship parts.
 
 /// Marks an entity as a ship.

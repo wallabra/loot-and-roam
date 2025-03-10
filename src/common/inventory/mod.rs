@@ -154,7 +154,7 @@ pub enum AmmoType {
 
 pub struct AmmoDef {
     pub ammo_type: AmmoType,
-    // [WIP] Projectile modifier list, to implement in a submodule.
+    // [TODO] Projectile modifier list, to implement in a submodule.
     // pub modifiers: Vec<ProjectileModifier>,
 }
 
