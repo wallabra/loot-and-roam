@@ -86,7 +86,7 @@ pub fn setup(
     ));
 
     // cube
-    let points = PointNetwork::from(
+    let mut points = PointNetwork::from(
         [
             [-0.5, 0.5, -0.5],
             [-0.5, 0.5, 0.5],
@@ -101,10 +101,20 @@ pub fn setup(
         .into_iter(),
     );
     let springs = points.make_radially_connected_springs(
-        crate::common::physics::SpringMode::Normal(NormalSpring { stiffness: 3.0 }),
-        1.0,
+        crate::common::physics::SpringMode::Normal(NormalSpring { stiffness: 10.0 }),
+        1.5, // bigger than sqrt(2) so should connect faces diagonally too
     );
 
+    info!(
+        "Cube has {} points and {} springs",
+        points.points.len(),
+        springs.springs.len()
+    );
+
+    // [NOTE] temporary test tug, or TTT for short :D
+    points.points[3].vel.y += 12.0;
+    points.points[3].vel.x += 5.0;
+    //
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
