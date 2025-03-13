@@ -35,7 +35,7 @@ struct TokioRuntime(pub(crate) tokio::runtime::Runtime);
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
-    app.add_plugins(FrameTimeDiagnosticsPlugin::default());
+    app.add_plugins(FrameTimeDiagnosticsPlugin);
     app.add_systems(Startup, setup);
     app.add_systems(Update, rotate);
 

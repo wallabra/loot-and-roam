@@ -214,8 +214,8 @@ pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork,
     for (mut points, springs) in query.iter_mut() {
         for spring in springs.springs.iter() {
             let point_data: (PhysPoint, PhysPoint) = (
-                points.points[spring.points.0].clone(),
-                points.points[spring.points.1].clone(),
+                points.points[spring.points.0],
+                points.points[spring.points.1],
             );
 
             // [NOTE] All forces are relative to point A.

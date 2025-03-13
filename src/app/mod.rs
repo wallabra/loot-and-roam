@@ -50,7 +50,7 @@ pub fn apply_app_systems(app: &mut App) {
         Update,
         |mut query: Query<(&mut Transform, &PointNetwork)>| {
             for (mut transform, network) in query.iter_mut() {
-                if network.points.len() > 0 {
+                if !network.points.is_empty() {
                     // Center Transform on average of all physics points
                     let avg: ultraviolet::Vec3 = network
                         .points
