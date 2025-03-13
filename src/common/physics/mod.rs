@@ -93,6 +93,17 @@ pub struct PointNetwork {
     pub points: Vec<PhysPoint>,
 }
 
+impl<Iter> From<Iter> for PointNetwork
+where
+    Iter: Iterator<Item = PhysPoint>,
+{
+    fn from(value: Iter) -> Self {
+        Self {
+            points: value.collect(),
+        }
+    }
+}
+
 impl PointNetwork {
     /// Produces a SpringNetwork connected according to some criterion.
     pub fn make_connected_springs_whenever<F>(

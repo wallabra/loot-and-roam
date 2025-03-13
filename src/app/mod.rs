@@ -20,6 +20,8 @@ use std::f32::consts::TAU;
 
 use bevy::prelude::*;
 
+use crate::common::physics::{Gravity, NormalSpring, PhysPoint, PointNetwork};
+
 // [TODO] Please uncomment *only* implemented modules.
 // pub mod renderer;
 // pub mod audio;
@@ -43,26 +45,79 @@ pub struct Rotatable {
     speed: f32,
 }
 
-/// Bevy setup.
+pub fn apply_app_systems(app: &mut App) {
+    app.add_systems(
+        Update,
+        |mut query: Query<(&mut Transform, &PointNetwork)>| {
+            for (mut transform, network) in query.iter_mut() {
+                if network.points.len() > 0 {
+                    // Center Transform on average of all physics points
+                    let avg: ultraviolet::Vec3 = network
+                        .points
+                        .iter()
+                        .map(|point| point.pos)
+                        .reduce(|acc, vec| acc + vec)
+                        .unwrap()
+                        / network.points.len() as f32;
+                    transform.translation.x = avg.x;
+                    transform.translation.y = avg.y;
+                    transform.translation.z = avg.z;
+                } else {
+                    panic!("Tried to reflect empty PointNetwork onto a Transform!");
+                }
+            }
+        },
+    );
+}
+
+/// Bevy setup system for the main Loot & Roam application.
 pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // stub copied from the Bevy example '3d/3d_scene.rs'
+    // -- stub copied from the Bevy example '3d/3d_scene.rs'
     // circular base
     commands.spawn((
         Mesh3d(meshes.add(Circle::new(4.0))),
         MeshMaterial3d(materials.add(Color::WHITE)),
-        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
+        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2))
+            .with_translation(Vec3::new(0.0, -0.5, 0.0)),
     ));
+
     // cube
+    let points = PointNetwork::from(
+        [
+            [-0.5, 0.5, -0.5],
+            [-0.5, 0.5, 0.5],
+            [-0.5, 1.5, -0.5],
+            [-0.5, 1.5, 0.5],
+            [0.5, 0.5, -0.5],
+            [0.5, 0.5, 0.5],
+            [0.5, 1.5, -0.5],
+            [0.5, 1.5, 0.5],
+        ]
+        .map(|arr| PhysPoint::from_pos(ultraviolet::Vec3::from(arr)))
+        .into_iter(),
+    );
+    let springs = points.make_radially_connected_springs(
+        crate::common::physics::SpringMode::Normal(NormalSpring { stiffness: 3.0 }),
+        1.0,
+    );
+
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
         Transform::from_xyz(0.0, 0.5, 0.0),
         Rotatable { speed: 0.3 },
+        points,
+        springs,
+        Gravity {
+            // low grav for development purposes
+            force: ultraviolet::Vec3::unit_y() * -0.5,
+        },
     ));
+
     // light
     commands.spawn((
         PointLight {
@@ -71,6 +126,7 @@ pub fn setup(
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
+
     // camera
     commands.spawn((
         Camera3d::default(),

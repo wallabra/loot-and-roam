@@ -25,7 +25,7 @@
 
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
-use loot_and_roam::app::{rotate, setup};
+use loot_and_roam::app::{apply_app_systems, rotate, setup};
 use loot_and_roam::common::physics::apply_physics_systems;
 
 /// A Tokio runtime wrapped in a Bevy resource.
@@ -40,6 +40,7 @@ fn main() {
     app.add_systems(Update, rotate);
 
     apply_physics_systems(&mut app);
+    apply_app_systems(&mut app);
 
     app.insert_resource(TokioRuntime(
         tokio::runtime::Builder::new_multi_thread()
