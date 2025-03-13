@@ -238,3 +238,38 @@ pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork,
         }
     }
 }
+
+/// This Bevy component applies gravity to a physics-enabled object.
+///
+/// Requires ]PointNetwork].
+#[derive(Component)]
+pub struct Gravity {
+    /// The force of gravity, with direction and magnitude.
+    ///
+    /// Defaults to -10 in the Y axis.
+    pub(crate) force: Vec3,
+}
+
+impl Default for Gravity {
+    fn default() -> Self {
+        Self {
+            force: Vec3::unit_y() * -10.0,
+        }
+    }
+}
+
+/// The system responsible for gravity in the physics system.
+pub fn gravity(time: Res<Time>, mut query: Query<(&mut PointNetwork, &Gravity)>) {
+    for (mut points, gravity) in query.iter_mut() {
+        for point in points.points.iter_mut() {
+            point.vel += gravity.force * time.delta_secs();
+
+            // Position change integration (approximating as that of a continuous linear acceleration)
+            point.pos += 0.5 * gravity.force * time.delta_secs().powi(2);
+        }
+    }
+}
+
+pub fn apply_physics_systems(app: &mut App) {
+    app.add_systems(Update, (gravity, point_base_physics, point_spring_forces));
+}
