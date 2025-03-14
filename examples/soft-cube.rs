@@ -192,7 +192,7 @@ pub fn setup(
             },
             Gravity {
                 // low grav for development purposes
-                force: Vec3::Y * -0.1,
+                force: Vec3::Y * -3.0,
             },
             SnapToPointNet,
             CameraFocus::default(),
