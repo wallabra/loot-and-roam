@@ -48,27 +48,38 @@ pub struct Rotatable {
 #[derive(Component)]
 pub struct SnapToPointNet;
 
+/// Camera target component.
+#[derive(Component)]
+pub struct CameraFocus {
+    /// Focus priority, highest value is used to point camera at.
+    prio: f32,
+}
+
 pub fn apply_app_systems(app: &mut App) {
+    
     app.add_systems(
         Update,
         |mut query: Query<(&mut Transform, &PointNetwork), With<SnapToPointNet>>| {
             for (mut transform, network) in query.iter_mut() {
                 if !network.points.is_empty() {
                     // Center Transform on average of all physics points
-                    // let len = network.points.len() as f32;
-                    // let avg: ultraviolet::Vec3 = network
-                    //     .points
-                    //     .iter()
-                    //     .map(|point| point.pos)
-                    //     .fold(ultraviolet::Vec3::zero(), |acc, pos| acc + pos);
-                    // let avg = avg * 2.0 / len;
+                    let len = network.points.len() as f32;
+                    let avg: Vec3 = network
+                        .points
+                        .iter()
+                        .map(|point| point.pos)
+                        .fold(Vec3::ZERO, |acc, pos| acc + pos);
+                    let avg = avg * 2.0 / len;
 
-                    // [TEMP] Center on first point for debugging
-                    let avg = network.points[0].pos.clone();
+                    let front = network.points[0].pos.clone();
+                    let up = network.points[(len * 0.5).floor() as usize].pos.clone();
+                    let up = (up - avg).normalize();
 
-                    transform.translation.x = avg.x;
-                    transform.translation.y = avg.y;
-                    transform.translation.z = avg.z;
+                    transform.translation = avg;
+                    transform.look_at(front, up);
+                    transform.rotate_local_x(TAU * 0.125);
+                    transform.rotate_local_y(TAU * 0.125);
+                    transform.rotate_local_z(TAU * 0.125);
                 } else {
                     panic!("Tried to reflect empty PointNetwork onto a Transform!");
                 }
@@ -95,9 +106,7 @@ fn debug_point_attach_snap(
         let parent_points: &PointNetwork = query_parent.get(parent.get()).unwrap();
 
         let point = &parent_points.points[attachment.point_idx].pos;
-        transform.translation.x = point.x;
-        transform.translation.y = point.y;
-        transform.translation.z = point.z;
+        transform.translation = *point;
     }
 }
 
@@ -132,7 +141,7 @@ pub fn setup(
             [0.5, 0.5, -0.5],
             [0.5, 0.5, 0.5],
         ]
-        .map(|arr| PhysPoint::from_pos(ultraviolet::Vec3::from(arr)))
+        .map(|arr| PhysPoint::from_pos(Vec3::from(arr)))
         .into_iter(),
     );
     let springs = points.make_radially_connected_springs(
@@ -167,7 +176,7 @@ pub fn setup(
             springs,
             Gravity {
                 // low grav for development purposes
-                force: ultraviolet::Vec3::unit_y() * -0.2,
+                force: Vec3::Y * -0.2,
             },
             SnapToPointNet,
         ))

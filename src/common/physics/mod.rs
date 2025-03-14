@@ -23,7 +23,6 @@
 
 use bevy::prelude::*;
 use itertools::iproduct;
-use ultraviolet::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct PhysPoint {
@@ -44,7 +43,7 @@ impl PhysPoint {
     pub fn from_pos(vec: Vec3) -> Self {
         Self {
             pos: vec,
-            vel: Vec3::zero(),
+            vel: Vec3::ZERO,
             mass: 1.0,
         }
     }
@@ -56,7 +55,7 @@ impl PhysPoint {
 
     /// Construct a new PhysPoint, with everything set to zero.
     pub fn zero() -> Self {
-        Self::from_pos(Vec3::zero())
+        Self::from_pos(Vec3::ZERO)
     }
 
     /// Sets this PhysPoint's position and returns itself.
@@ -131,7 +130,7 @@ impl PointNetwork {
             if point_1.0 != point_2.0 && predicate(point_1.1, point_2.1) {
                 Some(Spring {
                     points: (point_1.0, point_2.0),
-                    rest_dist: (point_1.1.pos - point_2.1.pos).mag(),
+                    rest_dist: (point_1.1.pos - point_2.1.pos).length(),
                     mode,
                 })
             } else {
@@ -152,7 +151,7 @@ impl PointNetwork {
     pub fn make_radially_connected_springs(&self, mode: SpringMode, max_rad: f32) -> SpringNetwork {
         let max_rad_sq = max_rad * max_rad;
         self.make_connected_springs_whenever(mode, |point_1, point_2| {
-            (point_1.pos - point_2.pos).mag_sq() <= max_rad_sq
+            (point_1.pos - point_2.pos).length_squared() <= max_rad_sq
         })
     }
 }
@@ -231,8 +230,8 @@ pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork,
             // As such, they will be applied half to point A, half to point B
             // inverted.
             let relative = point_data.1.pos - point_data.0.pos;
-            let unit_inward = relative.normalized();
-            let dist = relative.mag();
+            let unit_inward = relative.normalize();
+            let dist = relative.length();
 
             // If positive, dist must decrease (inward  force)
             // If negative, dist must increase (outward force)
@@ -273,7 +272,7 @@ pub struct Gravity {
 impl Default for Gravity {
     fn default() -> Self {
         Self {
-            force: Vec3::unit_y() * -10.0,
+            force: Vec3::Y * -10.0,
         }
     }
 }
