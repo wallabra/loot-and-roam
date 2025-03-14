@@ -7,6 +7,8 @@
 
 # UI Engine
 
+**NOTE: Document outdated - UI engine will probably piggyback off of Bevy's ECS.**
+
 No UI library in Rust meets our goals of being simple and immediate mode,
 while still providing a multi-pass layout engine, and being overlayable over
 an existing game. For that reason, we will write our own and eventually provide
