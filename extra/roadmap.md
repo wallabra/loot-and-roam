@@ -39,6 +39,7 @@ that order is not a requirement per se.
       laying around even while fleeing. This is not possible in a rigid
       state machine based NPC system.
   * [ ] Ship part code
+  * [ ] Island archetypes, with their own props and themes
   * [ ] Stationary props like turrets, buildings that drop loot when destroyed,
         or island decor
   * [ ] Ship crew, food consumption, strikes when hungry/unpaid
@@ -47,7 +48,7 @@ that order is not a requirement per se.
       How this will be done is yet unclear.
   * [ ] Internationalization system
   * [ ] Superstates, aka top-level game states (menu, play, etc)
-  * [ ] Immediate-mode reactive UI API
+  * [ ] Purely immediate-mode reactive UI API
 
 The current plans focus on catching up with the prorotype. You can see the
 prototype here for comparison:
