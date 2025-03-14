@@ -12,7 +12,6 @@ enum_dispatch = "0.3.13"
 itertools = "0.14.0"
 serde = "1.0.218"
 slotmap = { version = "1.0.7", features = ["serde"] }
-tokio = { version = "1.43.0", features = ["time", "rt-multi-thread", "macros"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]

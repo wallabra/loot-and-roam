@@ -28,24 +28,19 @@ use bevy::prelude::*;
 use loot_and_roam::app::apply_app_systems;
 use loot_and_roam::common::physics::apply_physics_systems;
 
-/// A Tokio runtime wrapped in a Bevy resource.
-#[derive(Resource)]
-struct TokioRuntime(pub tokio::runtime::Runtime);
-
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
+
+    // framerate
     app.add_plugins(FrameTimeDiagnosticsPlugin);
 
+    // system registration
     apply_physics_systems(&mut app);
     apply_app_systems(&mut app);
 
-    app.insert_resource(TokioRuntime(
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()
-            .unwrap(),
-    ));
+    // logger
     app.add_plugins(LogDiagnosticsPlugin::default());
+
     app.run();
 }
