@@ -50,8 +50,8 @@ that order is not a requirement per se.
   * [ ] Superstates, aka top-level game states (menu, play, etc)
   * [ ] Purely immediate-mode reactive UI API
 
-The current plans focus on catching up with the prorotype. You can see the
-prototype here for comparison:
+Most of the current plans focus on catching up with the prototype. You can see
+the prototype here for comparison:
 https://wallabra.github.io/proto-lnr
 
 For more details, there are notes scattered across the source code. In
