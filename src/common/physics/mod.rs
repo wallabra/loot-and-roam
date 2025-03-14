@@ -83,6 +83,15 @@ impl PhysPoint {
         self.vel += force / self.mass;
         self
     }
+
+    /// Applies a continuous force to this point (taking delta time into account),
+    /// and returns the point itself.
+    pub fn apply_force_over_time(&mut self, force: Vec3, delta_secs: f32) -> &mut Self {
+        let accel = force / self.mass;
+        self.vel += accel * delta_secs;
+        self.pos += 0.5 * accel * delta_secs.powi(2);
+        self
+    }
 }
 
 /// A network of physics points.
@@ -239,11 +248,11 @@ pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork,
                 }
 
                 SpringMode::Normal(mode) => {
-                    let force = unit_inward * dist_diff * mode.stiffness * delta_secs;
+                    let force = unit_inward * dist_diff * mode.stiffness;
                     let half_force = force * 0.5;
 
-                    points.points[spring.points.0].apply_instant_force(half_force);
-                    points.points[spring.points.1].apply_instant_force(-half_force);
+                    points.points[spring.points.0].apply_force_over_time(half_force, delta_secs);
+                    points.points[spring.points.1].apply_force_over_time(-half_force, delta_secs);
                 }
             }
         }
