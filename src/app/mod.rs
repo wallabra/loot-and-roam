@@ -22,7 +22,7 @@ use std::f32::consts::TAU;
 
 use bevy::prelude::*;
 
-use crate::common::physics::{Gravity, NormalSpring, PhysPoint, PointNetwork};
+use crate::common::physics::{Gravity, NormalSpring, PhysPoint, PointNetwork, SpringMode};
 
 // [TODO] Please uncomment *only* implemented modules.
 // pub mod renderer;
@@ -36,7 +36,7 @@ use crate::common::physics::{Gravity, NormalSpring, PhysPoint, PointNetwork};
 pub struct SnapToPointNet;
 
 /// Camera target component.
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct CameraFocus {
     /// Focus priority, highest value is used to point camera at.
     prio: f32,
@@ -55,17 +55,16 @@ pub fn apply_app_systems(app: &mut App) {
                         .iter()
                         .map(|point| point.pos)
                         .fold(Vec3::ZERO, |acc, pos| acc + pos);
-                    let avg = avg * 2.0 / len;
+                    let avg = avg / len;
 
                     let front = network.points[0].pos.clone();
-                    let up = network.points[(len * 0.5).floor() as usize].pos.clone();
+                    let up = network.points[(len * 0.333).floor() as usize].pos.clone();
                     let up = (up - avg).normalize();
 
                     transform.translation = avg;
                     transform.look_at(front, up);
                     transform.rotate_local_x(TAU * 0.125);
                     transform.rotate_local_y(TAU * 0.125);
-                    transform.rotate_local_z(TAU * 0.125);
                 } else {
                     panic!("Tried to reflect empty PointNetwork onto a Transform!");
                 }
@@ -73,7 +72,10 @@ pub fn apply_app_systems(app: &mut App) {
         },
     );
 
-    app.add_systems(Update, (debug_point_attach_snap,));
+    app.add_systems(
+        Update,
+        (debug_point_attach_snap, floor_plane_collision_system),
+    );
 
     app.add_systems(
         Update,
@@ -85,8 +87,8 @@ pub fn apply_app_systems(app: &mut App) {
                 return;
             }
 
-            focus.sort_by(|a, b| a.0.prio.partial_cmp(&b.0.prio).unwrap());
-            let focus = focus.last().unwrap().1;
+            focus.sort_by(|a, b| b.0.prio.partial_cmp(&a.0.prio).unwrap());
+            let focus = focus[0].1;
 
             for mut cam_transform in cam_query.iter_mut() {
                 cam_transform.look_at(focus.translation, Vec3::Y);
@@ -107,13 +109,45 @@ struct DebugPointAttach {
 
 fn debug_point_attach_snap(
     mut query_child: Query<(&Parent, &mut Transform, &DebugPointAttach)>,
-    query_parent: Query<&PointNetwork>,
+    query_parent: Query<(&PointNetwork, &GlobalTransform, &Transform), Without<DebugPointAttach>>,
 ) {
     for (parent, mut transform, attachment) in query_child.iter_mut() {
-        let parent_points: &PointNetwork = query_parent.get(parent.get()).unwrap();
+        let (parent_points, parent_global_transform, parent_transform) =
+            query_parent.get(parent.get()).unwrap();
 
-        let point = &parent_points.points[attachment.point_idx].pos;
-        transform.translation = *point;
+        transform.translation =
+            parent_points.points[attachment.point_idx].pos - parent_global_transform.translation();
+        transform.rotate_around(Vec3::ZERO, parent_transform.rotation.inverse());
+    }
+}
+
+// Floor plane collisions
+#[derive(Default, Component)]
+pub struct FloorPlaneCollision {
+    intercept_y: f32,
+    restitution: f32,
+    friction: f32,
+}
+
+pub fn floor_plane_collision_system(mut query: Query<(&mut PointNetwork, &FloorPlaneCollision)>) {
+    for (mut points, collision) in query.iter_mut() {
+        for point in &mut points.points {
+            if point.pos.y < collision.intercept_y {
+                point.pos.y = collision.intercept_y;
+                point.vel.y *= -collision.restitution;
+
+                let mut shift = point.vel * -collision.friction / point.mass;
+
+                if shift.length_squared() > point.vel.length_squared() {
+                    point.vel.x = 0.0;
+                    point.vel.z = 0.0;
+                } else {
+                    shift.y = 0.0;
+                    point.vel.x += shift.x;
+                    point.vel.z += shift.z;
+                }
+            }
+        }
     }
 }
 
@@ -138,6 +172,7 @@ pub fn setup(
     // cube
     let mut points = PointNetwork::from(
         [
+            // cube corners
             [-0.5, -0.5, -0.5],
             [-0.5, -0.5, 0.5],
             [-0.5, 0.5, -0.5],
@@ -146,15 +181,21 @@ pub fn setup(
             [0.5, -0.5, 0.5],
             [0.5, 0.5, -0.5],
             [0.5, 0.5, 0.5],
+            // face centers
+            [0.5, 0.0, 0.0],
+            [0.0, 0.5, 0.0],
+            [0.0, 0.0, 0.5],
+            [-0.5, 0.0, 0.0],
+            [0.0, -0.5, 0.0],
+            [0.0, 0.0, -0.5],
         ]
-        .map(|arr| PhysPoint::from_pos(Vec3::from(arr)))
+        .map(|arr| PhysPoint::from_pos(Vec3::from(arr) + Vec3::Y))
         .into_iter(),
     );
-    let springs = points.make_radially_connected_springs(
-        crate::common::physics::SpringMode::Normal(NormalSpring { stiffness: 10.0 }),
-        1.5, // bigger than sqrt(2) so should connect face vertices diagonally too
-             // but smaller than cbrt(3) so should not connect fully opposite vertices
-    );
+
+    let spring_mode = SpringMode::Normal(NormalSpring { stiffness: 30.0 });
+    let springs = points.make_radially_connected_springs(spring_mode, 1.5);
+    // let springs = points.make_fully_connected_springs(spring_mode);
 
     info!(
         "Cube has {} points and {} springs",
@@ -163,8 +204,8 @@ pub fn setup(
     );
 
     // [NOTE] temporary test tug, or TTT for short :D
-    points.points[3].vel.y += 3.0;
-    points.points[3].vel.x += 1.0;
+    points.points[3].vel.y += 1.5;
+    points.points[5].vel.z += 2.0;
 
     let num_points = points.points.len();
 
@@ -179,11 +220,17 @@ pub fn setup(
             Transform::default(),
             points,
             springs,
+            FloorPlaneCollision {
+                restitution: 0.2,
+                friction: 0.2,
+                intercept_y: -0.5,
+            },
             Gravity {
                 // low grav for development purposes
-                force: Vec3::Y * -0.2,
+                force: Vec3::Y * -0.1,
             },
             SnapToPointNet,
+            CameraFocus::default(),
         ))
         .id();
 
