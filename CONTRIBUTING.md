@@ -61,9 +61,11 @@ project, joining the team is not necessary in order to contribute to the
 development.
 
 Please note that membership in the organization IS, however, necessary for
-receiving financial dues (those allocated to splitting across team members);
+receiving financial splits (those allocated to splitting across team members);
 it can also be revoked at any time by a _motion to excise_, which can be
 voted by all members.
+
+<!-- [TODO] How do payout splits work? Is there a good external reference to point to? -->
 
 If you really want to see more about how the cooperative is structured (nerd!),
 feel free to read through:
@@ -113,7 +115,7 @@ The most direct forms of contribution.
 * **Game Design:** You can extend the game design, creating new ship parts and
   hull makes, inventory items, even new mechanics! Note that these have to be
   drawn up in accordance with the rest of the team, and that they won't be
-  merged into the full game unless
+  merged into the full game unless they meet these criteria:
 
   1. They're fully implemented, including all required assets;
 
@@ -179,7 +181,11 @@ supports that a game with a strong and enthusiastic community lives longer.
   maybe make a video about it!
 
   Note: while the main project isn't ready, it's probably best to instead share
-  the prototype: https://wallabra.github.io/proto-lnr
+  the prototype, which is available as a Web game:
+  https://wallabra.github.io/proto-lnr
+
+  For more info on the prototype, visit the repository:
+  https://codeberg.org/GameCircular/proto-lnr
 
 * **Bug Reports & Feature Requests:** If you encounter an issue, or stumble
   upon a really big idea but the above ways to make it happen are not within
