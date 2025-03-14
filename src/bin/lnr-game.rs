@@ -25,12 +25,23 @@
 
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
+use bevy::window::PresentMode;
 use loot_and_roam::app::apply_app_systems;
 use loot_and_roam::common::physics::apply_physics_systems;
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins);
+
+    // default plugin & main properties
+    app.add_plugins(DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            title: "Loot & Roam".into(),
+            name: Some("bevy.loot-and-roam".into()),
+            present_mode: PresentMode::AutoNoVsync,
+            ..default()
+        }),
+        ..default()
+    }));
 
     // framerate
     app.add_plugins(FrameTimeDiagnosticsPlugin);
