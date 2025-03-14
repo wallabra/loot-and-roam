@@ -25,19 +25,17 @@
 
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
-use loot_and_roam::app::{apply_app_systems, rotate, setup};
+use loot_and_roam::app::apply_app_systems;
 use loot_and_roam::common::physics::apply_physics_systems;
 
 /// A Tokio runtime wrapped in a Bevy resource.
 #[derive(Resource)]
-struct TokioRuntime(pub(crate) tokio::runtime::Runtime);
+struct TokioRuntime(pub tokio::runtime::Runtime);
 
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
     app.add_plugins(FrameTimeDiagnosticsPlugin);
-    app.add_systems(Startup, setup);
-    app.add_systems(Update, rotate);
 
     apply_physics_systems(&mut app);
     apply_app_systems(&mut app);

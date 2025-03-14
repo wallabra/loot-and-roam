@@ -93,6 +93,8 @@ pub fn apply_app_systems(app: &mut App) {
             }
         },
     );
+
+    app.add_systems(Startup, setup);
 }
 
 // -- Show physics points for debugging purposes
