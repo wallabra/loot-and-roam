@@ -40,7 +40,8 @@ use loot_and_roam::{
 pub struct SnapToPointNet;
 
 pub fn apply_example_systems(app: &mut App) {
-    // Center cube on the average of its physics points.
+    // Center cube on the average of its physics points, and orient it into the
+    // point as a sort of cage.
     app.add_systems(
         Update,
         |mut query: Query<(&mut Transform, &PointNetwork), With<SnapToPointNet>>| {
@@ -60,14 +61,15 @@ pub fn apply_example_systems(app: &mut App) {
                     // sufficient reorientation of the snapped cube mesh.
 
                     let front = network.points[0].pos.clone();
-                    let up = network.points[3].pos.clone();
+                    let up = network.points[2].pos.clone();
                     let up = (up - avg).normalize();
+
+                    transform.translation = avg;
+                    transform.look_at(front, up);
 
                     // the cube is facing the 'front' vertex now; we need to
                     // rotate it slightly so it aligns corner-wise rather than
                     // face-wise. (so it... "corners" the vertex? badum-tss!)
-                    transform.translation = avg;
-                    transform.look_at(front, up);
                     transform.rotate_local_x(TAU * 0.125);
                     transform.rotate_local_y(TAU * 0.125);
                 } else {
