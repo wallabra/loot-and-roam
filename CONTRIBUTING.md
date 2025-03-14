@@ -52,7 +52,8 @@ https://codeberg.org/GameCircular/internal/src/branch/main/code-of-conduct.md
 
 ### Organizational
 
-Here's some important stuff for anyone thinking about .
+Here's some important stuff for anyone thinking about the cooperative's relation
+to their community, whether they should join, etc.
 
 Loot & Roam is being developed by GameCircular. We accept public contributions
 under our own discretion of acceptance. While this is ultimately a GameCircular
