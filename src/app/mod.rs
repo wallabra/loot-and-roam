@@ -16,6 +16,8 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+// -- development demo based on Bevy example '3d/3d_scene.rs'
+
 use std::f32::consts::TAU;
 
 use bevy::prelude::*;
@@ -29,21 +31,6 @@ use crate::common::physics::{Gravity, NormalSpring, PhysPoint, PointNetwork};
 // pub mod input;
 // pub mod ui;
 
-pub fn rotate(mut cubes: Query<(&mut Transform, &Rotatable)>, timer: Res<Time>) {
-    for (mut transform, cube) in &mut cubes {
-        // The speed is first multiplied by TAU which is a full rotation (360deg) in radians,
-        // and then multiplied by delta_secs which is the time that passed last frame.
-        // In other words. Speed is equal to the amount of rotations per second.
-        transform.rotate_y(cube.speed * TAU * timer.delta_secs());
-    }
-}
-
-/// Cube rotation component.
-#[derive(Component)]
-pub struct Rotatable {
-    speed: f32,
-}
-
 /// Point netowrk snapping market component.
 #[derive(Component)]
 pub struct SnapToPointNet;
@@ -56,7 +43,6 @@ pub struct CameraFocus {
 }
 
 pub fn apply_app_systems(app: &mut App) {
-    
     app.add_systems(
         Update,
         |mut query: Query<(&mut Transform, &PointNetwork), With<SnapToPointNet>>| {
@@ -88,6 +74,25 @@ pub fn apply_app_systems(app: &mut App) {
     );
 
     app.add_systems(Update, (debug_point_attach_snap,));
+
+    app.add_systems(
+        Update,
+        |mut cam_query: Query<&mut Transform, With<Camera3d>>,
+         focus_query: Query<(&CameraFocus, &Transform), Without<Camera3d>>| {
+            let mut focus = focus_query.iter().collect::<Vec<_>>();
+
+            if focus.is_empty() {
+                return;
+            }
+
+            focus.sort_by(|a, b| a.0.prio.partial_cmp(&b.0.prio).unwrap());
+            let focus = focus.last().unwrap().1;
+
+            for mut cam_transform in cam_query.iter_mut() {
+                cam_transform.look_at(focus.translation, Vec3::Y);
+            }
+        },
+    );
 }
 
 // -- Show physics points for debugging purposes
@@ -116,7 +121,6 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // -- stub copied from the Bevy example '3d/3d_scene.rs'
     // circular base
     commands.spawn((
         Mesh3d(meshes.add(Circle::new(4.0))),
@@ -171,7 +175,6 @@ pub fn setup(
                 ..Default::default()
             })),
             Transform::default(),
-            Rotatable { speed: 0.1 },
             points,
             springs,
             Gravity {
