@@ -26,8 +26,6 @@
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
-use loot_and_roam::app::apply_app_systems;
-use loot_and_roam::common::physics::apply_physics_systems;
 
 fn main() {
     let mut app = App::new();
@@ -46,9 +44,8 @@ fn main() {
     // framerate
     app.add_plugins(FrameTimeDiagnosticsPlugin);
 
-    // system registration
-    apply_physics_systems(&mut app);
-    apply_app_systems(&mut app);
+    // engine
+    //app.add_plugins(LootAndRoamEnginePlugin)
 
     // logger
     app.add_plugins(LogDiagnosticsPlugin::default());

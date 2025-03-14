@@ -18,8 +18,7 @@
 // permitted by applicable law.  See the CNPL for details.
 
 // [TODO] Please uncomment *only* implemented modules.
-pub mod objrender;
-pub mod ui;
-// pub mod commands;
-pub mod terrarender;
-// pub mod lighting;
+// pub mod lighting;  // Scene lighting definitions
+pub mod objrender; // Object rendering code
+pub mod terrarender; // Terrain raymarcher
+pub mod ui; // UI renderer

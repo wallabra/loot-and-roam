@@ -26,3 +26,67 @@
 //
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
+
+use bevy::prelude::*;
+
+use crate::common::physics::base::PointNetwork;
+
+/// Use this component on a child entity to attach it to a physics point of its parent.
+///
+/// The parent must have a [PointNetwork] component.
+#[derive(Component)]
+pub struct PointAttach {
+    /// The index of the physics point on the parent's [PointNetwork].
+    pub point_idx: usize,
+}
+
+fn point_attach_snap(
+    mut query_child: Query<(&Parent, &mut Transform, &PointAttach)>,
+    query_parent: Query<(&PointNetwork, &GlobalTransform, &Transform), Without<PointAttach>>,
+) {
+    for (parent, mut transform, attachment) in query_child.iter_mut() {
+        let (parent_points, parent_global_transform, parent_transform) =
+            query_parent.get(parent.get()).unwrap();
+
+        assert!(attachment.point_idx < parent_points.points.len());
+
+        transform.translation =
+            parent_points.points[attachment.point_idx].pos - parent_global_transform.translation();
+        transform.rotate_around(Vec3::ZERO, parent_transform.rotation.inverse());
+    }
+}
+
+/// Camera target component.
+#[derive(Component, Default)]
+pub struct CameraFocus {
+    /// Focus priority, highest value is used to point camera at.
+    pub prio: f32,
+}
+
+fn camera_focus_system(
+    mut cam_query: Query<&mut Transform, With<Camera3d>>,
+    focus_query: Query<(&CameraFocus, &Transform), Without<Camera3d>>,
+) {
+    let mut focus = focus_query.iter().collect::<Vec<_>>();
+
+    if focus.is_empty() {
+        return;
+    }
+
+    focus.sort_by(|a, b| b.0.prio.partial_cmp(&a.0.prio).unwrap());
+    let focus = focus[0].1;
+
+    for mut cam_transform in cam_query.iter_mut() {
+        cam_transform.look_at(focus.translation, Vec3::Y);
+    }
+}
+
+// [TODO] Add camera following
+
+pub struct ObjectRendererPlugin;
+
+impl Plugin for ObjectRendererPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, (point_attach_snap, camera_focus_system));
+    }
+}
