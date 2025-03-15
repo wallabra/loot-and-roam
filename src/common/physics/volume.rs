@@ -48,8 +48,7 @@ impl AABB {
         self.spans
             .iter()
             .zip(other.spans.iter())
-            .map(|(span_a, span_b)| span_a.does_intersect(span_b))
-            .all(|x| x)
+            .all(|(span_a, span_b)| span_a.does_intersect(span_b))
     }
 
     /// Returns a new AABB which contains both input AABBs in it.
@@ -302,7 +301,7 @@ impl VolumeCloneSpawner {
 
 impl VolumeSpawner for VolumeCloneSpawner {
     fn volume_type_at(&self, _point: &PhysPoint, _point_idx: usize) -> VolumeType {
-        self.cloned_volume.clone()
+        self.cloned_volume
     }
 }
 
@@ -332,10 +331,10 @@ impl VolumeCollection {
             .iter()
             .enumerate()
             .filter_map(|(idx, point)| {
-                if predicate(&point, idx) {
+                if predicate(point, idx) {
                     Some(PhysicsVolume {
                         point_idx: idx,
-                        volume_type: volume_spawner.volume_type_at(&point, idx),
+                        volume_type: volume_spawner.volume_type_at(point, idx),
                     })
                 } else {
                     None

@@ -57,8 +57,8 @@ fn apply_example_systems(app: &mut App) {
                     // arbitrary pick within these bounds will allow for
                     // sufficient reorientation of the snapped cube mesh.
 
-                    let front = network.points[0].pos.clone();
-                    let up = network.points[2].pos.clone();
+                    let front = network.points[0].pos;
+                    let up = network.points[2].pos;
                     let up = (up - avg).normalize();
 
                     transform.translation = avg;
@@ -120,7 +120,7 @@ fn setup(
         [0.5, 6.25, 0.5],
         [1.5, 12.5, 1.5],
     ]
-    .map(|arr| Vec3::from_array(arr))
+    .map(Vec3::from_array)
     {
         println!(
             "cube spawned: {:?}",
