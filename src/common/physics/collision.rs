@@ -78,6 +78,10 @@ fn volume_volume_collision_system(mut query: Query<(&mut PointNetwork, &VolumeCo
     let mut combinations = query.iter_combinations_mut();
 
     while let Some([(mut points1, volumes1), (mut points2, volumes2)]) = combinations.fetch_next() {
+        if !volumes1.aabb(&points1).check(volumes2.aabb(&points2)) {
+            continue;
+        }
+
         for vol1 in &volumes1.volumes {
             let pos1 = points1.points[vol1.point_idx].pos;
 
@@ -88,6 +92,8 @@ fn volume_volume_collision_system(mut query: Query<(&mut PointNetwork, &VolumeCo
                 let collision = vol1.volume_type.collision(&vol2.volume_type, offs_1_to_2);
 
                 if let Some(collision) = collision {
+                    info!("Handling collision!");
+
                     let depth = -vol1.volume_type.sdf(collision.pos);
 
                     points1.points[vol1.point_idx].pos -= collision.normal * depth;

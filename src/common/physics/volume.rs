@@ -31,6 +31,10 @@ pub struct AABB {
     pub spans: [Range<f32>; 3],
 }
 
+fn span_union(span_a: &Range<f32>, span_b: &Range<f32>) -> Range<f32> {
+    span_a.start.min(span_b.start)..span_a.end.min(span_b.end)
+}
+
 impl AABB {
     /// Initialize an AABB with three ranges, one for each axis: X, Y and Z.
     pub fn new(range_x: Range<f32>, range_y: Range<f32>, range_z: Range<f32>) -> Self {
@@ -46,6 +50,24 @@ impl AABB {
             .zip(other.spans.iter())
             .map(|(span_a, span_b)| span_a.does_intersect(span_b))
             .all(|x| x)
+    }
+
+    /// Returns a new AABB which contains both input AABBs in it.
+    pub fn union(self, other: AABB) -> Self {
+        Self {
+            spans: std::array::from_fn(|i| span_union(&self.spans[i], &other.spans[i])),
+        }
+    }
+
+    /// Return a copy of this AABB, fully translated along a 3D vector.
+    pub fn translate(self, translation: Vec3) -> Self {
+        let coords = [translation.x, translation.y, translation.z];
+
+        Self {
+            spans: std::array::from_fn(|i| {
+                self.spans[i].start + coords[i]..self.spans[i].end + coords[i]
+            }),
+        }
     }
 }
 
@@ -341,5 +363,24 @@ impl VolumeCollection {
         indices: &[usize],
     ) -> Self {
         Self::at_points_when(point_net, volume_spawner, |_, idx| indices.contains(&idx))
+    }
+
+    /// Get the full axis-aligned bounding box of every volume in this
+    /// VolumeCollection.
+    ///
+    /// ## Panics
+    ///
+    /// If there are no volumes, this will panic, due to a unwrap on the
+    /// return value of reduce.
+    pub fn aabb(&self, point_net: &PointNetwork) -> AABB {
+        self.volumes
+            .iter()
+            .map(|vol| {
+                vol.volume_type
+                    .aabb()
+                    .translate(point_net.points[vol.point_idx].pos)
+            })
+            .reduce(|a, b| a.union(b))
+            .unwrap()
     }
 }
