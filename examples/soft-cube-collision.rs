@@ -20,7 +20,7 @@
 // Demo is a modified variant of Bevy's 3D cube example '3d/3d_scene':
 // https://github.com/bevyengine/bevy/blob/latest/examples/3d/3d_scene.rs
 
-use std::f32::consts::TAU;
+use std::f32::consts::{SQRT_2, TAU};
 
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
@@ -28,7 +28,7 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::renderer::objrender::{CameraFocus, ObjectRendererPlugin},
+    app::renderer::objrender::{ObjectRendererPlugin, PointAttach},
     common::physics::{prelude::*, volume::VolumeCloneSpawner},
 };
 
@@ -109,10 +109,45 @@ fn setup(
     // -- camera
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(-5.0, 9.0, 18.0).looking_at(Vec3::Y * 0.5, Vec3::Y),
     ));
 
     // spawn cubes
+
+    for at in [
+        [-0.2, 1.5, 1.0],
+        [-0.4, 3.5, -0.5],
+        [0.5, 6.25, 0.5],
+        [1.5, 12.5, 1.5],
+    ]
+    .map(|arr| Vec3::from_array(arr))
+    {
+        println!(
+            "cube spawned: {:?}",
+            spawn_cube(
+                at,
+                &mut commands,
+                &mut meshes,
+                &mut materials,
+                // cube_mesh.clone(),
+                // cube_material.clone(),
+                // point_mesh.clone(),
+                // point_material.clone()
+            )
+        );
+    }
+}
+
+fn spawn_cube(
+    at: Vec3,
+    commands: &mut Commands<'_, '_>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    // cube_mesh: Handle<Mesh>,
+    // cube_material: Handle<StandardMaterial>,
+    // point_mesh: Handle<Mesh>,
+    // point_material: Handle<StandardMaterial>,
+) -> Entity {
     let cube_mesh = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
     let cube_material = materials.add(StandardMaterial {
         base_color: Color::srgba_u8(124, 144, 255, 140),
@@ -120,21 +155,8 @@ fn setup(
         ..Default::default()
     });
 
-    for at in
-        [[-0.2, 1.5, 1.0], [-0.4, 2.5, -0.5], [0.5, 3.5, 0.5]].map(|arr| Vec3::from_array(arr))
-    {
-        spawn_cube(at, &mut commands, cube_mesh.clone(), cube_material.clone());
-    }
-}
-
-fn spawn_cube<M: Material>(
-    at: Vec3,
-    commands: &mut Commands<'_, '_>,
-    mesh: Handle<Mesh>,
-    material: Handle<M>,
-) -> Entity {
     // create point & spring networks
-    let mut points = PointNetwork::from(
+    let points = PointNetwork::from(
         [
             // cube corners
             [-0.5, -0.5, -0.5],
@@ -164,7 +186,9 @@ fn spawn_cube<M: Material>(
     );
     let volumes = VolumeCollection::at_every_point(
         &points,
-        VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef { radius: 0.25 })),
+        VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef {
+            radius: SQRT_2 / 2.0,
+        })),
     );
 
     info!(
@@ -174,15 +198,34 @@ fn spawn_cube<M: Material>(
         volumes.volumes.len(),
     );
 
-    // disturb point velocities for more interesting system stabiliztion observation
-    points.points[3].vel.y += 1.5;
-    points.points[5].vel.z += 2.0;
+    // generate point network visualization as little children balls
+    let children = (0..points.points.len())
+        .map(|point_idx| {
+            let point_mesh = meshes.add(Sphere::new(0.05));
+            let point_material = materials.add(StandardMaterial {
+                base_color: Color::srgba_u8(255, 255, 48, 200),
+                alpha_mode: AlphaMode::Blend,
+                ..Default::default()
+            });
+
+            let child_point = commands
+                .spawn((
+                    PointAttach { point_idx },
+                    Mesh3d(point_mesh),
+                    MeshMaterial3d(point_material),
+                    Transform::default(),
+                ))
+                .id();
+
+            child_point
+        })
+        .collect::<Vec<_>>();
 
     // create cube entity
     let cube = commands
         .spawn((
-            Mesh3d(mesh),
-            MeshMaterial3d(material),
+            Mesh3d(cube_mesh),
+            MeshMaterial3d(cube_material),
             Transform::default(),
             points,
             springs,
@@ -197,9 +240,11 @@ fn spawn_cube<M: Material>(
                 force: Vec3::Y * -3.0,
             },
             SnapToPointNet,
-            CameraFocus::default(),
+            //CameraFocus::default(),
         ))
         .id();
+
+    commands.entity(cube).add_children(&children);
 
     cube
 }
