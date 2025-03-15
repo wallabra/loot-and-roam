@@ -134,7 +134,11 @@ fn volume_volume_collision_system(
                 let collision = vol1.volume_type.collision(&vol2.volume_type, offs_1_to_2);
 
                 if let Some(collision) = collision {
-                    let depth = -vol1.volume_type.sdf(collision.pos);
+                    // Depth is average of SDF-based depth on both entities
+                    let depth = (-vol1.volume_type.sdf(collision.pos)
+                        - vol2.volume_type.sdf(collision.pos - offs_1_to_2))
+                        / 2.0;
+
                     info!("Handling collision of depth {}", depth);
 
                     // points1.points[vol1.point_idx].pos -= collision.normal * depth;
