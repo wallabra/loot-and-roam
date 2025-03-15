@@ -152,6 +152,19 @@ pub struct CollisionInfo {
     pub normal: Vec3,
 }
 
+impl CollisionInfo {
+    /// Returns an inverted CollisionInfo.
+    ///
+    /// 'offset' would be the relative position of the other object, used to
+    /// mirror the collision position.
+    pub fn invert(&self, offset: Vec3) -> CollisionInfo {
+        Self {
+            pos: self.pos - offset,
+            normal: -self.normal,
+        }
+    }
+}
+
 /// Implmeent for objects that can have collision with volumes tested.
 pub trait VolumeCollision {
     /// Returns whether this collides with a volume at offset.

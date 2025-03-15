@@ -21,7 +21,7 @@ use bevy::prelude::*;
 
 use super::{
     base::PointNetwork,
-    volume::{VolumeCollection, VolumeCollision, VolumeInfo},
+    volume::{CollisionInfo, PhysicsVolume, VolumeCollection, VolumeCollision, VolumeInfo},
 };
 
 // [TODO] Volume collisions
@@ -72,12 +72,54 @@ fn floor_plane_collision_system(mut query: Query<(&mut PointNetwork, &FloorPlane
     }
 }
 
+/// Event emitted when two volumed objects collide.
+#[derive(Event)]
+pub struct VolumeVolumeCollisionDetectionEvent {
+    /// The first entity on the collision check.
+    ///
+    /// Parameters like [info] are from the perspective of this entity.
+    pub entity_ref: Entity,
+
+    /// The second entity on the collision check.
+    pub entity_other: Entity,
+
+    /// The volume on the first entity for which collision was detected.
+    ///
+    /// This is a clone, so any changes on it will *not* be reflected on the
+    /// original entity. That has to be done externally, e.g. by accessing
+    /// [entity_ref] directly on the system's Commands.
+    pub volume_1: PhysicsVolume,
+
+    /// The volume on the second entity for which collision was detected.
+    ///
+    /// This is a clone, so any changes on it will *not* be reflected on the
+    /// original entity. That has to be done externally, e.g. by accessing
+    /// [entity_other] directly on the system's Commands.
+    pub volume_2: PhysicsVolume,
+
+    /// Collision info, such as relative position and collision normal.
+    ///
+    /// Note that this is relative to the first entity, [entity_ref].
+    pub info: CollisionInfo,
+
+    /// Collision depth.
+    ///
+    /// An average of the depth calculated from both volumes based on their
+    /// SDFs.
+    pub depth: f32,
+}
+
 /// Object-object collision via physics volumes.
-fn volume_volume_collision_system(mut query: Query<(&mut PointNetwork, &VolumeCollection)>) {
+fn volume_volume_collision_system(
+    mut ev_collision: EventWriter<VolumeVolumeCollisionDetectionEvent>,
+    mut query: Query<(Entity, &mut PointNetwork, &VolumeCollection)>,
+) {
     // [TODO] Replace global all-pair combination iteration with a spatially accelerated data structure.
     let mut combinations = query.iter_combinations_mut();
 
-    while let Some([(mut points1, volumes1), (mut points2, volumes2)]) = combinations.fetch_next() {
+    'detect_loop: while let Some([(e1, mut points1, volumes1), (e2, mut points2, volumes2)]) =
+        combinations.fetch_next()
+    {
         if !volumes1.aabb(&points1).check(volumes2.aabb(&points2)) {
             continue;
         }
@@ -100,6 +142,17 @@ fn volume_volume_collision_system(mut query: Query<(&mut PointNetwork, &VolumeCo
 
                     // points2.points[vol2.point_idx].pos += collision.normal * depth;
                     points2.points[vol2.point_idx].vel += collision.normal * depth;
+
+                    ev_collision.send(VolumeVolumeCollisionDetectionEvent {
+                        entity_ref: e1,
+                        entity_other: e2,
+                        info: collision,
+                        depth,
+                        volume_1: vol1.clone(),
+                        volume_2: vol2.clone(),
+                    });
+
+                    continue 'detect_loop;
                 }
             }
         }
