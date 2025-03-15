@@ -43,7 +43,9 @@ impl Plugin for BasicPhysicsPlugin {
 
 pub mod prelude {
     pub use super::base::{Gravity, PhysPoint, PointNetwork};
-    pub use super::collision::{CollisionPlugin, FloorPlaneCollision};
+    pub use super::collision::{
+        CollisionPlugin, FloorPlaneCollision, VolumeVolumeCollisionDetectionEvent,
+    };
     pub use super::spring::{NormalSpring, Spring, SpringMode, SpringNetwork};
     pub use super::volume::{
         CollisionInfo, PhysicsVolume, SphereDef, VolumeCollection, VolumeCollision, VolumeInfo,

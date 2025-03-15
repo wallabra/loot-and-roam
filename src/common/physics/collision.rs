@@ -173,5 +173,6 @@ impl Plugin for CollisionPlugin {
             Update,
             (floor_plane_collision_system, volume_volume_collision_system),
         );
+        app.add_event::<VolumeVolumeCollisionDetectionEvent>();
     }
 }
