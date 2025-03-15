@@ -188,7 +188,7 @@ impl<V: VolumeInfo> VolumeCollision for V {
     /// That is the point of the [VolumeCollection] API!
     fn collision<T: VolumeInfo>(&self, volume: &T, offset: Vec3) -> Option<CollisionInfo> {
         let average_point =
-            (self.closest_point_to(offset) + volume.closest_point_to(-offset)) / 2.0;
+            (self.closest_point_to(offset) + offset + volume.closest_point_to(-offset)) / 2.0;
 
         if self.point_is_within(average_point) && volume.point_is_within(average_point) {
             Some(CollisionInfo {
@@ -204,6 +204,7 @@ impl<V: VolumeInfo> VolumeCollision for V {
 /// A Sphere-based volume.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SphereDef {
+    /// The radius of this sphere, centered at its origin.
     pub radius: f32,
 }
 
