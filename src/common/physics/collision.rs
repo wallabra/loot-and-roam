@@ -95,12 +95,13 @@ fn volume_volume_collision_system(mut query: Query<(&mut PointNetwork, &VolumeCo
                     info!("Handling collision!");
 
                     let depth = -vol1.volume_type.sdf(collision.pos);
+                    println!("Collision depth: {}", depth);
 
                     points1.points[vol1.point_idx].pos -= collision.normal * depth;
-                    points1.points[vol1.point_idx].vel -= collision.normal * depth;
+                    //points1.points[vol1.point_idx].vel -= collision.normal * depth;
 
                     points2.points[vol2.point_idx].pos += collision.normal * depth;
-                    points2.points[vol2.point_idx].vel += collision.normal * depth;
+                    // points2.points[vol2.point_idx].vel += collision.normal * depth;
                 }
             }
         }
