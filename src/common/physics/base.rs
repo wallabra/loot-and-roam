@@ -1,4 +1,7 @@
-//! Basic physics definitions and systems.
+//! # Basic physics definitions and systems
+//!
+//! Physics points and their most basic systems (inertia and gravity) are
+//! defined here.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -15,6 +18,8 @@
 
 use bevy::prelude::*;
 use itertools::iproduct;
+
+use super::spring::{Spring, SpringMode, SpringNetwork};
 
 #[derive(Debug, Clone, Copy)]
 pub struct PhysPoint {
@@ -105,6 +110,8 @@ where
 }
 
 impl PointNetwork {
+    // [TODO] Find way to move spring network creation functions onto the spring module
+
     /// Produces a SpringNetwork connected according to some criterion.
     pub fn make_connected_springs_whenever<F>(
         &self,
@@ -159,97 +166,6 @@ pub fn point_base_physics(time: Res<Time>, mut query_points: Query<(&mut PointNe
     }
 }
 
-//---- Springs
-
-/// The parameters for a normal-mode spring.
-#[derive(Debug, Clone, Copy)]
-pub struct NormalSpring {
-    /// The stiffness of the string.
-    ///
-    /// This is a linear scale on the force exerted on points to bring them
-    /// either closer to or apart from each other, to converge the real
-    /// distance towards the at-rest distance.
-    pub stiffness: f32,
-}
-
-/// The spring mode.
-///
-/// Determines how a spring connects two points.
-#[derive(Debug, Clone, Copy)]
-pub enum SpringMode {
-    /// Instant mode - points snap to the exact target distance.
-    Instant,
-
-    /// Normal mode - pushes the points closer to rest according to stiffness.
-    Normal(NormalSpring),
-}
-
-/// A spring connecting two points.
-#[derive(Debug, Clone)]
-pub struct Spring {
-    /// The index of points A and B into the PointNetwork.
-    pub points: (usize, usize),
-
-    /// The target/rest distance.
-    pub rest_dist: f32,
-
-    /// The spring mode.
-    pub mode: SpringMode,
-}
-
-/// A spring network.
-///
-/// A component that must be used to link points together, regardless of how
-/// spring-like their joints should actually be.
-#[derive(Component)]
-pub struct SpringNetwork {
-    /// The list of springs in this network.
-    pub springs: Vec<Spring>,
-}
-
-/// The system responsible for computing the spring system and its forces on points.
-pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork, &SpringNetwork)>) {
-    let delta_secs = time.delta_secs();
-
-    for (mut points, springs) in query.iter_mut() {
-        for spring in springs.springs.iter() {
-            let point_data: (PhysPoint, PhysPoint) = (
-                points.points[spring.points.0],
-                points.points[spring.points.1],
-            );
-
-            // [NOTE] All forces are relative to point A.
-            // As such, they will be applied half to point A, half to point B
-            // inverted.
-            let relative = point_data.1.pos - point_data.0.pos;
-            let unit_inward = relative.normalize();
-            let dist = relative.length();
-
-            // If positive, dist must decrease (inward  force)
-            // If negative, dist must increase (outward force)
-            let dist_diff = dist - spring.rest_dist;
-
-            match spring.mode {
-                SpringMode::Instant => {
-                    let offset = unit_inward * dist_diff;
-                    let half_offset = offset * 0.5;
-
-                    points.points[spring.points.0].pos += half_offset;
-                    points.points[spring.points.1].pos -= half_offset;
-                }
-
-                SpringMode::Normal(mode) => {
-                    let force = unit_inward * dist_diff * mode.stiffness;
-                    let half_force = force * 0.5;
-
-                    points.points[spring.points.0].apply_force_over_time(half_force, delta_secs);
-                    points.points[spring.points.1].apply_force_over_time(-half_force, delta_secs);
-                }
-            }
-        }
-    }
-}
-
 /// This Bevy component applies gravity to a physics-enabled object.
 ///
 /// Requires ]PointNetwork].
@@ -278,13 +194,5 @@ pub fn gravity(time: Res<Time>, mut query: Query<(&mut PointNetwork, &Gravity)>)
             // Position change integration (approximating as that of a continuous linear acceleration)
             point.pos += 0.5 * gravity.force * time.delta_secs().powi(2);
         }
-    }
-}
-
-pub struct BasicPhysicsPlugin;
-
-impl Plugin for BasicPhysicsPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, (point_base_physics, point_spring_forces, gravity));
     }
 }

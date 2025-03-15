@@ -2566,6 +2566,7 @@ dependencies = [
  "bevy",
  "enum_dispatch",
  "itertools 0.14.0",
+ "range-ext",
  "serde",
  "slotmap",
 ]
@@ -3344,6 +3345,12 @@ name = "range-alloc"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3d6831663a5098ea164f89cff59c6284e95f4e3c76ce9848d4529f5ccca9bde"
+
+[[package]]
+name = "range-ext"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ef928f61c6999ac5f35fe4cbba7ba0b70040d4089d63fc7416e50802d6c0872"
 
 [[package]]
 name = "rangemap"

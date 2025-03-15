@@ -1,8 +1,8 @@
-//! # Soft-body demonstration with a cube.
+//! # Collision system demonstration between soft-body cubes
 //!
-//! Demonstrates Loot & Roam's point-based softbody physics system,
-//! with a "sufficiently rigid" cube against a mildly bouncy floor
-//! plane, of which a circle is visible.
+//! Demonstrates Loot & Roam's [VolumeCollection] and related collision system,
+//! spawning multiple soft-body cubes with simple volumes on every physics
+//! point, and allowing them to collide with gravity.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -28,15 +28,15 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::renderer::objrender::{CameraFocus, ObjectRendererPlugin, PointAttach},
-    common::physics::prelude::*,
+    app::renderer::objrender::{CameraFocus, ObjectRendererPlugin},
+    common::physics::{prelude::*, volume::VolumeCloneSpawner},
 };
 
 /// Point netowrk snapping market component.
 #[derive(Component)]
-pub struct SnapToPointNet;
+struct SnapToPointNet;
 
-pub fn apply_example_systems(app: &mut App) {
+fn apply_example_systems(app: &mut App) {
     // Center cube on the average of its physics points, and orient it into the
     // point as a sort of cage.
     app.add_systems(
@@ -80,7 +80,7 @@ pub fn apply_example_systems(app: &mut App) {
 }
 
 /// Bevy setup system for the softbody cube demo.
-pub fn setup(
+fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -112,8 +112,27 @@ pub fn setup(
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 
-    // -- cube
+    // spawn cubes
+    let cube_mesh = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
+    let cube_material = materials.add(StandardMaterial {
+        base_color: Color::srgba_u8(124, 144, 255, 140),
+        alpha_mode: AlphaMode::Blend,
+        ..Default::default()
+    });
 
+    for at in
+        [[-0.2, 1.5, 1.0], [-0.4, 2.5, -0.5], [0.5, 3.5, 0.5]].map(|arr| Vec3::from_array(arr))
+    {
+        spawn_cube(at, &mut commands, cube_mesh.clone(), cube_material.clone());
+    }
+}
+
+fn spawn_cube<M: Material>(
+    at: Vec3,
+    commands: &mut Commands<'_, '_>,
+    mesh: Handle<Mesh>,
+    material: Handle<M>,
+) -> Entity {
     // create point & spring networks
     let mut points = PointNetwork::from(
         [
@@ -134,7 +153,7 @@ pub fn setup(
             [0.0, -0.5, 0.0],
             [0.0, 0.0, -0.5],
         ]
-        .map(|arr| PhysPoint::from_pos(Vec3::from(arr) + Vec3::Y))
+        .map(|arr| PhysPoint::from_pos(at + Vec3::from(arr)))
         .into_iter(),
     );
 
@@ -143,45 +162,31 @@ pub fn setup(
         spring_mode,
         1.5, /* max spring auto-connection range */
     );
+    let volumes = VolumeCollection::at_every_point(
+        &points,
+        VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef { radius: 0.25 })),
+    );
 
     info!(
-        "Cube has {} points and {} springs",
+        "Cube has {} points, {} springs, {} volumes",
         points.points.len(),
-        springs.springs.len()
+        springs.springs.len(),
+        volumes.volumes.len(),
     );
 
     // disturb point velocities for more interesting system stabiliztion observation
     points.points[3].vel.y += 1.5;
     points.points[5].vel.z += 2.0;
 
-    // generate point network visualization as little children balls
-    let children = (0..points.points.len())
-        .map(|point_idx| {
-            let child_point = commands
-                .spawn((
-                    PointAttach { point_idx },
-                    Mesh3d(meshes.add(Sphere::new(0.04))),
-                    MeshMaterial3d(materials.add(Color::srgb_u8(255, 255, 64))),
-                    Transform::default(),
-                ))
-                .id();
-
-            child_point
-        })
-        .collect::<Vec<_>>();
-
     // create cube entity
     let cube = commands
         .spawn((
-            Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-            MeshMaterial3d(materials.add(StandardMaterial {
-                base_color: Color::srgba_u8(124, 144, 255, 140),
-                alpha_mode: AlphaMode::Blend,
-                ..Default::default()
-            })),
+            Mesh3d(mesh),
+            MeshMaterial3d(material),
             Transform::default(),
             points,
             springs,
+            volumes,
             FloorPlaneCollision {
                 restitution: 0.2,
                 friction: 0.2,
@@ -196,7 +201,7 @@ pub fn setup(
         ))
         .id();
 
-    commands.entity(cube).add_children(&children);
+    cube
 }
 
 fn main() {

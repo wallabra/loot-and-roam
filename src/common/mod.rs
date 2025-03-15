@@ -9,17 +9,17 @@
 //!
 //! A player can load a single island at a time. There are two types of islands:
 //!
-//! * Bases - those are the meat and potatoes of the game, where players spawn in to loot
-//!           the props/buildings and the ships therein.
+//! * Bases: those are the meat and potatoes of the game, where players spawn in to loot
+//!   the props/buildings and the ships therein.
 //!
-//!           Here is where all the physics and combat happens.
+//!   Here is where all the physics and combat happens.
 //!
-//! * Towns - presnted as an intermission screen (either a menu or a map with clickable
-//!           buildings that enter menus, depending on client settings), where players can
-//!           modify their ships and manage their inventory.
-//!
-//!           Being a sort of non-game state, towns are made interesting by means of an
-//!           economic simulation.
+//! * Towns: presnted as an intermission screen (either a menu or a map with clickable
+// !  buildings that enter menus, depending on client settings), where players can
+// !  modify their ships and manage their inventory.
+// !
+// !  Being a sort of non-game state, towns are made interesting by means of an
+// !  economic simulation.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -38,8 +38,8 @@
 pub mod inventory; // Inventory items and related operations
 pub mod makeup;
 pub mod physics; // Object physics and collision detection // Ship makeup and parts
-                                                           // pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
-                                                           // pub mod namegen;   // Localizable name generation for NPC ships
+                 // pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
+                 // pub mod namegen;   // Localizable name generation for NPC ships
 pub mod terrain; // Terrain generation, caching, and lookup
                  // pub mod ai;        // NPC ship controller
                  // pub mod player;    // Player state tracking
