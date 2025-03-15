@@ -117,7 +117,11 @@ fn volume_volume_collision_system(
     // [TODO] Replace global all-pair combination iteration with a spatially accelerated data structure.
     let mut combinations = query.iter_combinations_mut();
 
-    'detect_loop: while let Some([(e1, mut points1, volumes1), (e2, mut points2, volumes2)]) =
+    // [NOTE] For more info on the below comment on loop label, see note below
+    // near its continue.
+
+    // 'detect_loop:
+    while let Some([(e1, mut points1, volumes1), (e2, mut points2, volumes2)]) =
         combinations.fetch_next()
     {
         if !volumes1.aabb(&points1).check(volumes2.aabb(&points2)) {
@@ -156,7 +160,13 @@ fn volume_volume_collision_system(
                         volume_2: vol2.clone(),
                     });
 
-                    continue 'detect_loop;
+                    // [NOTE] Uncomment the following to handle only one
+                    // volume-volume interaction at a time. Might help in terms
+                    // of performance and reducing "redundant" collision
+                    // events, but will likely lead to worse collision
+                    // resolution overall.
+
+                    // continue 'detect_loop;
                 }
             }
         }
