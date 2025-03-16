@@ -25,8 +25,16 @@ use std::f32::consts::{SQRT_2, TAU};
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
+    render::{
+        camera::RenderTarget,
+        render_resource::{
+            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+        },
+        RenderPlugin,
+    },
     window::PresentMode,
 };
+use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
 use loot_and_roam::{
     app::renderer::objrender::{ObjectRendererPlugin, PointAttach},
     common::physics::{prelude::*, volume::VolumeCloneSpawner},
@@ -57,8 +65,8 @@ fn apply_example_systems(app: &mut App) {
                     // arbitrary pick within these bounds will allow for
                     // sufficient reorientation of the snapped cube mesh.
 
-                    let front = network.points[0].pos;
-                    let up = network.points[2].pos;
+                    let front = network.points[0].pos.clone();
+                    let up = network.points[2].pos.clone();
                     let up = (up - avg).normalize();
 
                     transform.translation = avg;
@@ -79,13 +87,46 @@ fn apply_example_systems(app: &mut App) {
     app.add_systems(Startup, setup);
 }
 
-/// Bevy setup system for the softbody cube demo.
+// Resolution for exporting demo images.
+const WIDTH: u32 = 1280;
+const HEIGHT: u32 = 720;
+
+/// Bevy setup system for the softbody cube collision demo.
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
+    mut export_sources: ResMut<Assets<ImageExportSource>>,
 ) {
-    // -- circular base
+    // output texture for image sequence rendering
+    let output_texture_handle = {
+        let size = Extent3d {
+            width: WIDTH,
+            height: HEIGHT,
+            ..default()
+        };
+        let mut export_texture = Image {
+            texture_descriptor: TextureDescriptor {
+                label: None,
+                size,
+                dimension: TextureDimension::D2,
+                format: TextureFormat::Rgba8UnormSrgb,
+                mip_level_count: 1,
+                sample_count: 1,
+                usage: TextureUsages::COPY_DST
+                    | TextureUsages::COPY_SRC
+                    | TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            },
+            ..default()
+        };
+        export_texture.resize(size);
+
+        images.add(export_texture)
+    };
+
+    // circular base
     commands.spawn((
         Mesh3d(meshes.add(Circle::new(4.0))),
         MeshMaterial3d(materials.add(StandardMaterial {
@@ -97,7 +138,7 @@ fn setup(
             .with_translation(Vec3::new(0.0, -0.5, 0.0)),
     ));
 
-    // -- light
+    // light
     commands.spawn((
         PointLight {
             shadows_enabled: true,
@@ -106,21 +147,29 @@ fn setup(
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 
-    // -- camera
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(-5.0, 9.0, 18.0).looking_at(Vec3::Y * 0.5, Vec3::Y),
-    ));
+    // camera
+    commands
+        .spawn((
+            Camera3d::default(),
+            Transform::from_xyz(-5.0, 9.0, 18.0).looking_at(Vec3::Y * 0.5, Vec3::Y),
+        ))
+        .with_child((
+            Camera3d::default(),
+            Camera {
+                // Connect the output texture to a camera as a RenderTarget.
+                target: RenderTarget::Image(output_texture_handle.clone()),
+                ..default()
+            },
+        ));
 
-    // spawn cubes
-
+    // cubes
     for at in [
         [-0.2, 1.5, 1.0],
         [-0.4, 3.5, -0.5],
         [0.5, 6.25, 0.5],
         [1.5, 12.5, 1.5],
     ]
-    .map(Vec3::from_array)
+    .map(|arr| Vec3::from_array(arr))
     {
         println!(
             "cube spawned: {:?}",
@@ -136,6 +185,19 @@ fn setup(
             )
         );
     }
+
+    // start image exportation
+    commands.spawn((
+        ImageExport(export_sources.add(output_texture_handle)),
+        ImageExportSettings {
+            // Frames will be saved to "./out/[#####].png"
+            // [NOTE] update output dir when grafting this code onto other examples
+            output_dir: "out/soft-cube-colision/".into(),
+
+            // Choose "exr" for HDR renders (requires feature on crate bevy_image_export)
+            extension: "png".into(),
+        },
+    ));
 }
 
 fn spawn_cube(
@@ -252,16 +314,28 @@ fn spawn_cube(
 fn main() {
     let mut app = App::new();
 
+    // image export
+    let export_plugin = ImageExportPlugin::default();
+    let export_threads = export_plugin.threads.clone();
+
     // default plugin & main properties
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: "Loot & Roam Tech Demo - Soft Body Cube".into(),
-            name: Some("bevy.loot-and-roam.techdemo.softbody".into()),
-            present_mode: PresentMode::AutoNoVsync,
-            ..default()
-        }),
-        ..default()
-    }));
+    app.add_plugins((
+        DefaultPlugins
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Loot & Roam Tech Demo - Soft Body Cube".into(),
+                    name: Some("bevy.loot-and-roam.techdemo.softbody".into()),
+                    present_mode: PresentMode::AutoNoVsync,
+                    ..default()
+                }),
+                ..default()
+            })
+            .set(RenderPlugin {
+                synchronous_pipeline_compilation: true,
+                ..default()
+            }),
+        export_plugin,
+    ));
 
     // engine systems
     app.add_plugins((
@@ -278,4 +352,9 @@ fn main() {
     app.add_plugins(LogDiagnosticsPlugin::default());
 
     app.run();
+
+    // block till image sequence exportation is done
+    export_threads.finish();
+
+    // ffmpeg -r 60 -i out/soft-cube-collision/%05d.png -vcodec libx264 -crf 25 -pix_fmt out/soft-cube-collision-yuv420p.mp4
 }
