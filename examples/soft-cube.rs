@@ -29,10 +29,7 @@ use bevy::{
 };
 use loot_and_roam::{
     app::renderer::objrender::{CameraFocus, ObjectRendererPlugin, PointAttach},
-    common::physics::{
-        base::{BasicPhysicsPlugin, Gravity, NormalSpring, PhysPoint, PointNetwork, SpringMode},
-        collision::{CollisionPlugin, FloorPlaneCollision},
-    },
+    common::physics::prelude::*,
 };
 
 /// Point netowrk snapping market component.

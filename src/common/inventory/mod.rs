@@ -17,8 +17,6 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use std::u8;
-
 pub struct CannonDef {
     /// The minimum amount of power with which to launch a cannonball.
     pub min_power: f32,

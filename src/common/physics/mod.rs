@@ -17,7 +17,39 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-// [TODO] Please uncomment *only* implemented modules.
-// pub mod volume;    // Volumes, their intersection, and volume/surface forces
-pub mod base; // Basic point network definitions and systems.
+use base::{gravity, point_base_physics};
+use bevy::prelude::*;
+use spring::point_spring_forces;
+
+pub mod base; // Basic point network definitions and systems
 pub mod collision; // Advanced collision handling for objects
+pub mod spring; // Spring based soft body implementation
+pub mod volume; // Volumes, their intersection, and volume/surface forces
+
+/// # Basic physics
+///
+/// Adds systems for basic physics:
+///
+/// * Point inertia (applying velocity to position) - see [PointNetwork].
+/// * [SpringNetwork]s.
+/// * [Gravity].
+pub struct BasicPhysicsPlugin;
+
+impl Plugin for BasicPhysicsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, (point_base_physics, point_spring_forces, gravity));
+    }
+}
+
+pub mod prelude {
+    pub use super::base::{Gravity, PhysPoint, PointNetwork};
+    pub use super::collision::{
+        CollisionPlugin, FloorPlaneCollision, VolumeVolumeCollisionDetectionEvent,
+    };
+    pub use super::spring::{NormalSpring, Spring, SpringMode, SpringNetwork};
+    pub use super::volume::{
+        CollisionInfo, PhysicsVolume, SphereDef, VolumeCollection, VolumeCollision, VolumeInfo,
+        VolumeType, AABB,
+    };
+    pub use super::BasicPhysicsPlugin;
+}
