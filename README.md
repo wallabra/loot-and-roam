@@ -35,11 +35,11 @@ order of release:
 
 * **Cube softbody demo** - a demonstration of the point-spring network based
   soft body physics simulation, which will be fairly universally used (although
-  many objects will be springless single points).
+  many objects will be springless single points).  
   `cargo run --example soft-cube`
 
 * **Cube softbody collision demo** - a demonstration of the volume primitive
-  based collision system.
+  based collision system.  
   `cargo run --example soft-cube-collision`
 
 
