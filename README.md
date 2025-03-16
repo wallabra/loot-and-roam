@@ -34,9 +34,13 @@ to try out. Progress in developing engine features can be gauged this way. In
 order of release:
 
 * **Cube softbody demo** - a demonstration of the point-spring network based
-  soft body physics simulation, which will be fairly universally used to
-  varying degrees (although most objects will be single points).  
+  soft body physics simulation, which will be fairly universally used (although
+  many objects will be springless single points).
   `cargo run --example soft-cube`
+
+* **Cube softbody collision demo** - a demonstration of the volume primitive
+  based collision system.
+  `cargo run --example soft-cube-collision`
 
 
 ## Licensing
