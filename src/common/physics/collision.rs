@@ -143,8 +143,6 @@ fn volume_volume_collision_system(
                         - vol2.volume_type.sdf(collision.pos - offs_1_to_2))
                         / 2.0;
 
-                    //info!("Handling collision of depth {}", depth);
-
                     // points1.points[vol1.point_idx].pos -= collision.normal * depth;
                     points1.points[vol1.point_idx].vel -= collision.normal * depth;
 
