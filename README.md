@@ -39,7 +39,13 @@ order of release:
   `cargo run --example soft-cube`
 
 
-## Licensing
+## Contributing
+
+If you want to contribute to the project, it might be worth checking out our
+shiny new [Contribution Guidelines](CONTRIBUTING.md). :)
+
+
+## Licensing Information
 
 (c)2025 GameCircular.
 
