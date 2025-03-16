@@ -190,9 +190,9 @@ fn setup(
     commands.spawn((
         ImageExport(export_sources.add(output_texture_handle)),
         ImageExportSettings {
-            // Frames will be saved to "./out/[#####].png"
+            // Frames will be saved to "./out/soft-cube-collision/[#####].png"
             // [NOTE] update output dir when grafting this code onto other examples
-            output_dir: "out/soft-cube-colision/".into(),
+            output_dir: "out/soft-cube-collision/".into(),
 
             // Choose "exr" for HDR renders (requires feature on crate bevy_image_export)
             extension: "png".into(),
@@ -356,5 +356,8 @@ fn main() {
     // block till image sequence exportation is done
     export_threads.finish();
 
-    // ffmpeg -r 60 -i out/soft-cube-collision/%05d.png -vcodec libx264 -crf 25 -pix_fmt out/soft-cube-collision-yuv420p.mp4
+    // command to render to video:
+    // $ ffmpeg -r 60 -i out/soft-cube-collision/%05d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out/soft-cube-collision.mp4
+    // command to reset demo recordings:
+    // $ rm -r out/
 }
