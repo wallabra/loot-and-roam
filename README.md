@@ -2,7 +2,7 @@
 
 > Try as you might, even above the water line there are bigger fish...
 
-![Loot & Roam logo](media/logo/Loot & Roam monochrome.png)
+![Loot & Roam logo]"(media/logo/Loot & Roam monochrome.png" "Loot & Roam logo")
 
 
 A physics-based steampunk pirate game. A roguelike action RPG. Some would even
