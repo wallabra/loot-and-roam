@@ -1,4 +1,4 @@
-//! # Object physics engine.
+//! # Object physics engine
 //!
 //! Objects in Loot & Roam are physically comprised of a network of "points",
 //! which are mobile points in 3D space, to which can be attached physical
@@ -17,14 +17,18 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use base::{gravity, point_base_physics};
+use base::point_base_physics;
 use bevy::prelude::*;
-use spring::point_spring_forces;
+use forces::BasicForcesPlugin;
+use spring::SpringForcesPlugin;
+use water::WaterPhysicsPlugin;
 
 pub mod base; // Basic point network definitions and systems
 pub mod collision; // Advanced collision handling for objects
+pub mod forces; // Basic forces
 pub mod spring; // Spring based soft body implementation
 pub mod volume; // Volumes, their intersection, and volume/surface forces
+pub mod water; // Water physics
 
 /// # Basic physics
 ///
@@ -37,19 +41,23 @@ pub struct BasicPhysicsPlugin;
 
 impl Plugin for BasicPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (point_base_physics, point_spring_forces, gravity));
+        // app.add_systems(Update, (point_base_physics, point_spring_forces, gravity));
+        app.add_systems(Update, (point_base_physics,));
+        app.add_plugins((SpringForcesPlugin, BasicForcesPlugin, WaterPhysicsPlugin));
     }
 }
 
 pub mod prelude {
-    pub use super::base::{Gravity, PhysPoint, PointNetwork};
+    pub use super::base::{PhysPoint, PointNetwork};
     pub use super::collision::{
         CollisionPlugin, FloorPlaneCollision, VolumeVolumeCollisionDetectionEvent,
     };
+    pub use super::forces::{AirDrag, Gravity};
     pub use super::spring::{NormalSpring, Spring, SpringMode, SpringNetwork};
     pub use super::volume::{
         CollisionInfo, PhysicsVolume, SphereDef, VolumeCollection, VolumeCollision, VolumeInfo,
         VolumeType, AABB,
     };
+    pub use super::water::WaterPhysics;
     pub use super::BasicPhysicsPlugin;
 }

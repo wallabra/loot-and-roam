@@ -68,7 +68,7 @@ pub struct SpringNetwork {
 }
 
 /// The system responsible for computing the spring system and its forces on points.
-pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork, &SpringNetwork)>) {
+fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork, &SpringNetwork)>) {
     let delta_secs = time.delta_secs();
 
     for (mut points, springs) in query.iter_mut() {
@@ -107,5 +107,14 @@ pub fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork,
                 }
             }
         }
+    }
+}
+
+/// Spring system plugin.
+pub struct SpringForcesPlugin;
+
+impl Plugin for SpringForcesPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, (point_spring_forces,));
     }
 }

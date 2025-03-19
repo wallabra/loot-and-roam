@@ -137,6 +137,18 @@ pub trait VolumeInfo {
     fn point_is_within(&self, point: Vec3) -> bool {
         self.sdf(point) < 0.0
     }
+
+    /// Returns the total volume of this geometry.
+    fn volume(&self) -> f32;
+
+    /// Returns the surface area of this geometry.
+    fn surface_area(&self) -> f32;
+
+    /// Returns the volume of this geometry's section under a given y-intercept.
+    fn volume_below(&self, y_intercept: f32) -> f32;
+
+    /// Returns the surface area of this geometry's section under a given y-intercept.
+    fn surface_area_below(&self, y_intercept: f32) -> f32;
 }
 
 /// Basic information on a detected collision.
@@ -249,6 +261,40 @@ impl VolumeInfo for SphereDef {
             -self.radius..self.radius,
             -self.radius..self.radius,
         )
+    }
+
+    fn volume(&self) -> f32 {
+        self.radius.powi(3) * std::f32::consts::FRAC_PI_4 * 3.0
+    }
+
+    fn surface_area(&self) -> f32 {
+        4.0 * std::f32::consts::PI * self.radius.powi(2)
+    }
+
+    fn volume_below(&self, y_intercept: f32) -> f32 {
+        // Spherical cap volume formula
+        // https://en.wikipedia.org/wiki/Spherical_cap#Volume_and_surface_area
+        if y_intercept <= -self.radius {
+            0.0
+        } else if y_intercept >= self.radius {
+            self.volume()
+        } else {
+            let cap_height = -y_intercept + self.radius;
+            std::f32::consts::FRAC_PI_3 * cap_height.powi(2) * (3.0 * self.radius - cap_height)
+        }
+    }
+
+    fn surface_area_below(&self, y_intercept: f32) -> f32 {
+        // Spherical cap volume formula
+        // https://en.wikipedia.org/wiki/Spherical_cap#Volume_and_surface_area
+        if y_intercept <= -self.radius {
+            0.0
+        } else if y_intercept >= self.radius {
+            self.surface_area()
+        } else {
+            let cap_height = -y_intercept + self.radius;
+            2.0 * std::f32::consts::PI * self.radius * cap_height
+        }
     }
 }
 
@@ -395,5 +441,15 @@ impl VolumeCollection {
             })
             .reduce(|a, b| a.union(b))
             .unwrap()
+    }
+
+    /// Iterates immutably on every volume and physics point pair.
+    pub fn iter_with_points<'a>(
+        &'a self,
+        point_net: &'a PointNetwork,
+    ) -> impl Iterator<Item = (&'a PhysicsVolume, &'a PhysPoint)> {
+        self.volumes
+            .iter()
+            .map(|vol| (vol, &point_net.points[vol.point_idx]))
     }
 }
