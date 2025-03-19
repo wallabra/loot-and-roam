@@ -44,6 +44,11 @@ order of release:
   based collision system.  
   `cargo run --example soft-cube-collision`
 
+* **Cube buoyancy demo** - a demonstration of the water physics simulation,
+  which interacts with volume primitives to compute both buoyancy and fluid
+  drag.  
+  `cargo run --example soft-cube-buoyancy`
+
 
 ## Contributing
 
