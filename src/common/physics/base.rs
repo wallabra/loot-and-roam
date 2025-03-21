@@ -93,7 +93,7 @@ impl PhysPoint {
 /// A network of physics points.
 ///
 /// A component that must be in any physics-capable entity.
-#[derive(Component)]
+#[derive(Component, Clone, Default)]
 pub struct PointNetwork {
     pub points: Vec<PhysPoint>,
 }

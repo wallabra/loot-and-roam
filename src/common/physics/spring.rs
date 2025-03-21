@@ -61,7 +61,7 @@ pub struct Spring {
 ///
 /// A component that must be used to link points together, regardless of how
 /// spring-like their joints should actually be.
-#[derive(Component)]
+#[derive(Component, Clone, Default)]
 pub struct SpringNetwork {
     /// The list of springs in this network.
     pub springs: Vec<Spring>,

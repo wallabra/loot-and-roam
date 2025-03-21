@@ -328,7 +328,7 @@ pub struct PhysicsVolume {
 }
 
 /// ECS component with a list of physics-point-attached volumes.
-#[derive(Component)]
+#[derive(Component, Clone, Default)]
 pub struct VolumeCollection {
     /// The physics volumes on this collection.
     ///
