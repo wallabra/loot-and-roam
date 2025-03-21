@@ -25,7 +25,7 @@ use super::{
 /// This Bevy component applies gravity to a physics-enabled object.
 ///
 /// Requires ]PointNetwork].
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Gravity {
     /// The force of gravity, with direction and magnitude.
     ///
@@ -64,7 +64,7 @@ fn gravity(time: Res<Time>, mut query: Query<(&mut PointNetwork, &Gravity)>) {
 /// This Bevy component applies air drag to a physics-enabled object.
 ///
 /// Requires [PointNetwork] and [VolumeCollection].
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct AirDrag {
     pub drag_factor: f32,
 }

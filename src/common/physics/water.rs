@@ -28,7 +28,7 @@ use super::{
 /// This includes both drag and buoyancy.
 ///
 /// Requires ]PointNetwork] and [VolumeCollection].
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct WaterPhysics {
     /// Drag force factor.
     pub drag_factor: f32,
