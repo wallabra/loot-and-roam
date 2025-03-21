@@ -33,13 +33,14 @@ use bevy::{
     window::PresentMode,
 };
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
+use derive_builder::Builder;
 use loot_and_roam::{
     app::renderer::objrender::{ObjectRendererPlugin, PointAttach},
     common::physics::{prelude::*, volume::VolumeCloneSpawner, water::WaterPhysics},
 };
 
 /// Point netowrk snapping market component.
-#[derive(Component)]
+#[derive(Component, Default)]
 struct SnapToPointNet;
 
 fn apply_example_systems(app: &mut App) {
@@ -200,6 +201,37 @@ fn setup(
     }
 }
 
+/// Bundle for spawning a soft body cube.
+#[derive(Bundle, Builder)]
+struct CubeBundle<M: Material> {
+    points: PointNetwork,
+    springs: SpringNetwork,
+    volumes: VolumeCollection,
+
+    #[builder(default)]
+    water_physics: WaterPhysics,
+
+    #[builder(default)]
+    air_drag: AirDrag,
+
+    #[builder(default)]
+    gravity: Gravity,
+
+    #[builder(setter(skip), default)]
+    snap_to_points: SnapToPointNet,
+
+    mesh: Mesh3d,
+    material: MeshMaterial3d<M>,
+
+    transform: Transform,
+}
+
+impl<M: Material> CubeBundle<M> {
+    pub fn builder() -> CubeBundleBuilder<M> {
+        Default::default()
+    }
+}
+
 fn spawn_cube(
     at: Vec3,
     commands: &mut Commands<'_, '_>,
@@ -285,29 +317,27 @@ fn spawn_cube(
 
     // create cube entity
     let cube = commands
-        .spawn((
-            Mesh3d(cube_mesh),
-            MeshMaterial3d(cube_material),
-            Transform::default(),
-            points,
-            springs,
-            volumes,
-            WaterPhysics {
+        .spawn((CubeBundle::builder()
+            .mesh(Mesh3d(cube_mesh))
+            .material(MeshMaterial3d(cube_material))
+            .transform(Transform::default())
+            .points(points)
+            .springs(springs)
+            .volumes(volumes)
+            .water_physics(WaterPhysics {
                 water_level: -1.5,
 
                 // exaggerated for demonstrative purposes
                 buoyancy_factor: 4.0,
 
                 ..Default::default()
-            },
-            AirDrag::default(),
-            Gravity {
+            })
+            .gravity(Gravity {
                 // low grav for development purposes
                 force: Vec3::Y * -3.0,
-            },
-            SnapToPointNet,
-            //CameraFocus::default(),
-        ))
+            })
+            .build()
+            .unwrap(),))
         .id();
 
     commands.entity(cube).add_children(&children);
