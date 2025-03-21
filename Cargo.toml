@@ -8,6 +8,7 @@ authors = ["GameCircular team"]
 
 [dependencies]
 bevy = "0.15.2"
+derive_builder = "0.20.2"
 enum_dispatch = "0.3.13"
 itertools = "0.14.0"
 range-ext = "0.3.0"
