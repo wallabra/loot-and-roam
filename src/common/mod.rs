@@ -48,3 +48,7 @@ pub mod terrain; // Terrain generation, caching, and lookup
                  // pub mod town;      // Economic mechanisms, and town state tracking
                  // pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
                  // pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
+
+pub mod prelude {
+    pub use physics::prelude::*;
+}
