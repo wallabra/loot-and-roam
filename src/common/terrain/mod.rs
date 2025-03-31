@@ -1,8 +1,8 @@
 //! # Terrain definitions
 //!
-//! Broadly speaking, terrain is defined as a set of mathematical equations,
-//! which define its geometry, and then rendered via an optimized in-GPU
-//! raymarcher implemented on top of Bevy.
+//! Broadly speaking, terrain is defined as a tree of 'terrain primitives',
+//! which generate fields such as the heightmap and signed distance field,
+//! which are used in both the physics and rendering stages.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -16,3 +16,5 @@
 //
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
+
+pub mod noise;
