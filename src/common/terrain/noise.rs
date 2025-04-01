@@ -128,11 +128,11 @@ impl NoiseLattice {
     }
 
     fn corners_at_quad(&self, qx: usize, qy: usize) -> LatticeQuadCorners {
-        assert!(qx < self.width - 1);
-        assert!(qy < self.height() - 1);
+        debug_assert!(qx < self.width - 1);
+        debug_assert!(qy < self.height() - 1);
 
         let c_nw = qy * self.width + qx;
-        let c_sw = (qy * self.width + 1) + qx;
+        let c_sw = qy * (self.width + 1) + qx;
 
         LatticeQuadCorners {
             nw: self.points[c_nw],
@@ -150,10 +150,10 @@ impl NoiseLattice {
 
     /// The last 7 bits of each value are the fractional part of each quadrant.
     pub fn get_influence_at_u16(&self, pos_x: u16, pos_y: u16) -> i8 {
-        let quad_x = (pos_x >> 8) as usize;
-        let quad_y = (pos_y >> 8) as usize;
-        let inner_x = (pos_x & 0x7F) as i8;
-        let inner_y = (pos_y & 0x7F) as i8;
+        let quad_x = (pos_x / 128) as usize;
+        let quad_y = (pos_y / 128) as usize;
+        let inner_x = (pos_x % 128) as i8;
+        let inner_y = (pos_y % 128) as i8;
 
         self.corners_at_quad(quad_x, quad_y)
             .influence_at_i8(inner_x, inner_y)
