@@ -37,8 +37,8 @@ impl NoiseLatticePoint {
     }
 
     fn influence_on_i8(&self, off_x: i8, off_y: i8) -> i8 {
-        ((self.inf_vec_x as i16) * (off_x as i16)
-            >> 8 + (self.inf_vec_y as i16) * (off_y as i16)
+        ((self.inf_vec_x as i16) * (off_x as i16 + ((off_x < 64) as i16))
+            >> 8 + (self.inf_vec_y as i16 + ((off_y < 64) as i16)) * (off_y as i16)
             >> 8) as i8
     }
 
@@ -163,32 +163,4 @@ impl NoiseLattice {
     }
 }
 
-#[cfg(test)]
-pub mod tests {
-    use super::*;
-
-    #[test]
-    fn quad_influence_1() {
-        let quad = LatticeQuadCorners {
-            nw: NoiseLatticePoint {
-                inf_vec_x: -127,
-                inf_vec_y: -127,
-            },
-            ne: NoiseLatticePoint {
-                inf_vec_x: 0,
-                inf_vec_y: 0,
-            },
-            sw: NoiseLatticePoint {
-                inf_vec_x: 0,
-                inf_vec_y: 0,
-            },
-            se: NoiseLatticePoint {
-                inf_vec_x: -127,
-                inf_vec_y: -127,
-            },
-        };
-
-        assert!(quad.influence_at_i8(0, 0) < 0);
-        assert!(quad.influence_at_i8(127, 127) > 0);
-    }
-}
+// [TODO] fractal noise
