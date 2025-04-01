@@ -17,10 +17,10 @@
 
 use rand::Rng;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub struct NoiseLatticePoint {
-    inf_vec_x: f32,
-    inf_vec_y: f32,
+    pub inf_vec_x: f32,
+    pub inf_vec_y: f32,
 }
 
 impl NoiseLatticePoint {
@@ -43,11 +43,12 @@ impl NoiseLatticePoint {
     }
 }
 
+#[derive(Clone, PartialEq, Debug)]
 pub struct LatticeQuadCorners {
-    nw: NoiseLatticePoint,
-    ne: NoiseLatticePoint,
-    sw: NoiseLatticePoint,
-    se: NoiseLatticePoint,
+    pub nw: NoiseLatticePoint,
+    pub ne: NoiseLatticePoint,
+    pub sw: NoiseLatticePoint,
+    pub se: NoiseLatticePoint,
 }
 
 fn smootherstep(from: f32, to: f32, alpha: f32) -> f32 {
@@ -100,12 +101,12 @@ impl NoiseLattice {
         self.points.len() / self.width
     }
 
-    fn corners_at_quad(&self, qx: usize, qy: usize) -> LatticeQuadCorners {
+    pub fn corners_at_quad(&self, qx: usize, qy: usize) -> LatticeQuadCorners {
         debug_assert!(qx < self.width - 1);
         debug_assert!(qy < self.height() - 1);
 
-        let c_nw = qy * self.width + qx;
-        let c_sw = qy * (self.width + 1) + qx;
+        let c_nw = qx + qy * self.width;
+        let c_sw = qx + qy * (self.width + 1);
 
         LatticeQuadCorners {
             nw: self.points[c_nw],
