@@ -39,13 +39,12 @@ impl NoiseLatticePoint {
     }
 
     fn influence_on_i8(&self, off_x: i8, off_y: i8) -> i8 {
-        ((self.inf_vec_x as i16) * (off_x as i16 + ((off_x < 64) as i16))
-            >> 8 + (self.inf_vec_y as i16 + ((off_y < 64) as i16)) * (off_y as i16)
-            >> 8) as i8
+        ((self.inf_vec_x as i16) * (off_x as i16 + ((off_x < 64) as i16)) / 128
+            + (self.inf_vec_y as i16 + ((off_y < 64) as i16)) * (off_y as i16) / 128) as i8
     }
 
     fn influence_on_f32(&self, off_x: f32, off_y: f32) -> f32 {
-        (self.inf_vec_x as f32 / 127.0) * off_x + (self.inf_vec_y as f32 / 127.0) * off_y
+        (self.inf_vec_x as f32 / 128.0) * off_x + (self.inf_vec_y as f32 / 128.0) * off_y
     }
 }
 
@@ -56,18 +55,16 @@ pub struct LatticeQuadCorners {
     se: NoiseLatticePoint,
 }
 
-fn lerp_i8(from: i8, to: i8, alpha: u8) -> i8 {
-    let diff = to - from;
-    let diff_scaled = TryInto::<i8>::try_into((diff as i16 * alpha as i16) >> 8).unwrap();
+fn smootherstep_i8(from: i8, to: i8, alpha: u8) -> i8 {
+    let alpha = (alpha as f32) / 256.0;
+    let alpha = alpha * alpha * alpha * (alpha * (6.0 * alpha - 15.0) + 10.0);
 
-    from + diff_scaled
+    (from as i32 + (alpha * (to as f32 - from as f32)) as i32) as i8
 }
 
-fn lerp_f32(from: f32, to: f32, alpha: f32) -> f32 {
-    let diff = to - from;
-    let diff_scaled = diff * alpha;
-
-    from + diff_scaled
+fn smootherstep_f32(from: f32, to: f32, alpha: f32) -> f32 {
+    let alpha = alpha * alpha * alpha * (alpha * (6.0 * alpha - 15.0) + 10.0);
+    from + alpha * (to - from)
 }
 
 impl LatticeQuadCorners {
@@ -81,27 +78,35 @@ impl LatticeQuadCorners {
     }
 
     pub fn influence_at_i8(&self, off_x: i8, off_y: i8) -> i8 {
+        debug_assert!(off_x >= 0);
+        debug_assert!(off_y >= 0);
+
         let inf_nw = self.nw.influence_on_i8(off_x, off_y);
-        let inf_ne = self.ne.influence_on_i8(-off_x, off_y);
-        let inf_sw = self.sw.influence_on_i8(off_x, -off_y);
-        let inf_se = self.se.influence_on_i8(-off_x, -off_y);
+        let inf_ne = self.ne.influence_on_i8(off_x - 127, off_y);
+        let inf_sw = self.sw.influence_on_i8(off_x, off_y - 127);
+        let inf_se = self.se.influence_on_i8(off_x - 127, off_y - 127);
 
-        let inf_n = lerp_i8(inf_nw, inf_ne, off_x as u8 * 2);
-        let inf_s = lerp_i8(inf_sw, inf_se, off_x as u8 * 2);
+        let inf_n = smootherstep_i8(inf_nw, inf_ne, off_x as u8 * 2);
+        let inf_s = smootherstep_i8(inf_sw, inf_se, off_x as u8 * 2);
 
-        lerp_i8(inf_n, inf_s, off_y as u8 * 2 + ((off_y > 63) as u8))
+        smootherstep_i8(inf_n, inf_s, off_y as u8 * 2)
     }
 
     pub fn influence_at_f32(&self, off_x: f32, off_y: f32) -> f32 {
+        debug_assert!(off_x >= 0.0);
+        debug_assert!(off_y >= 0.0);
+        debug_assert!(off_x < 1.0);
+        debug_assert!(off_y < 1.0);
+
         let inf_nw = self.nw.influence_on_f32(off_x, off_y);
-        let inf_ne = self.ne.influence_on_f32(-off_x, off_y);
-        let inf_sw = self.sw.influence_on_f32(off_x, -off_y);
-        let inf_se = self.se.influence_on_f32(-off_x, -off_y);
+        let inf_ne = self.ne.influence_on_f32(off_x - 1.0, off_y);
+        let inf_sw = self.sw.influence_on_f32(off_x, off_y - 1.0);
+        let inf_se = self.se.influence_on_f32(off_x - 1.0, off_y - 1.0);
 
-        let inf_n = lerp_f32(inf_nw, inf_ne, off_x);
-        let inf_s = lerp_f32(inf_sw, inf_se, off_x);
+        let inf_n = smootherstep_f32(inf_nw, inf_ne, off_x);
+        let inf_s = smootherstep_f32(inf_sw, inf_se, off_x);
 
-        lerp_f32(inf_n, inf_s, off_y)
+        smootherstep_f32(inf_n, inf_s, off_y)
     }
 }
 
