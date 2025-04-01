@@ -26,7 +26,7 @@ const IMAGE_SIZE: u32 = 600;
 
 /// Number of quads on any given side of the noise texture.
 /// Edit this constant to change the 'resolution' of the noise texture.
-const QUAD_EXTENT: u32 = 12;
+const QUAD_EXTENT: u32 = 5;
 
 /// Size of each quad in pixels.
 const QUAD_SIZE: f32 = IMAGE_SIZE as f32 / QUAD_EXTENT as f32;
@@ -66,21 +66,31 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // draw noise (f32)
     for y in 0..IMAGE_SIZE {
         for x in 0..IMAGE_SIZE {
-            // get noise map's influence value at coordinates
-            let norm_x = (x as f32) / QUAD_SIZE;
-            let norm_y = (y as f32) / QUAD_SIZE;
-
-            let influence = noise.get_influence_at(norm_x, norm_y);
-
             // find bytes of this pixel by coordinates
             let pixel_bytes = image.pixel_bytes_mut(UVec3::new(x, y, 0)).unwrap();
 
+            // find normalized coordinates (quad size 1.0)
+            let norm_x = (x as f32) / QUAD_SIZE;
+            let norm_y = (y as f32) / QUAD_SIZE;
+
+            // draw tile boundaries for debug
+            if norm_x.fract() < 0.01
+                || norm_y.fract() < 0.01
+                || norm_x.fract() > 0.99
+                || norm_y.fract() > 0.99
+            {
+                pixel_bytes[1] = 127;
+            }
+
+            // get noise map's influence value at coordinates
+            let influence = noise.get_influence_at(norm_x, norm_y);
+
             // draw influence value
-            // red for positive, blue for negative
+            // (red for positive, blue for negative)
             if influence > 0.0 {
-                pixel_bytes[0] = (influence * 256.0) as u8;
+                pixel_bytes[0] = (influence * 256.0).floor() as u8;
             } else {
-                pixel_bytes[2] = (-influence * 256.0) as u8;
+                pixel_bytes[2] = (-influence * 256.0).floor() as u8;
             }
         }
     }
