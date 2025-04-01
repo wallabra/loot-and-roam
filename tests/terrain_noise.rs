@@ -18,12 +18,22 @@ use loot_and_roam::common::terrain::noise::*;
 #[test]
 fn quad_influence_1() {
     let quad = LatticeQuadCorners::new(
-        NoiseLatticePoint::new(-127, -127),
-        NoiseLatticePoint::new(0, 0),
-        NoiseLatticePoint::new(0, 0),
-        NoiseLatticePoint::new(-127, -127),
+        NoiseLatticePoint::new(-1.0, -1.0),
+        NoiseLatticePoint::new(0.0, 0.0),
+        NoiseLatticePoint::new(0.0, 0.0),
+        NoiseLatticePoint::new(-1.0, -1.0),
     );
 
-    assert!(quad.influence_at_i8(0, 0) < 0);
-    assert!(quad.influence_at_i8(127, 127) > 0);
+    assert!(quad.influence_at(0.1, 0.1) < 0.0);
+    assert!(quad.influence_at(0.9, 0.9) > 0.0);
+}
+
+#[test]
+fn quad_lookup() {
+    let lattice = NoiseLattice::new(3, 3);
+    let quad_1 = lattice.corners_at_quad(1, 0);
+    let quad_2 = lattice.corners_at_quad(1, 1);
+
+    assert_eq!(quad_1.sw, quad_2.nw);
+    assert_eq!(quad_1.se, quad_2.ne);
 }
