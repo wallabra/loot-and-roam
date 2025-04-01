@@ -70,7 +70,7 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
             let norm_x = (x as f32) / QUAD_SIZE;
             let norm_y = (y as f32) / QUAD_SIZE;
 
-            let influence = noise.get_influence_at_f32(norm_x, norm_y);
+            let influence = noise.get_influence_at(norm_x, norm_y);
 
             // find bytes of this pixel by coordinates
             let pixel_bytes = image.pixel_bytes_mut(UVec3::new(x, y, 0)).unwrap();
