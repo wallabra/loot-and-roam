@@ -18,3 +18,7 @@
 // permitted by applicable law.  See the CNPL for details.
 
 pub mod noise;
+
+pub mod prelude {
+    // [WIP] Terrain module prelude
+}
