@@ -18,12 +18,19 @@
 use rand::Rng;
 
 #[derive(Default, Clone, Copy)]
-struct NoiseLatticePoint {
+pub struct NoiseLatticePoint {
     inf_vec_x: i8,
     inf_vec_y: i8,
 }
 
 impl NoiseLatticePoint {
+    pub fn new(inf_vec_x: i8, inf_vec_y: i8) -> Self {
+        Self {
+            inf_vec_x,
+            inf_vec_y,
+        }
+    }
+
     fn randomize<R: Rng + ?Sized>(&mut self, rng: &mut R) {
         self.inf_vec_x = rng.random();
         self.inf_vec_y = rng.random();
@@ -40,7 +47,7 @@ impl NoiseLatticePoint {
     }
 }
 
-struct LatticeQuadCorners {
+pub struct LatticeQuadCorners {
     nw: NoiseLatticePoint,
     ne: NoiseLatticePoint,
     sw: NoiseLatticePoint,
@@ -62,7 +69,16 @@ fn lerp_f32(from: f32, to: f32, alpha: f32) -> f32 {
 }
 
 impl LatticeQuadCorners {
-    fn influence_at_i8(&self, off_x: i8, off_y: i8) -> i8 {
+    pub fn new(
+        nw: NoiseLatticePoint,
+        ne: NoiseLatticePoint,
+        sw: NoiseLatticePoint,
+        se: NoiseLatticePoint,
+    ) -> Self {
+        Self { nw, ne, sw, se }
+    }
+
+    pub fn influence_at_i8(&self, off_x: i8, off_y: i8) -> i8 {
         let inf_nw = self.nw.influence_on_i8(off_x, off_y);
         let inf_ne = self.ne.influence_on_i8(-off_x, off_y);
         let inf_sw = self.sw.influence_on_i8(off_x, -off_y);
@@ -74,7 +90,7 @@ impl LatticeQuadCorners {
         lerp_i8(inf_n, inf_s, off_y as u8 * 2 + ((off_y > 63) as u8))
     }
 
-    fn influence_at_f32(&self, off_x: f32, off_y: f32) -> f32 {
+    pub fn influence_at_f32(&self, off_x: f32, off_y: f32) -> f32 {
         let inf_nw = self.nw.influence_on_f32(off_x, off_y);
         let inf_ne = self.ne.influence_on_f32(-off_x, off_y);
         let inf_sw = self.sw.influence_on_f32(off_x, -off_y);
@@ -148,7 +164,7 @@ impl NoiseLattice {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     #[test]
