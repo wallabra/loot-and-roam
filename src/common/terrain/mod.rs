@@ -20,5 +20,5 @@
 pub mod noise;
 
 pub mod prelude {
-    // [WIP] Terrain module prelude
+    pub use super::noise::NoiseLattice;
 }
