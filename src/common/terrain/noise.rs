@@ -32,8 +32,10 @@ impl NoiseLatticePoint {
     }
 
     fn randomize<R: Rng + ?Sized>(&mut self, rng: &mut R) {
-        self.inf_vec_x = rng.random();
-        self.inf_vec_y = rng.random();
+        // Use polar randomization to ensure unit length
+        let angle: f32 = rng.random_range(0.0..std::f32::consts::TAU);
+        self.inf_vec_x = (angle.cos() * 128.0) as i8;
+        self.inf_vec_y = (angle.sin() * 128.0) as i8;
     }
 
     fn influence_on_i8(&self, off_x: i8, off_y: i8) -> i8 {
