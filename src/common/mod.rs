@@ -50,5 +50,6 @@ pub mod terrain; // Terrain generation, caching, and lookup
                  // pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
 
 pub mod prelude {
-    pub use physics::prelude::*;
+    pub use super::physics::prelude::*;
+    pub use super::terrain::prelude::*;
 }
