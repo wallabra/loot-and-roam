@@ -34,6 +34,8 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+use bevy::prelude::Plugin;
+
 // [TODO] Please uncomment *only* implemented modules.
 pub mod inventory; // Inventory items and related operations
 pub mod makeup;
@@ -49,7 +51,17 @@ pub mod terrain; // Terrain generation, caching, and lookup
                  // pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
                  // pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
 
+/// Main plugin, groups all the important Loot & Roam systems together.
+pub struct LootAndRoamPlugin;
+
+impl Plugin for LootAndRoamPlugin {
+    fn build(&self, app: &mut bevy::app::App) {
+        app.add_plugins((physics::BasicPhysicsPlugin,));
+    }
+}
+
 pub mod prelude {
     pub use super::physics::prelude::*;
     pub use super::terrain::prelude::*;
+    pub use super::LootAndRoamPlugin;
 }

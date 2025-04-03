@@ -1,8 +1,6 @@
-//! # Graphics & rendering code.
+//! # Sky and background rendering
 //!
-//! While Bevy is the main game engine and handles the backend, more advanced
-//! rendering functionality such as the lighting engine and terrain SDF3D
-//! rendering can be found here.
+//! Applies a background to in-game scenes.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -17,9 +15,12 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-// [TODO] Please uncomment *only* implemented modules.
-// pub mod lighting;  // Scene lighting definitions
-pub mod objrender; // Object rendering code
-pub mod sky; // Sky/background
-pub mod terrarender; // Terrain renderer
-pub mod ui; // UI renderer
+use bevy::prelude::*;
+
+fn sky_setup(mut commands: Commands) {
+    // [TODO] sky rendering
+}
+
+pub struct SkyRenderingPlugin;
+
+impl Plugin for SkyRenderingPlugin {}
