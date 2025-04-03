@@ -25,10 +25,18 @@ pub struct NoiseLatticePoint {
 
 impl NoiseLatticePoint {
     pub fn new(inf_vec_x: f32, inf_vec_y: f32) -> Self {
-        Self {
+        *Self {
             inf_vec_x,
             inf_vec_y,
         }
+        .renormalize()
+    }
+
+    fn renormalize(&mut self) -> &mut Self {
+        let mag = (self.inf_vec_x.powi(2) + self.inf_vec_y.powi(2)).sqrt();
+        self.inf_vec_x /= mag;
+        self.inf_vec_y /= mag;
+        self
     }
 
     fn randomize<R: Rng + ?Sized>(&mut self, rng: &mut R) {
@@ -80,7 +88,7 @@ impl LatticeQuadCorners {
         let inf_n = smootherstep(inf_nw, inf_ne, off_x);
         let inf_s = smootherstep(inf_sw, inf_se, off_x);
 
-        smootherstep(inf_n, inf_s, off_y)
+        smootherstep(inf_s, inf_n, off_y)
     }
 }
 
@@ -134,3 +142,36 @@ impl NoiseLattice {
 }
 
 // [TODO] fractal noise
+
+pub mod tests {
+    use super::*;
+
+    #[test]
+    fn quad_influence_1() {
+        let quad = LatticeQuadCorners::new(
+            NoiseLatticePoint::new(-1.0, -1.0),
+            NoiseLatticePoint::new(0.5, -0.5),
+            NoiseLatticePoint::new(-0.5, 0.5),
+            NoiseLatticePoint::new(-1.0, -1.0),
+        );
+
+        println!("{:?}", quad.influence_at(0.1, 0.1));
+        println!("{:?}", quad.influence_at(0.9, 0.9));
+        assert!(quad.influence_at(0.2, 0.2) < 0.0);
+        assert!(quad.influence_at(0.8, 0.8) > 0.0);
+    }
+
+    #[test]
+    fn quad_lookup() {
+        let lattice = NoiseLattice::new(3, 3);
+        let quad_1 = lattice.corners_at_quad(1, 0);
+        let quad_2 = lattice.corners_at_quad(1, 1);
+
+        assert_eq!(quad_1.sw, quad_2.nw);
+        assert_eq!(quad_1.se, quad_2.ne);
+        assert_eq!(
+            quad_1.influence_at(0.5, 0.99999),
+            quad_2.influence_at(0.5, 0.0)
+        );
+    }
+}
