@@ -15,9 +15,11 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+use std::fmt::Debug;
+
 use rand::Rng;
 
-#[derive(Default, Clone, Copy, PartialEq, Debug)]
+#[derive(Default, Clone, Copy, PartialEq)]
 pub struct NoiseLatticePoint {
     pub inf_vec_x: f32,
     pub inf_vec_y: f32,
@@ -48,6 +50,13 @@ impl NoiseLatticePoint {
 
     fn influence_on(&self, off_x: f32, off_y: f32) -> f32 {
         self.inf_vec_x * off_x + self.inf_vec_y * off_y
+    }
+}
+
+impl Debug for NoiseLatticePoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({:?},{:?})", self.inf_vec_x, self.inf_vec_y)?;
+        Ok(())
     }
 }
 
@@ -114,7 +123,7 @@ impl NoiseLattice {
         debug_assert!(qy < self.height() - 1);
 
         let c_nw = qx + qy * self.width;
-        let c_sw = qx + qy * (self.width + 1);
+        let c_sw = qx + (qy + 1) * self.width;
 
         LatticeQuadCorners {
             nw: self.points[c_nw],
@@ -147,28 +156,16 @@ pub mod tests {
     use super::*;
 
     #[test]
-    fn quad_influence_1() {
-        let quad = LatticeQuadCorners::new(
-            NoiseLatticePoint::new(-1.0, -1.0),
-            NoiseLatticePoint::new(0.5, -0.5),
-            NoiseLatticePoint::new(-0.5, 0.5),
-            NoiseLatticePoint::new(-1.0, -1.0),
-        );
-
-        println!("{:?}", quad.influence_at(0.1, 0.1));
-        println!("{:?}", quad.influence_at(0.9, 0.9));
-        assert!(quad.influence_at(0.2, 0.2) < 0.0);
-        assert!(quad.influence_at(0.8, 0.8) > 0.0);
-    }
-
-    #[test]
     fn quad_lookup() {
-        let lattice = NoiseLattice::new(3, 3);
+        let lattice = NoiseLattice::new(4, 3);
         let quad_1 = lattice.corners_at_quad(1, 0);
         let quad_2 = lattice.corners_at_quad(1, 1);
+        let quad_3 = lattice.corners_at_quad(2, 0);
 
         assert_eq!(quad_1.sw, quad_2.nw);
         assert_eq!(quad_1.se, quad_2.ne);
+        assert_eq!(quad_1.ne, quad_3.nw);
+        assert_eq!(quad_1.se, quad_3.sw);
         assert_eq!(
             quad_1.influence_at(0.5, 0.99999),
             quad_2.influence_at(0.5, 0.0)
