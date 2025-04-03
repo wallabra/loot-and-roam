@@ -68,9 +68,13 @@ pub struct LatticeQuadCorners {
     pub se: NoiseLatticePoint,
 }
 
+fn lerp(from: f32, to: f32, alpha: f32) -> f32 {
+    from + alpha * (to - from)
+}
+
 fn smootherstep(from: f32, to: f32, alpha: f32) -> f32 {
     let alpha = alpha * alpha * alpha * (alpha * (6.0 * alpha - 15.0) + 10.0);
-    from + alpha * (to - from)
+    lerp(from, to, alpha)
 }
 
 impl LatticeQuadCorners {
@@ -97,7 +101,7 @@ impl LatticeQuadCorners {
         let inf_n = smootherstep(inf_nw, inf_ne, off_x);
         let inf_s = smootherstep(inf_sw, inf_se, off_x);
 
-        smootherstep(inf_s, inf_n, off_y)
+        smootherstep(inf_n, inf_s, off_y)
     }
 }
 
@@ -153,10 +157,10 @@ impl NoiseLattice {
 // [TODO] fractal noise
 
 pub mod tests {
-    use super::*;
-
     #[test]
     fn quad_lookup() {
+        use super::NoiseLattice;
+
         let lattice = NoiseLattice::new(4, 3);
         let quad_1 = lattice.corners_at_quad(1, 0);
         let quad_2 = lattice.corners_at_quad(1, 1);
