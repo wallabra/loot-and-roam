@@ -343,7 +343,7 @@ impl FractalNoise {
         mut initializer: T,
     ) -> &mut Self {
         for octave in
-            self.max_octave as u16 + 1..=self.max_octave as u16 + u16::from(num_octaves) + 1
+            (self.max_octave + 1) as u16..=(self.max_octave + 1) as u16 + u16::from(num_octaves)
         {
             self.add_octave(octave, &mut initializer);
         }
