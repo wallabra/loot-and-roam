@@ -1,4 +1,4 @@
-//! Perlin noise test demo.
+//! Fractal Perlin noise test demo.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -19,7 +19,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
-use loot_and_roam::common::prelude::NoiseLattice;
+use loot_and_roam::common::terrain::noise::FractalNoise;
 
 /// Size of both sides of the image texture to be drawn onto.
 const IMAGE_SIZE: u32 = 600;
@@ -44,9 +44,11 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // spawn a camera
     commands.spawn(Camera2d);
 
-    // initialize Perlin noise
-    let mut noise = NoiseLattice::new(QUAD_EXTENT as usize + 1, QUAD_EXTENT as usize + 1);
-    noise.randomize(&mut rand::rng());
+    // initialize fractal Perlin noise
+    let mut noise = FractalNoise::new(QUAD_EXTENT as f32 + 1.0, QUAD_EXTENT as f32 + 1.0);
+    let mut rng = rand::rng();
+    noise.add_many_random_octaves(5, &mut rng);
+
     let noise = noise; // make immutable
 
     // create an image to draw Perlin noise into

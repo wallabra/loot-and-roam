@@ -20,5 +20,5 @@
 pub mod noise;
 
 pub mod prelude {
-    pub use super::noise::NoiseLattice;
+    pub use super::noise::{FractalNoise, NoiseLattice};
 }
