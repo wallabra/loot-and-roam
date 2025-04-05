@@ -25,6 +25,8 @@ use std::{fmt::Debug, num::NonZeroU16};
 
 use rand::Rng;
 
+use crate::common::math::smootherstep;
+
 #[derive(Default, Clone, Copy, PartialEq)]
 /// A point on the grid of lattice points.
 pub struct NoiseLatticePoint {
@@ -94,15 +96,6 @@ pub struct LatticeQuadCorners {
     pub se: NoiseLatticePoint,
 }
 
-fn lerp(from: f32, to: f32, alpha: f32) -> f32 {
-    from + alpha * (to - from)
-}
-
-fn smootherstep(from: f32, to: f32, alpha: f32) -> f32 {
-    let alpha = alpha * alpha * alpha * (alpha * (6.0 * alpha - 15.0) + 10.0);
-    lerp(from, to, alpha)
-}
-
 impl LatticeQuadCorners {
     /// Creates a square lattice tile, or 'quad', from four [NoiseLatticePoint]
     /// definitions, one for each corner.
@@ -146,6 +139,7 @@ impl LatticeQuadCorners {
 /// bilinear interpolation (so closer grid points have more influence).
 /// Note that the dot product (and thus the output) is zero when exactly on
 /// grid points.
+#[derive(Clone)]
 pub struct NoiseLattice {
     points: Vec<NoiseLatticePoint>,
     width: usize,
@@ -213,6 +207,7 @@ impl NoiseLattice {
     }
 }
 
+#[derive(Clone)]
 struct FractalNoiseOctave {
     lattice: NoiseLattice,
     octave: u16,
@@ -262,6 +257,7 @@ impl FractalNoiseOctave {
 ///
 /// This algorithm is known as 'fractal noise' because, if extended infinitely,
 /// 'zooming in' an octave would look just as detailed, just like a fractal!
+#[derive(Clone)]
 pub struct FractalNoise {
     width: f32,
     height: f32,
@@ -361,6 +357,19 @@ impl FractalNoise {
         rng: &mut impl Rng,
     ) -> &mut Self {
         self.add_many_octaves(num_octaves, move |layer| layer.randomize(rng))
+    }
+
+    /// Construct a new FractalNoise noise generator with this many ranodmly
+    /// generated layers of noise, using the passed [Rng].
+    pub fn random_octaves(
+        width: f32,
+        height: f32,
+        num_octaves: NonZeroU16,
+        rng: &mut impl Rng,
+    ) -> Self {
+        let mut res = Self::new(width, height);
+        res.add_many_random_octaves(num_octaves, rng);
+        res
     }
 
     /// Get the noise value at the input coordinates pos_x and pos_y.

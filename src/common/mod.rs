@@ -50,6 +50,8 @@ pub mod terrain; // Terrain generation, caching, and lookup
                  // pub mod town;      // Economic mechanisms, and town state tracking
                  // pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
                  // pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
+                 // ṕub mod util;      // Miscellaneous utility functions
+pub mod math; // Mathematical utility functions
 
 /// Main plugin, groups all the important Loot & Roam systems together.
 pub struct LootAndRoamPlugin;

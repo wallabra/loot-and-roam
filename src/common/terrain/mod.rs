@@ -17,8 +17,15 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+pub mod generator;
 pub mod noise;
 
 pub mod prelude {
+    pub use super::generator::{
+        default_modulator, CenterPoint, DefaultTerrainGenerator, DefaultTerrainGeneratorBuilder,
+        DefaultTerrainModulatorAlgorithm, DistanceCollector, MinDistance, ModulationParams,
+        SmoothminDistance, TerrainGenerator, TerrainGeneratorBuilder, TerrainModulator,
+        TerrainModulatorAlgorithm,
+    };
     pub use super::noise::{FractalNoise, NoiseLattice};
 }
