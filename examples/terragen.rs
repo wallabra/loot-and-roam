@@ -48,9 +48,14 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
             &mut rng,
         ))
         .modulator(default_modulator())
+        .modulation_params(ModulationParams {
+            min_shore_distance: 30.0,
+            max_shore_distance: 150.0,
+            ..Default::default()
+        })
         .center_points(vec![
-            CenterPoint::new(Vec2::new(400.0, 400.0), 1.0),
-            CenterPoint::new(Vec2::new(300.0, 600.0), 0.4),
+            CenterPoint::new(Vec2::new(400.0, 400.0), 1.5),
+            CenterPoint::new(Vec2::new(500.0, 50.0), 0.3),
         ])
         .build()
         .unwrap();
@@ -85,9 +90,13 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
             // draw influence value
             // (red for positive, blue for negative)
             if height > 0.0 {
-                pixel_bytes[0] = (height * 256.0).floor() as u8;
+                pixel_bytes[2] = (height * 256.0).floor() as u8;
+                pixel_bytes[1] = 255;
+                pixel_bytes[0] = 127;
             } else {
-                pixel_bytes[2] = (-height * 256.0).floor() as u8;
+                pixel_bytes[0] = (255 - (-height * 256.0).floor() as u8) / 2;
+                pixel_bytes[1] = 10;
+                pixel_bytes[2] = 200;
             }
         }
     }

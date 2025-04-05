@@ -38,11 +38,11 @@ pub struct ModulationParams {
     /// above the water.
     pub min_shore_distance: f32,
 
-    /// The minimum height of land (above water) terrain, between 0 and 1.
-    pub shore_rim: f32,
-
-    /// The maximum height of underwater terrain, between -1 and 0.
-    pub seabed_rim: f32,
+    /// The amount by which to conform terrain into the island forms.
+    ///
+    /// Smaller amounts let in more Perlin noise, higher amounts conform it
+    /// more; too high and you get blobs!
+    pub islandification: f32,
 }
 
 impl Default for ModulationParams {
@@ -50,8 +50,7 @@ impl Default for ModulationParams {
         Self {
             min_shore_distance: 100.0,
             max_shore_distance: 300.0,
-            shore_rim: 0.1,
-            seabed_rim: -0.4,
+            islandification: 0.4,
         }
     }
 }
@@ -72,23 +71,18 @@ pub struct DefaultTerrainModulatorAlgorithm;
 impl TerrainModulatorAlgorithm for DefaultTerrainModulatorAlgorithm {
     fn push_terrain(&self, params: &ModulationParams, distance: f32, curr_height: f32) -> f32 {
         // Use a spline to push terrain up or down.
-        let pushed_up = lerp(params.shore_rim, 1.0, (curr_height + 1.0) / 2.0);
-        let pushed_down = lerp(0.0, params.seabed_rim, (curr_height + 1.0) / 2.0);
-
-        if distance < params.min_shore_distance {
-            pushed_up
-        } else if distance > params.max_shore_distance
-            || params.max_shore_distance == params.min_shore_distance
-        {
-            pushed_down
+        let step_alpha = if distance < params.min_shore_distance {
+            0.0
+        } else if distance > params.max_shore_distance {
+            1.0
         } else {
-            // This division is why we check if max and min shore distances are equal above. :)
-            let alpha = (distance - params.min_shore_distance)
-                / (params.max_shore_distance - params.min_shore_distance);
+            (distance - params.min_shore_distance)
+                / (params.max_shore_distance - params.min_shore_distance)
+        };
 
-            // [TODO] Generalize spline interpolation algorithm choice
-            smootherstep(pushed_up, pushed_down, alpha)
-        }
+        let distance_step = smootherstep(1.0, -1.0, step_alpha);
+
+        lerp(curr_height, distance_step, params.islandification)
     }
 }
 
@@ -121,30 +115,28 @@ impl DistanceCollector for MinDistance {
 pub struct SmoothminDistance {
     /// The 'roughness' of this smoothmin collector.
     ///
-    /// The higher this value is, the wider the smoothening of the seams.
+    /// The higher this value is, the sharper the smoothening of the seams.
     ///
-    /// A value of 1 is functionally equivalent to [MinDistance].
+    /// A value of infinity would be functionally equivalent to [MinDistance],
+    /// if computers were like magical unicorns.
     pub roughness: f32,
 }
 
 impl Default for SmoothminDistance {
     fn default() -> Self {
-        Self { roughness: 20.0 }
+        Self { roughness: 1.5 }
     }
 }
 
 impl DistanceCollector for SmoothminDistance {
     fn collect_distances(&self, distances: Vec<f32>) -> f32 {
         0.0_f32.max(
-            (0.000001_f32
-                .max(
-                    distances
-                        .into_iter()
-                        .map(|v| (v * self.roughness).exp())
-                        .sum(),
-                )
-                .ln())
-                / self.roughness,
+            (-distances
+                .into_iter()
+                .map(|v| (-self.roughness as f64 * v as f64).exp())
+                .sum::<f64>()
+                .ln()
+                / self.roughness as f64) as f32,
         )
     }
 }
@@ -209,7 +201,7 @@ where
     ) -> f32 {
         let distances = center_points
             .iter()
-            .map(|point| (point.pos - at).length() * point.scale)
+            .map(|point| (point.pos - at).length() / point.scale)
             .collect::<Vec<_>>();
         let distance = self.distance_collector.collect_distances(distances);
 
@@ -246,7 +238,7 @@ where
 
     /// The size of each noise 'tile' (at octave 0).
     // [NOTE] Change the below default value to change the size of terrain noise tiles!
-    #[builder(default = 80.0)]
+    #[builder(default = 200.0)]
     resolution: f32,
 }
 
