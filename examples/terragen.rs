@@ -55,7 +55,7 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         })
         .center_points(vec![
             CenterPoint::new(Vec2::new(400.0, 400.0), 1.5),
-            CenterPoint::new(Vec2::new(500.0, 50.0), 0.3),
+            CenterPoint::new(Vec2::new(500.0, 50.0), 0.5),
         ])
         .build()
         .unwrap();

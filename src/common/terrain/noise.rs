@@ -263,6 +263,7 @@ pub struct FractalNoise {
     height: f32,
     octaves: Vec<FractalNoiseOctave>,
     max_octave: i32,
+    norm_denom: f32,
 }
 
 impl FractalNoise {
@@ -276,6 +277,7 @@ impl FractalNoise {
             height,
             octaves: vec![],
             max_octave: -1,
+            norm_denom: 0.0,
         }
     }
 
@@ -286,6 +288,19 @@ impl FractalNoise {
             .map(|layer| layer.get_octave() as i32)
             .reduce(i32::max)
             .unwrap_or(if self.octaves.is_empty() { -1 } else { 0 });
+    }
+
+    fn update_norm_denom(&mut self) {
+        self.norm_denom = self
+            .octaves
+            .iter()
+            .map(|layer| 2.0_f32.powi(-(layer.octave as i32)))
+            .sum()
+    }
+
+    fn internal_update(&mut self) {
+        self.update_max_octave();
+        self.update_norm_denom();
     }
 
     /// Get the width of the input coordinate boundary; that is, the maximum
@@ -317,7 +332,7 @@ impl FractalNoise {
         initializer(&mut lattice);
 
         self.octaves.push(FractalNoiseOctave::new(lattice, octave));
-        self.update_max_octave();
+        self.internal_update();
         self
     }
 
@@ -377,7 +392,8 @@ impl FractalNoise {
         self.octaves
             .iter()
             .map(|oct| oct.get_influence_at(pos_x, pos_y))
-            .sum()
+            .sum::<f32>()
+            / self.norm_denom
     }
 }
 

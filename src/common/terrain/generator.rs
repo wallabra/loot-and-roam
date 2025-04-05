@@ -50,7 +50,7 @@ impl Default for ModulationParams {
         Self {
             min_shore_distance: 100.0,
             max_shore_distance: 300.0,
-            islandification: 0.4,
+            islandification: 0.2,
         }
     }
 }
