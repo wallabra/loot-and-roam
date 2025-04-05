@@ -47,7 +47,7 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // initialize fractal Perlin noise
     let mut noise = FractalNoise::new(QUAD_EXTENT as f32 + 1.0, QUAD_EXTENT as f32 + 1.0);
     let mut rng = rand::rng();
-    noise.add_many_random_octaves(5, &mut rng);
+    noise.add_many_random_octaves(5.try_into().unwrap(), &mut rng);
 
     let noise = noise; // make immutable
 
@@ -84,7 +84,7 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
                 pixel_bytes[1] = 127;
             }
 
-            // get noise map's influence value at coordinates
+            // get noise value at coordinates
             let influence = noise.get_influence_at(norm_x, norm_y);
 
             // draw influence value
