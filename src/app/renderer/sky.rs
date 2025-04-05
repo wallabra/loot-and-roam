@@ -23,4 +23,8 @@ fn sky_setup(mut commands: Commands) {
 
 pub struct SkyRenderingPlugin;
 
-impl Plugin for SkyRenderingPlugin {}
+impl Plugin for SkyRenderingPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, sky_setup);
+    }
+}
