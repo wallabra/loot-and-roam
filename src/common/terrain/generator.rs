@@ -23,7 +23,7 @@
 use bevy::math::Vec2;
 use derive_builder::Builder;
 
-use crate::common::math::smootherstep;
+use crate::common::math::{lerp, smootherstep};
 
 use super::noise::FractalNoise;
 
@@ -37,6 +37,12 @@ pub struct ModulationParams {
     /// The radius away from a center point which should be guaranteed to be
     /// above the water.
     pub min_shore_distance: f32,
+
+    /// The minimum height of land (above water) terrain, between 0 and 1.
+    pub shore_rim: f32,
+
+    /// The maximum height of underwater terrain, between -1 and 0.
+    pub seabed_rim: f32,
 }
 
 impl Default for ModulationParams {
@@ -44,6 +50,8 @@ impl Default for ModulationParams {
         Self {
             min_shore_distance: 100.0,
             max_shore_distance: 300.0,
+            shore_rim: 0.1,
+            seabed_rim: -0.4,
         }
     }
 }
@@ -64,8 +72,8 @@ pub struct DefaultTerrainModulatorAlgorithm;
 impl TerrainModulatorAlgorithm for DefaultTerrainModulatorAlgorithm {
     fn push_terrain(&self, params: &ModulationParams, distance: f32, curr_height: f32) -> f32 {
         // Use a spline to push terrain up or down.
-        let pushed_up = (curr_height + 1.0) / 2.0;
-        let pushed_down = (curr_height - 1.0) / 2.0;
+        let pushed_up = lerp(params.shore_rim, 1.0, (curr_height + 1.0) / 2.0);
+        let pushed_down = lerp(0.0, params.seabed_rim, (curr_height + 1.0) / 2.0);
 
         if distance < params.min_shore_distance {
             pushed_up
