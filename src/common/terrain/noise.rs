@@ -311,9 +311,11 @@ impl FractalNoise {
         octave: u16,
         mut initializer: T,
     ) -> &mut Self {
-        let span = 2.0_f32.powi(octave.into());
-        let octave_width = (self.width * span + 1.0).floor() as usize;
-        let octave_height = (self.height * span + 1.0).floor() as usize;
+        let resolution = 2.0_f32.powi(octave.into());
+
+        // make sure octave lattice can fit (coords + 1) * resolution
+        let octave_width = ((self.width + 1.0) * resolution).ceil() as usize;
+        let octave_height = ((self.height + 1.0) * resolution).ceil() as usize;
 
         let mut lattice = NoiseLattice::new(octave_width, octave_height);
         initializer(&mut lattice);
@@ -403,10 +405,12 @@ pub mod tests {
 
         let inf_1 = fractal.get_influence_at(0.5, 0.5);
 
-        fractal.add_random_octave(12, &mut rng);
+        // whoops, 2^12 is too large!
+        let test_octave = 6;
+        fractal.add_random_octave(6, &mut rng);
 
         let inf_2 = fractal.get_influence_at(0.5, 0.5);
 
-        assert!((inf_1 - inf_2).abs() <= 2.0_f32.powi(-12));
+        assert!((inf_1 - inf_2).abs() <= 2.0_f32.powi(-6));
     }
 }
