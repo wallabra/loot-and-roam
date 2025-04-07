@@ -1,8 +1,6 @@
 //! # Terrain rendering.
 //!
-//! A terrain node can produce a signed distance field.
-//!
-//! This signed distance field is used for rendering.
+//! Unused stub as of now.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -16,3 +14,5 @@
 //
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
+
+// [TODO] Implement custom low level terrain renderer, checking for a single Terrain entity

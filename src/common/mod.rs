@@ -63,6 +63,7 @@ impl Plugin for LootAndRoamPlugin {
 }
 
 pub mod prelude {
+    pub use super::math::*;
     pub use super::physics::prelude::*;
     pub use super::terrain::prelude::*;
     pub use super::LootAndRoamPlugin;
