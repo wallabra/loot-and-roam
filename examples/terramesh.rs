@@ -64,7 +64,7 @@ fn scene(
     // spawn camera
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(700.0, 200.0, 500.0).looking_at(Vec3::Y * 30.0, Vec3::Y),
+        Transform::from_xyz(500.0, 150.0, 300.0).looking_at(Vec3::Y * 30.0, Vec3::Y),
     ));
 
     // spawn light
@@ -72,10 +72,10 @@ fn scene(
         PointLight {
             shadows_enabled: true,
             range: 50000.0,
-            intensity: 10000.0,
+            intensity: 100000.0,
             ..default()
         },
-        Transform::from_xyz(30.0, 1000.0, -10.0),
+        Transform::from_xyz(100.0, 300.0, -30.0),
     ));
 
     // spawn water level plane
