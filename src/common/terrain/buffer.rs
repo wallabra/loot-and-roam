@@ -130,7 +130,7 @@ impl TerrainBuffer {
                     let which_corner = match tri_idx % 2 {
                         0 => {
                             // even triangles: NW, NE, SW
-                            [NW, NE, SW][vert_in_tri]
+                            [NE, NW, SW][vert_in_tri]
                         }
                         1 => {
                             // odd triangles: NE, SW, SE
