@@ -48,9 +48,9 @@ pub struct ModulationParams {
 impl Default for ModulationParams {
     fn default() -> Self {
         Self {
-            min_shore_distance: 100.0,
-            max_shore_distance: 300.0,
-            islandification: 0.2,
+            min_shore_distance: 30.0,
+            max_shore_distance: 80.0,
+            islandification: 0.4,
         }
     }
 }
@@ -71,18 +71,15 @@ pub struct DefaultTerrainModulatorAlgorithm;
 impl TerrainModulatorAlgorithm for DefaultTerrainModulatorAlgorithm {
     fn push_terrain(&self, params: &ModulationParams, distance: f32, curr_height: f32) -> f32 {
         // Use a spline to push terrain up or down.
-        let step_alpha = if distance < params.min_shore_distance {
+        let scaled_distance = if distance < params.min_shore_distance {
             0.0
-        } else if distance > params.max_shore_distance {
-            1.0
         } else {
+            // let the result be > 1
             (distance - params.min_shore_distance)
                 / (params.max_shore_distance - params.min_shore_distance)
         };
 
-        let distance_step = smootherstep(1.0, -1.0, step_alpha);
-
-        lerp(curr_height, distance_step, params.islandification)
+        lerp(curr_height, 1.0 - scaled_distance, params.islandification).max(-1.0)
     }
 }
 
