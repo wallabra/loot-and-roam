@@ -83,7 +83,6 @@ fn scene(
         Mesh3d(meshes.add(Circle::new(1000.0))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgba_u8(20, 60, 255, 100),
-            alpha_mode: AlphaMode::Blend,
             ..Default::default()
         })),
         Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
