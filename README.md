@@ -49,8 +49,8 @@ order of release:
   drag.  
   `cargo run --example soft-cube-buoyancy`
 
-* **Terrain heightmap demo** - an early sneak peek into the terrain generation.
-  `cargo run --example terragen`
+* **Terrain mesh demo** - a basic 3D terrain demo.
+  `cargo run --example terramesh`
 
 ## Contributing
 

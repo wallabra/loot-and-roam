@@ -1,4 +1,4 @@
-//! Terrain rendering test demo.
+//! 3D terrain meshing test demo.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
