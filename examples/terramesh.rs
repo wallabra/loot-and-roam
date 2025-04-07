@@ -71,8 +71,7 @@ fn scene(
     commands.spawn((
         PointLight {
             shadows_enabled: true,
-            range: 50000.0,
-            intensity: 100000.0,
+            intensity: 150.0,
             ..default()
         },
         Transform::from_xyz(100.0, 300.0, -30.0),
@@ -91,7 +90,7 @@ fn scene(
     // spawn terrain mesh
     commands.spawn((
         terrain.as_bundle(&mut meshes),
-        MeshMaterial3d(materials.add(Color::srgb_u8(32, 140, 32))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(80, 190, 45))),
         Transform::default(),
     ));
 }
