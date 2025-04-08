@@ -28,7 +28,9 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::renderer::objrender::{CameraFocus, ObjectRendererPlugin, PointAttach},
+    app::renderer::objrender::{
+        camera_controller_system, CameraFocus, DevCamera, ObjectRendererPlugin, PointAttach,
+    },
     common::physics::prelude::*,
 };
 
@@ -76,6 +78,7 @@ pub fn apply_example_systems(app: &mut App) {
         },
     );
 
+    app.add_systems(Update, camera_controller_system);
     app.add_systems(Startup, setup);
 }
 
@@ -110,8 +113,14 @@ pub fn setup(
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+        DevCamera {
+            move_speed: 5.0,
+            rotate_sensitivity: 0.1,
+            pitch: 0.0,
+            yaw: 0.0,
+            enabled: true,
+        },
     ));
-
     // -- cube
 
     // create point & spring networks
@@ -192,7 +201,7 @@ pub fn setup(
                 force: Vec3::Y * -3.0,
             },
             SnapToPointNet,
-            CameraFocus::default(),
+            // CameraFocus::default(),
         ))
         .id();
 
