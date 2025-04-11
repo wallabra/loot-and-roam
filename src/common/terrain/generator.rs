@@ -23,13 +23,13 @@
 use bevy::math::Vec2;
 use derive_builder::Builder;
 
-use crate::common::math::{lerp, smootherstep};
+use crate::common::math::smootherstep;
 
 use super::noise::FractalNoise;
 
 /// The parameters used when modulating terrain height.
-#[derive(Clone, Debug)]
-pub struct ModulationParams {
+#[derive(Clone, Debug, Builder)]
+pub struct ModulationParams<'fn_interp> {
     /// The distance around center points outside of which should be
     /// underwater.
     pub max_shore_distance: f32,
@@ -43,14 +43,20 @@ pub struct ModulationParams {
     /// Smaller amounts let in more Perlin noise, higher amounts conform it
     /// more; too high and you get blobs!
     pub islandification: f32,
+
+    /// Function to use to interpolate between the
+    /// Perlin height and the 'islandified' height.
+    #[builder(default=&(smootherstep as fn(f32, f32, f32) -> f32))]
+    pub interpolator: &'fn_interp fn(f32, f32, f32) -> f32,
 }
 
-impl Default for ModulationParams {
+impl<'a> Default for ModulationParams<'a> {
     fn default() -> Self {
         Self {
             min_shore_distance: 30.0,
             max_shore_distance: 80.0,
             islandification: 0.4,
+            interpolator: &(smootherstep as fn(f32, f32, f32) -> f32),
         }
     }
 }
@@ -79,7 +85,9 @@ impl TerrainModulatorAlgorithm for DefaultTerrainModulatorAlgorithm {
                 / (params.max_shore_distance - params.min_shore_distance)
         };
 
-        lerp(curr_height, 1.0 - scaled_distance, params.islandification).max(-1.0)
+        let islandified_height = 1.0 - scaled_distance;
+
+        (params.interpolator)(curr_height, islandified_height, params.islandification).max(-1.0)
     }
 }
 
@@ -215,7 +223,7 @@ where
 /// This terrain generator outputs values between 0.0 and 1.0. Further
 /// transformation may be desired depending on the desired vertical scale.
 #[derive(Builder, Clone)]
-pub struct TerrainGenerator<TMA, DC>
+pub struct TerrainGenerator<'fn_interp, TMA, DC>
 where
     TMA: TerrainModulatorAlgorithm + Sized,
     DC: DistanceCollector + Sized,
@@ -231,7 +239,7 @@ where
 
     /// The terrain modulation parameters.
     #[builder(default)]
-    modulation_params: ModulationParams,
+    modulation_params: ModulationParams<'fn_interp>,
 
     /// The size of each noise 'tile' (at octave 0).
     // [NOTE] Change the below default value to change the size of terrain noise tiles!
@@ -239,7 +247,7 @@ where
     resolution: f32,
 }
 
-impl<TMA, DC> TerrainGenerator<TMA, DC>
+impl<'fn_interp, TMA, DC> TerrainGenerator<'fn_interp, TMA, DC>
 where
     TMA: TerrainModulatorAlgorithm,
     DC: DistanceCollector,
@@ -269,7 +277,7 @@ where
 }
 
 pub type DefaultTerrainGenerator =
-    TerrainGenerator<DefaultTerrainModulatorAlgorithm, SmoothminDistance>;
+    TerrainGenerator<'static, DefaultTerrainModulatorAlgorithm, SmoothminDistance>;
 
 pub type DefaultTerrainGeneratorBuilder =
-    TerrainGeneratorBuilder<DefaultTerrainModulatorAlgorithm, SmoothminDistance>;
+    TerrainGeneratorBuilder<'static, DefaultTerrainModulatorAlgorithm, SmoothminDistance>;
