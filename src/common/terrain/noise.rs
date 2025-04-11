@@ -231,6 +231,7 @@ impl FractalNoiseOctave {
         (self.lattice.get_height() as f32) / self.resolution - 1.0
     }
 
+    #[allow(dead_code)] // [NOTE] accessor method
     pub fn get_octave_scale(&self) -> f32 {
         self.resolution
     }
