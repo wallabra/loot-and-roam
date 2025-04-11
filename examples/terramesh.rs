@@ -64,7 +64,7 @@ fn scene(
     // spawn camera
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(500.0, 150.0, 300.0).looking_at(Vec3::Y * 30.0, Vec3::Y),
+        Transform::from_xyz(500.0, 250.0, 300.0).looking_at(Vec3::Y * 30.0, Vec3::Y),
     ));
 
     // spawn light
