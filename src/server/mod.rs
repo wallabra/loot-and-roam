@@ -21,3 +21,16 @@
 //
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
+
+use bevy::prelude::*;
+
+/// Server networking plugin.
+///
+/// Use this on any instance for which server connectivity is desired.
+pub struct ServerPlugin;
+
+impl bevy::prelude::Plugin for ServerPlugin {
+    fn build(&self, _app: &mut App) {
+        todo!("server functionality not yet implemented");
+    }
+}

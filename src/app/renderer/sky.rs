@@ -17,7 +17,7 @@
 
 use bevy::prelude::*;
 
-fn sky_setup(mut commands: Commands) {
+fn sky_setup(mut _commands: Commands) {
     // [TODO] sky rendering
     todo!("sky rendering setup system");
 }

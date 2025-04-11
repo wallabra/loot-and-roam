@@ -53,10 +53,13 @@ pub mod terrain; // Terrain generation, caching, and lookup
                  // ṕub mod util;      // Miscellaneous utility functions
 pub mod math; // Mathematical utility functions
 
-/// Main plugin, groups all the important Loot & Roam systems together.
-pub struct LootAndRoamPlugin;
+/// Main game plugin, groups all the important Loot & Roam systems together.
+///
+/// This is essential to be registered in any simulation instance, regardless
+/// of it being headless or not.
+pub struct CommonPlugin;
 
-impl Plugin for LootAndRoamPlugin {
+impl Plugin for CommonPlugin {
     fn build(&self, app: &mut bevy::app::App) {
         app.add_plugins((physics::BasicPhysicsPlugin,));
     }
@@ -66,5 +69,5 @@ pub mod prelude {
     pub use super::math::*;
     pub use super::physics::prelude::*;
     pub use super::terrain::prelude::*;
-    pub use super::LootAndRoamPlugin;
+    pub use super::CommonPlugin;
 }
