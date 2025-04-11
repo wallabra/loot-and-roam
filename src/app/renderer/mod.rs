@@ -24,6 +24,17 @@ pub mod sky; // Sky/background
 pub mod terrain; // Terrain renderer
 pub mod ui; // UI renderer
 
+/// Renderer plugin.
+///
+/// Adds all rendering related setup to the Bevy instance.
+pub struct RendererPlugin;
+
+impl bevy::prelude::Plugin for RendererPlugin {
+    fn build(&self, app: &mut bevy::app::App) {
+        app.add_plugins((sky::SkyRenderingPlugin,));
+    }
+}
+
 pub mod prelude {
-    pub use super::sky::SkyRenderingPluginn;
+    pub use super::sky::SkyRenderingPlugin;
 }

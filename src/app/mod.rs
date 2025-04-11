@@ -22,6 +22,18 @@
 // pub mod input;
 pub mod renderer;
 
+/// Loot & Roam app plugin.
+///
+/// Applies every application system. Can be left out for 'headless'
+/// configurations.
+pub struct AppPlugin;
+
+impl bevy::prelude::Plugin for AppPlugin {
+    fn build(&self, app: &mut bevy::app::App) {
+        app.add_plugins((renderer::RendererPlugin,));
+    }
+}
+
 pub mod prelude {
     pub use super::renderer::prelude::*;
 }
