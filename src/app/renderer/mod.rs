@@ -19,7 +19,11 @@
 
 // [TODO] Please uncomment *only* implemented modules.
 // pub mod lighting;  // Scene lighting definitions
-pub mod objrender; // Object rendering code
+pub mod object; // Common object rendering code
 pub mod sky; // Sky/background
-pub mod terrarender; // Terrain renderer
+pub mod terrain; // Terrain renderer
 pub mod ui; // UI renderer
+
+pub mod prelude {
+    pub use super::sky::SkyRenderingPluginn;
+}

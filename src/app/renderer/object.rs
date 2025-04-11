@@ -1,18 +1,9 @@
 //! # Object rendering code.
 //!
 //! Objects in Loot & Roam are physically a network of points, with volumes
-//! attached to them, and visually PointRender instances, each attached to
-//! a point.
+//! attached to them.
 //!
-//! A PointRender component refers to exactly one point, and will always
-//! snap to it. If the point ceases to exist, the entity destroys itself.
-//!
-//! A PointRender statically enum-dispatches the production of rendering
-//! commands to one of its implementations:
-//!
-//! * PointSprite - a billboarded sprite snapped to the location of the point
-//!
-//! * PointModel - a model snapped to the location of the point
+//! This module contains code common to the rendering of all objects.
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>

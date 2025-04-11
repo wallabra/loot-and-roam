@@ -21,3 +21,7 @@
 // pub mod resource;
 // pub mod input;
 pub mod renderer;
+
+pub mod prelude {
+    pub use super::renderer::prelude::*;
+}

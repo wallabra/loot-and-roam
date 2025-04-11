@@ -19,6 +19,7 @@ use bevy::prelude::*;
 
 fn sky_setup(mut commands: Commands) {
     // [TODO] sky rendering
+    todo!();
 }
 
 pub struct SkyRenderingPlugin;
@@ -26,5 +27,6 @@ pub struct SkyRenderingPlugin;
 impl Plugin for SkyRenderingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, sky_setup);
+        app.insert_resource(ClearColor(Color::srgb_u8(40, 160, 200)));
     }
 }
