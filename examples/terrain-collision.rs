@@ -253,7 +253,7 @@ fn spawn_cube(
     // generate point network visualization as little children balls
     let children = (0..points.points.len())
         .map(|point_idx| {
-            let point_mesh = meshes.add(Sphere::new(size * std::f32::consts::SQRT_2 / 4.0));
+            let point_mesh = meshes.add(Sphere::new(size * std::f32::consts::SQRT_2 / 12.0));
             let point_material = materials.add(StandardMaterial {
                 base_color: Color::srgba_u8(255, 255, 48, 200),
                 alpha_mode: AlphaMode::Blend,
