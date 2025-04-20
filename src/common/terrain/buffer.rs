@@ -39,10 +39,13 @@ pub struct TerrainBuffer {
 
     /// The data of the 2D heightmap sample array.
     values: Vec<f32>,
+
+    /// The range of values that this buffer holds.
+    height_range: Range<f32>,
 }
 
 impl TerrainBuffer {
-    pub fn get_vert_width(&self) -> usize {
+    pub fn get_vertex_width(&self) -> usize {
         self.width
     }
 
@@ -50,8 +53,16 @@ impl TerrainBuffer {
         self.width as f32 * self.resolution
     }
 
-    pub fn get_vert_height(&self) -> usize {
+    pub fn get_vertex_height(&self) -> usize {
         self.height
+    }
+
+    pub fn get_vertical_height_range(&self) -> Range<f32> {
+        self.height_range
+    }
+
+    pub fn get_vertical_height_span(&self) -> f32 {
+        self.height_range.1 - self.height_range.0
     }
 
     pub fn get_real_height(&self) -> f32 {
@@ -59,9 +70,63 @@ impl TerrainBuffer {
     }
 
     pub fn get_num_tris(&self) -> usize {
-        (self.get_vert_width() - 1) * (self.get_vert_height() - 1) * 2
+        (self.get_vertex_width() - 1) * (self.get_vertex_height() - 1) * 2
     }
 
+    /// Gets the height at a particular point along the terrain using bilinear
+    /// interpolation.
+    ///
+    /// Note that this will necessarily mismatch the triangulated mesh that is
+    /// generated.
+    pub fn get_height_at(&self, pos_x: f32, pos_y: f32) -> f32 {
+        let mapped_x = pos_x / self.resolution;
+        let mapped_y = pos_y / self.resolution;
+
+        let nw = self.get_value_at(mapped_x.floor() as usize, mapped_y.floor() as usize);
+        let ne = self.get_value_at(mapped_x.ceil() as usize, mapped_y.floor() as usize);
+        let sw = self.get_value_at(mapped_x.floor() as usize, mapped_y.ceil() as usize);
+        let se = self.get_value_at(mapped_x.ceil() as usize, mapped_y.ceil() as usize);
+
+        let frac_x = mapped_x.fract();
+        let frac_y = mapped_y.fract();
+
+        let interp_n = lerp(nw, ne, frac_x);
+        let interp_s = lerp(sw, se, frac_x);
+
+        lerp(interp_n, interp_s, frac_y)
+    }
+
+    /// Calculate the gradient vector at the position described by the X and Y
+    /// coordinates.
+    ///
+    /// This manually calculates the gradient by sampling three points in the
+    /// terrain, flipping if they're outside the terrain's boudaries for safety,
+    /// and weighting the result accordingly.
+    pub fn get_gradient_at<const SAMPLE_EPSILON: f32 = 0.0001>(
+        &self,
+        pos_x: f32,
+        pos_y: f32,
+    ) -> Vec2 {
+        let sample_base = self.get_height_at(pos_x, pos_y);
+
+        let mut flip = pos_x + SAMPLE_EPSILON > self.get_real_width()
+            || pos_y + SAMPLE_EPSILON > self.get_real_height();
+        let flip_multiplier = if flip { -1.0_f32 } else { 1.0_f32 };
+
+        let sample_x = self.get_height_at(pos_x + SAMPLE_EPSILON * flip_multiplier, pos_y);
+        let sample_y = self.get_height_at(pos_x, pos_y + SAMPLE_EPSILON * flip_multiplier);
+
+        Vec2::new(sample_x - sample_base, sample_y - sample_base) / SAMPLE_EPSILON * flip_multiplier
+    }
+
+    /// Use the gradient value at a position to get a normal vector.
+    pub fn get_normal_at(&self, pos_x: f32, pos_y: f32) -> Vec3 {
+        let grad = self.get_gradient_at(pos_x, pos_y);
+
+        Vec3::from(grad).with_z(1.0).normalize()
+    }
+
+    /// Create a new TerrainBuffer by using a TerrainGenerator to initialize.
     pub fn generate<TMA, DC>(
         generator: TerrainGenerator<TMA, DC>,
         resolution: f32,
@@ -94,18 +159,19 @@ impl TerrainBuffer {
             height,
             resolution: scale,
             values,
+            height_range: -vert_scale..vert_scale,
         }
     }
 
     pub fn get_value_at(&self, value_x: usize, value_y: usize) -> f32 {
-        self.values[value_y * self.get_vert_width() + value_x]
+        self.values[value_y * self.get_vertex_width() + value_x]
     }
 
     pub fn to_mesh(&self) -> Mesh {
         debug_assert!(self.width > 1);
         debug_assert!(self.height > 1);
 
-        let quad_width = self.get_vert_width() - 1;
+        let quad_width = self.get_vertex_width() - 1;
         let center_x = self.get_real_width() / 2.0;
         let center_y = self.get_real_height() / 2.0;
 
@@ -145,7 +211,7 @@ impl TerrainBuffer {
                     let vert_x = value_x as f32 * self.resolution - center_x;
                     let vert_z = value_y as f32 * self.resolution - center_y;
                     // vertical
-                    let vert_y = self.get_value_at(value_x, value_y);
+                    let vert_y = ((self.get_value_at(value_x, value_y) * 0.5) + 0.5 * s);
 
                     [vert_x, vert_y, vert_z]
                 })
