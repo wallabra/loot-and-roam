@@ -272,7 +272,7 @@ impl VolumeInfo for SphereDef {
     }
 
     fn volume(&self) -> f32 {
-        self.radius.powi(3) * std::f32::consts::FRAC_PI_4 * 3.0
+        self.radius.powi(3) * std::f32::consts::FRAC_PI_3 * 4.0
     }
 
     fn surface_area(&self) -> f32 {
