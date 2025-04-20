@@ -72,6 +72,35 @@ fn floor_plane_collision_system(mut query: Query<(&mut PointNetwork, &FloorPlane
     }
 }
 
+/// A generic collision detection event interface.
+///
+/// All collision detection event types must implement this trait's common
+/// behavior.
+pub trait CollisionDetectionEvent {
+    /// The first entity on the collision check.
+    ///
+    /// Parameters like [info] are from the perspective of this entity.
+    fn perspective_entity(&self) -> Entity;
+
+    /// The second entity on the collision check.
+    fn other_entity(&self) -> Entity;
+
+    /// Collision info, such as relative position and collision normal.
+    ///
+    /// Note that this is relative to the perspective entity.
+    fn info(&self) -> ColisionInfo;
+
+    /// Collision depth.
+    ///
+    /// An amorphous value that can serve to compare collisions cardinally.
+    /// Deeper collisions can be understood to be more 'severe'.
+    ///
+    /// Note that this value does not scale over time; it's an instant,
+    /// single-frame measure, usually of how much two objects intersect at the
+    /// single frame of collision.
+    fn depth(&self) -> f32;
+}
+
 /// Event emitted when two volumed objects collide.
 #[derive(Event)]
 pub struct VolumeVolumeCollisionDetectionEvent {
@@ -107,6 +136,24 @@ pub struct VolumeVolumeCollisionDetectionEvent {
     /// An average of the depth calculated from both volumes based on their
     /// SDFs.
     pub depth: f32,
+}
+
+impl CollisionDetectionEvent for VolumeVolumeCollisionDetectionEvent {
+    fn perspective_entity(&self) -> Entity {
+        self.entity_ref
+    }
+
+    fn other_entity(&self) -> Entity {
+        self.entity_other
+    }
+
+    fn info(&self) -> ColisionInfo {
+        self.info
+    }
+
+    fn depth(&self) -> f32 {
+        self.depth
+    }
 }
 
 /// Object-object collision via physics volumes.
