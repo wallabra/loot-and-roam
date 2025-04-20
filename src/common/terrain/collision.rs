@@ -107,7 +107,10 @@ fn terrain_volume_collision_system(
                 }
 
                 // Vertical check
-                let terra_height = terrabuf.get_height_at(pos.x, pos.z);
+                let terra_height = terrabuf.get_height_at(
+                    pos.x - terratransf.translation.x,
+                    pos.z - terratransf.translation.z,
+                ) + terratransf.translation.y;
 
                 if pos.y > terra_height {
                     continue;
