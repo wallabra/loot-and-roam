@@ -16,6 +16,8 @@
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use loot_and_roam::app::renderer::object::PointAttach;
+use loot_and_roam::common::physics::volume::VolumeCloneSpawner;
 use loot_and_roam::common::prelude::*;
 use loot_and_roam::common::terrain::buffer::TerrainBuffer;
 
@@ -166,7 +168,7 @@ fn spawn_cube(
     let volumes = VolumeCollection::at_every_point(
         &points,
         VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef {
-            radius: SQRT_2 / 2.0,
+            radius: std::f32::consts::SQRT_2 / 2.0,
         })),
     );
 
