@@ -64,17 +64,18 @@ fn scene(
     // spawn camera
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(800.0, 50.0, 35.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
+        Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
     ));
 
     // spawn light
     commands.spawn((
         PointLight {
             shadows_enabled: true,
-            intensity: 150.0,
+            intensity: 5000.0,
+            range: 2000.0,
             ..default()
         },
-        Transform::from_xyz(100.0, 300.0, -30.0),
+        Transform::from_xyz(100.0, 300.0, -150.0),
     ));
 
     // spawn terrain mesh
@@ -85,8 +86,13 @@ fn scene(
     ));
 
     // spawn cubes
-    for at in [[-0.2, 101.5, 1.0], [1.5, 126.5, 1.5], [-20.0, 250.0, -20.0]]
-        .map(|arr| Vec3::from_array(arr))
+    for at in [
+        [-0.2, 1.5, 1.0],
+        [1.5, 36.5, 1.5],
+        [-20.0, 60.0, -20.0],
+        [-5.0, 80.0, 10.0],
+    ]
+    .map(|arr| Vec3::from_array(arr))
     {
         println!(
             "cube spawned: {:?}",
