@@ -92,8 +92,10 @@ impl TerrainBuffer {
     /// Note that this will necessarily mismatch the triangulated mesh that is
     /// generated.
     pub fn get_height_at(&self, pos_x: f32, pos_y: f32) -> f32 {
-        let mapped_x = pos_x / self.resolution;
-        let mapped_y = pos_y / self.resolution;
+        let mapped_x = (pos_x + self.get_real_width() * 0.5) / self.resolution;
+        let mapped_y = (pos_y + self.get_real_height() * 0.5) / self.resolution;
+        let mapped_x = mapped_x.max(0.0);
+        let mapped_y = mapped_y.max(0.0);
 
         let nw = self.get_value_at(mapped_x.floor() as usize, mapped_y.floor() as usize);
         let ne = self.get_value_at(mapped_x.ceil() as usize, mapped_y.floor() as usize);
@@ -204,7 +206,8 @@ impl TerrainBuffer {
     }
 
     pub fn get_value_at(&self, value_x: usize, value_y: usize) -> f32 {
-        self.values[value_y * self.get_vertex_width() + value_x]
+        self.values[value_y.min(self.get_vertex_height() - 1) * self.get_vertex_width()
+            + value_x.min(self.get_vertex_width() - 1)]
     }
 
     pub fn to_mesh(&self) -> Mesh {
