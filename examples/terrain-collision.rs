@@ -13,10 +13,20 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
-use bevy::prelude::*;
-use bevy::window::PresentMode;
-use loot_and_roam::app::renderer::object::PointAttach;
+use bevy::{
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    prelude::*,
+    render::{
+        camera::RenderTarget,
+        render_resource::{
+            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+        },
+        RenderPlugin,
+    },
+    window::PresentMode,
+};
+use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
+use loot_and_roam::app::{renderer::object::PointAttach, AppPlugin};
 use loot_and_roam::common::physics::volume::VolumeCloneSpawner;
 use loot_and_roam::common::prelude::*;
 use loot_and_roam::common::terrain::buffer::TerrainBuffer;
@@ -53,19 +63,61 @@ fn generate_terrain() -> TerrainBuffer {
     TerrainBuffer::generate(terragen, 0.3, 3.0, 80.0)
 }
 
+// Resolution for exporting demo images.
+const WIDTH: u32 = 1280;
+const HEIGHT: u32 = 720;
+
 fn scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
+    export_sources: Option<ResMut<Assets<ImageExportSource>>>,
 ) {
+    // output texture for image sequence rendering
+    let output_texture_handle = {
+        let size = Extent3d {
+            width: WIDTH,
+            height: HEIGHT,
+            ..default()
+        };
+        let mut export_texture = Image {
+            texture_descriptor: TextureDescriptor {
+                label: None,
+                size,
+                dimension: TextureDimension::D2,
+                format: TextureFormat::Rgba8UnormSrgb,
+                mip_level_count: 1,
+                sample_count: 1,
+                usage: TextureUsages::COPY_DST
+                    | TextureUsages::COPY_SRC
+                    | TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            },
+            ..default()
+        };
+        export_texture.resize(size);
+
+        images.add(export_texture)
+    };
+
     // get terrain mesh
     let terrain = generate_terrain();
 
     // spawn camera
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
-    ));
+    commands
+        .spawn((
+            Camera3d::default(),
+            Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
+        ))
+        .with_child((
+            Camera3d::default(),
+            Camera {
+                // Connect the output texture to a camera as a RenderTarget.
+                target: RenderTarget::Image(output_texture_handle.clone()),
+                ..default()
+            },
+        ));
 
     // spawn light
     commands.spawn((
@@ -76,6 +128,17 @@ fn scene(
             ..default()
         },
         Transform::from_xyz(100.0, 300.0, -150.0),
+    ));
+
+    // create water plane
+    commands.spawn((
+        Mesh3d(meshes.add(Circle::new(1000.0))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgba_u8(190, 190, 255, 90),
+            ..Default::default()
+        })),
+        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2))
+            .with_translation(Vec3::new(0.0, -40.0, 0.0)),
     ));
 
     // spawn terrain mesh
@@ -109,6 +172,21 @@ fn scene(
             )
         );
     }
+
+    // start image exportation
+    if let Some(mut export_sources) = export_sources {
+        commands.spawn((
+            ImageExport(export_sources.add(output_texture_handle)),
+            ImageExportSettings {
+                // Frames will be saved to "./out/terrain-collision/[#####].png"
+                // [NOTE] update output dir when grafting this code onto other examples
+                output_dir: "out/terrain-collision/".into(),
+
+                // Choose "exr" for HDR renders (requires feature on crate bevy_image_export)
+                extension: "png".into(),
+            },
+        ));
+    }
 }
 
 fn spawn_cube(
@@ -122,7 +200,8 @@ fn spawn_cube(
     // point_mesh: Handle<Mesh>,
     // point_material: Handle<StandardMaterial>,
 ) -> Entity {
-    let cube_mesh = meshes.add(Cuboid::new(size, size, size));
+    let mesh_size = size * (1.0 + std::f32::consts::SQRT_2 * 0.25);
+    let cube_mesh = meshes.add(Cuboid::new(mesh_size, mesh_size, mesh_size));
     let cube_material = materials.add(StandardMaterial {
         base_color: Color::srgba_u8(124, 144, 255, 140),
         alpha_mode: AlphaMode::Blend,
@@ -149,14 +228,20 @@ fn spawn_cube(
             [0.0, -0.5, 0.0],
             [0.0, 0.0, -0.5],
         ]
-        .map(|arr| PhysPoint::from_pos(at + Vec3::from(arr) * size))
+        .map(|arr| {
+            PhysPoint::new(
+                at + (Vec3::from(arr) * size),
+                Vec3::ZERO,
+                4.0 * std::f32::consts::FRAC_PI_3 * size.powi(3),
+            )
+        })
         .into_iter(),
     );
 
-    let spring_mode = SpringMode::Normal(NormalSpring { stiffness: 30.0 });
+    let spring_mode = SpringMode::Instant;
     let springs = points.make_radially_connected_springs(
         spring_mode,
-        1.5 * size, /* max spring auto-connection range */
+        3.0 * size, /* max spring auto-connection range */
     );
     let volumes = VolumeCollection::at_every_point(
         &points,
@@ -168,7 +253,7 @@ fn spawn_cube(
     // generate point network visualization as little children balls
     let children = (0..points.points.len())
         .map(|point_idx| {
-            let point_mesh = meshes.add(Sphere::new(0.05));
+            let point_mesh = meshes.add(Sphere::new(size * std::f32::consts::SQRT_2 / 4.0));
             let point_material = materials.add(StandardMaterial {
                 base_color: Color::srgba_u8(255, 255, 48, 200),
                 alpha_mode: AlphaMode::Blend,
@@ -188,17 +273,6 @@ fn spawn_cube(
         })
         .collect::<Vec<_>>();
 
-    // create water plane
-    commands.spawn((
-        Mesh3d(meshes.add(Circle::new(1000.0))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgba_u8(190, 190, 255, 90),
-            ..Default::default()
-        })),
-        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2))
-            .with_translation(Vec3::new(0.0, -40.0, 0.0)),
-    ));
-
     // create cube entity
     let cube = commands
         .spawn((
@@ -208,11 +282,6 @@ fn spawn_cube(
             points,
             springs,
             volumes,
-            FloorPlaneCollision {
-                restitution: 0.2,
-                friction: 0.2,
-                intercept_y: -80.0,
-            },
             Gravity::default(),
             WaterPhysics {
                 water_level: -60.0,
@@ -279,26 +348,54 @@ fn apply_example(app: &mut App) {
 fn main() {
     let mut app = App::new();
 
-    // image export
-
     // default plugin & main properties
-    app.add_plugins((DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: "Loot & Roam Tech Demo - Terrain Renderer".into(),
-            name: Some("bevy.loot-and-roam.techdemo.terrarender".into()),
-            present_mode: PresentMode::AutoNoVsync,
+    app.add_plugins((DefaultPlugins
+        .set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Loot & Roam Tech Demo - Terrain Collision".into(),
+                name: Some("bevy.loot-and-roam.techdemo.terrain-collision".into()),
+                present_mode: PresentMode::AutoNoVsync,
+                ..default()
+            }),
             ..default()
-        }),
-        ..default()
-    }),));
+        })
+        .set(RenderPlugin {
+            synchronous_pipeline_compilation: true,
+            ..default()
+        }),));
+
+    let export_plugin = if cfg!(not(debug_assertions)) {
+        Some(ImageExportPlugin::default())
+    } else {
+        None
+    };
+
+    let export_threads = if let Some(export_plugin) = export_plugin {
+        let threads = Some(export_plugin.threads.clone());
+        app.add_plugins(export_plugin);
+
+        threads
+    } else {
+        None
+    };
 
     apply_example(&mut app);
 
     // engine systems
-    app.add_plugins((CommonPlugin, FrameTimeDiagnosticsPlugin));
+    app.add_plugins((CommonPlugin, AppPlugin, FrameTimeDiagnosticsPlugin));
 
     // logger
     app.add_plugins(LogDiagnosticsPlugin::default());
 
     app.run();
+
+    // block till image sequence exportation is done
+    if let Some(export_threads) = export_threads {
+        export_threads.finish();
+    }
+
+    // command to render to video:
+    // $ ffmpeg -r 60 -i out/terrain-collision/%05d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out/terrain-collision.mp4
+    // command to reset demo recordings:
+    // $ rm -r out/
 }
