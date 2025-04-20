@@ -88,7 +88,7 @@ pub trait CollisionDetectionEvent {
     /// Collision info, such as relative position and collision normal.
     ///
     /// Note that this is relative to the perspective entity.
-    fn info(&self) -> ColisionInfo;
+    fn info(&self) -> &CollisionInfo;
 
     /// Collision depth.
     ///
@@ -147,8 +147,8 @@ impl CollisionDetectionEvent for VolumeVolumeCollisionDetectionEvent {
         self.entity_other
     }
 
-    fn info(&self) -> ColisionInfo {
-        self.info
+    fn info(&self) -> &CollisionInfo {
+        &self.info
     }
 
     fn depth(&self) -> f32 {
@@ -171,7 +171,7 @@ fn volume_volume_collision_system(
     while let Some([(e1, mut points1, volumes1), (e2, mut points2, volumes2)]) =
         combinations.fetch_next()
     {
-        if !volumes1.aabb(&points1).check(volumes2.aabb(&points2)) {
+        if !volumes1.aabb(&points1).check(&volumes2.aabb(&points2)) {
             continue;
         }
 

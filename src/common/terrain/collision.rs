@@ -15,17 +15,20 @@
 
 use bevy::prelude::*;
 
-use crate::common::prelude::{CollisionInfo, AABB};
+use crate::common::{
+    physics::collision::CollisionDetectionEvent,
+    prelude::{CollisionInfo, PhysicsVolume, PointNetwork, VolumeCollection, AABB},
+};
 
 use super::buffer::{TerrainBuffer, TerrainMarker};
 
-fn terrain_aabb(buffer: &TerrainBuffer, transf: &Transform) {
+fn terrain_aabb(buffer: &TerrainBuffer, transf: &Transform) -> AABB {
     AABB::new(
         -buffer.get_real_width() / 2.0..buffer.get_real_width() / 2.0,
         buffer.get_vertical_height_range(),
         -buffer.get_real_height() / 2.0..buffer.get_real_height() / 2.0,
     )
-    .translate(transf)
+    .translate(transf.translation)
 }
 
 /// Event emitted when a volumed object collides with a terrain entity.
@@ -67,8 +70,8 @@ impl CollisionDetectionEvent for TerrainVolumeCollisionDetectionEvent {
         self.entity_terrain
     }
 
-    fn info(&self) -> ColisionInfo {
-        self.info
+    fn info(&self) -> &CollisionInfo {
+        &self.info
     }
 
     fn depth(&self) -> f32 {
@@ -78,24 +81,24 @@ impl CollisionDetectionEvent for TerrainVolumeCollisionDetectionEvent {
 
 /// Terrain-object collision via physics volumes.
 fn terrain_volume_collision_system(
-    mut ev_collision: EventWriter<VolumeVolumeCollisionDetectionEvent>,
+    mut ev_collision: EventWriter<TerrainVolumeCollisionDetectionEvent>,
     mut query: Query<(Entity, &mut PointNetwork, &VolumeCollection), Without<TerrainMarker>>,
-    terrain_query: Query<(Entity, TerrainMarker, Transform)>,
+    terrain_query: Query<(Entity, &TerrainMarker, &Transform)>,
 ) {
     for (e1, mut points1, volumes1) in query.iter_mut() {
         // [NOTE] For more info on the below comment on loop label, see note below
         // near its continue.
 
         // 'detect_loop:
-        for (e2, terramark, terratransf) in terrain_query..iter() {
+        for (e2, terramark, terratransf) in terrain_query.iter() {
             let terrabuf = &terramark.buffer;
             let terrabox = terrain_aabb(&terrabuf, &terratransf);
 
-            if !volumes1.aabb(&points1).check(terrabox) {
+            if !volumes1.aabb(&points1).check(&terrabox) {
                 continue;
             }
 
-            for vo1 in &volumes1.volumes {
+            for vol in &volumes1.volumes {
                 let pos = points1.points[vol.point_idx].pos;
 
                 // Horizontal check
@@ -104,7 +107,7 @@ fn terrain_volume_collision_system(
                 }
 
                 // Vertical check
-                let terra_height = terrabuf.get_value_at(pos.x, pos.z);
+                let terra_height = terrabuf.get_height_at(pos.x, pos.z);
 
                 if pos.y > terra_height {
                     continue;
@@ -152,7 +155,7 @@ pub struct TerrainCollisionPlugin;
 
 impl Plugin for TerrainCollisionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (terrain_volume_collision_system));
+        app.add_systems(Update, (terrain_volume_collision_system,));
         app.add_event::<TerrainVolumeCollisionDetectionEvent>();
     }
 }

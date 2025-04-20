@@ -15,12 +15,15 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+use std::ops::Range;
+
 use crate::common::prelude::*;
 use bevy::{
     asset::RenderAssetUsages,
     prelude::*,
     render::mesh::{Indices, PrimitiveTopology},
 };
+use derive_builder::Builder;
 
 /// A terrain buffer.
 ///
@@ -44,6 +47,16 @@ pub struct TerrainBuffer {
     height_range: Range<f32>,
 }
 
+/// A request to compute the gradient at a given X and Y position of the
+/// terrain, using a custom offset epsilon.
+#[derive(Builder)]
+pub struct GradientLookupRequest {
+    pos_x: f32,
+    pos_y: f32,
+    #[builder(default = 0.0001)]
+    sample_epsilon: f32,
+}
+
 impl TerrainBuffer {
     pub fn get_vertex_width(&self) -> usize {
         self.width
@@ -58,11 +71,11 @@ impl TerrainBuffer {
     }
 
     pub fn get_vertical_height_range(&self) -> Range<f32> {
-        self.height_range
+        self.height_range.clone()
     }
 
     pub fn get_vertical_height_span(&self) -> f32 {
-        self.height_range.1 - self.height_range.0
+        self.height_range.end - self.height_range.start
     }
 
     pub fn get_real_height(&self) -> f32 {
@@ -102,28 +115,51 @@ impl TerrainBuffer {
     /// This manually calculates the gradient by sampling three points in the
     /// terrain, flipping if they're outside the terrain's boudaries for safety,
     /// and weighting the result accordingly.
-    pub fn get_gradient_at<const SAMPLE_EPSILON: f32 = 0.0001>(
-        &self,
-        pos_x: f32,
-        pos_y: f32,
-    ) -> Vec2 {
+    pub fn get_gradient_with_request(&self, request: GradientLookupRequest) -> Vec2 {
+        let pos_x = request.pos_x;
+        let pos_y = request.pos_y;
+        let sample_epsilon = request.sample_epsilon;
+
         let sample_base = self.get_height_at(pos_x, pos_y);
 
-        let mut flip = pos_x + SAMPLE_EPSILON > self.get_real_width()
-            || pos_y + SAMPLE_EPSILON > self.get_real_height();
+        let flip = pos_x + sample_epsilon > self.get_real_width()
+            || pos_y + sample_epsilon > self.get_real_height();
         let flip_multiplier = if flip { -1.0_f32 } else { 1.0_f32 };
 
-        let sample_x = self.get_height_at(pos_x + SAMPLE_EPSILON * flip_multiplier, pos_y);
-        let sample_y = self.get_height_at(pos_x, pos_y + SAMPLE_EPSILON * flip_multiplier);
+        let sample_x = self.get_height_at(pos_x + sample_epsilon * flip_multiplier, pos_y);
+        let sample_y = self.get_height_at(pos_x, pos_y + sample_epsilon * flip_multiplier);
 
-        Vec2::new(sample_x - sample_base, sample_y - sample_base) / SAMPLE_EPSILON * flip_multiplier
+        Vec2::new(sample_x - sample_base, sample_y - sample_base) / sample_epsilon * flip_multiplier
+    }
+
+    /// Get the gradient of the terrain height field at the given X and Y
+    /// coordinate, using the default offset sampling epsilon.
+    ///
+    /// For more information, see [get_gradient_with_request].
+    pub fn get_gradient_at(&self, pos_x: f32, pos_y: f32) -> Vec2 {
+        self.get_gradient_with_request(
+            GradientLookupRequestBuilder::default()
+                .pos_x(pos_x)
+                .pos_y(pos_y)
+                .build()
+                .unwrap(),
+        )
+    }
+
+    /// Use the gradient value at a position to get a normal vector,
+    ///
+    /// providing a custom sample epsilon via a GradientLookupReuest object.
+    pub fn get_normal_with_request(&self, request: GradientLookupRequest) -> Vec3 {
+        let grad = self.get_gradient_with_request(request);
+
+        Vec3::new(grad.x, grad.y, 1.0).normalize()
     }
 
     /// Use the gradient value at a position to get a normal vector.
     pub fn get_normal_at(&self, pos_x: f32, pos_y: f32) -> Vec3 {
         let grad = self.get_gradient_at(pos_x, pos_y);
 
-        Vec3::from(grad).with_z(1.0).normalize()
+        Vec3::new(grad.x, grad.y, 1.0).normalize()
     }
 
     /// Create a new TerrainBuffer by using a TerrainGenerator to initialize.
@@ -211,7 +247,7 @@ impl TerrainBuffer {
                     let vert_x = value_x as f32 * self.resolution - center_x;
                     let vert_z = value_y as f32 * self.resolution - center_y;
                     // vertical
-                    let vert_y = ((self.get_value_at(value_x, value_y) * 0.5) + 0.5 * s);
+                    let vert_y = self.get_value_at(value_x, value_y);
 
                     [vert_x, vert_y, vert_z]
                 })
