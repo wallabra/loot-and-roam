@@ -433,7 +433,7 @@ pub mod tests {
 
         // whoops, 2^12 is too large!
         let test_octave = 6;
-        fractal.add_random_octave(6, &mut rng);
+        fractal.add_random_octave(test_octave, &mut rng);
 
         let inf_2 = fractal.get_influence_at(0.5, 0.5);
 
