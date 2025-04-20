@@ -18,6 +18,7 @@ use std::ops::Range;
 
 use bevy::prelude::*;
 use enum_dispatch::enum_dispatch;
+use itertools::Itertools;
 use range_ext::intersect::Intersect;
 
 use super::base::{PhysPoint, PointNetwork};
@@ -41,6 +42,14 @@ impl AABB {
         Self {
             spans: [range_x, range_y, range_z],
         }
+    }
+
+    /// Checks whether a single point is within this AABB.
+    pub fn check_point(&self, point: Vec3) -> bool {
+        self.spans
+            .iter()
+            .enumerate()
+            .all(|idx, range| range.contains([point.x, point.y, point.z][idx]))
     }
 
     /// Check whether two AABBs intersect.
