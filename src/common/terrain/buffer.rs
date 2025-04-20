@@ -152,14 +152,18 @@ impl TerrainBuffer {
     pub fn get_normal_with_request(&self, request: GradientLookupRequest) -> Vec3 {
         let grad = self.get_gradient_with_request(request);
 
-        Vec3::new(grad.x, grad.y, 1.0).normalize()
+        Vec3::new(-grad.x, 1.0, -grad.y).normalize()
     }
 
     /// Use the gradient value at a position to get a normal vector.
     pub fn get_normal_at(&self, pos_x: f32, pos_y: f32) -> Vec3 {
-        let grad = self.get_gradient_at(pos_x, pos_y);
-
-        Vec3::new(grad.x, grad.y, 1.0).normalize()
+        self.get_normal_with_request(
+            GradientLookupRequestBuilder::default()
+                .pos_x(pos_x)
+                .pos_y(pos_y)
+                .build()
+                .unwrap(),
+        )
     }
 
     /// Create a new TerrainBuffer by using a TerrainGenerator to initialize.
