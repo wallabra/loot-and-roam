@@ -61,7 +61,10 @@ pub struct CommonPlugin;
 
 impl Plugin for CommonPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_plugins((physics::BasicPhysicsPlugin,));
+        app.add_plugins((
+            physics::BasicPhysicsPlugin,
+            terrain::collision::TerrainCollisionPlugin,
+        ));
     }
 }
 

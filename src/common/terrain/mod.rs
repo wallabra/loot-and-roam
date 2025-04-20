@@ -18,10 +18,12 @@
 // permitted by applicable law.  See the CNPL for details.
 
 pub mod buffer;
+pub mod collision;
 pub mod generator;
 pub mod noise;
 
 pub mod prelude {
+    pub use super::collision::TerrainCollisionPlugin;
     pub use super::generator::{
         default_modulator, CenterPoint, DefaultTerrainGenerator, DefaultTerrainGeneratorBuilder,
         DefaultTerrainModulatorAlgorithm, DistanceCollector, MinDistance, ModulationParams,
