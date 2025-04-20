@@ -31,7 +31,7 @@ pub struct RendererPlugin;
 
 impl bevy::prelude::Plugin for RendererPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_plugins((sky::SkyRenderingPlugin,));
+        app.add_plugins((sky::SkyRenderingPlugin, object::ObjectRendererPlugin));
     }
 }
 

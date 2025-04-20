@@ -19,7 +19,7 @@ use bevy::prelude::*;
 
 fn sky_setup(mut _commands: Commands) {
     // [TODO] sky rendering
-    todo!("sky rendering setup system");
+    //todo!("sky rendering setup system");
 }
 
 pub struct SkyRenderingPlugin;
