@@ -28,7 +28,7 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::renderer::objrender::{CameraFocus, ObjectRendererPlugin, PointAttach},
+    app::renderer::object::{CameraFocus, ObjectRendererPlugin, PointAttach},
     common::physics::prelude::*,
 };
 

@@ -35,7 +35,7 @@ use bevy::{
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
 use derive_builder::Builder;
 use loot_and_roam::{
-    app::renderer::objrender::{ObjectRendererPlugin, PointAttach},
+    app::renderer::object::{ObjectRendererPlugin, PointAttach},
     common::physics::{prelude::*, volume::VolumeCloneSpawner, water::WaterPhysics},
 };
 

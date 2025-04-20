@@ -36,7 +36,7 @@ use bevy::{
 };
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
 use loot_and_roam::{
-    app::renderer::objrender::{ObjectRendererPlugin, PointAttach},
+    app::renderer::object::{ObjectRendererPlugin, PointAttach},
     common::physics::{prelude::*, volume::VolumeCloneSpawner},
 };
 
