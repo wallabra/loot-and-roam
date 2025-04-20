@@ -50,7 +50,7 @@ fn generate_terrain() -> TerrainBuffer {
         .build()
         .unwrap();
 
-    TerrainBuffer::generate(terragen, 0.3, 3.0, 100.0)
+    TerrainBuffer::generate(terragen, 0.3, 3.0, 80.0)
 }
 
 fn scene(
@@ -64,7 +64,7 @@ fn scene(
     // spawn camera
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(50.0, 10.0, 30.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
+        Transform::from_xyz(800.0, 50.0, 35.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
     ));
 
     // spawn light
@@ -77,31 +77,16 @@ fn scene(
         Transform::from_xyz(100.0, 300.0, -30.0),
     ));
 
-    // spawn water level plane
-    commands.spawn((
-        Mesh3d(meshes.add(Circle::new(1000.0))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgba_u8(20, 60, 255, 100),
-            ..Default::default()
-        })),
-        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
-    ));
-
     // spawn terrain mesh
     commands.spawn((
         terrain.as_bundle(&mut meshes),
         MeshMaterial3d(materials.add(Color::srgb_u8(80, 190, 45))),
-        Transform::default(),
+        Transform::from_xyz(0.0, -40.0, 0.0),
     ));
 
     // spawn cubes
-    for at in [
-        [-0.2, 101.5, 1.0],
-        [-0.4, 103.5, -0.5],
-        [0.5, 106.25, 0.5],
-        [1.5, 112.5, 1.5],
-    ]
-    .map(|arr| Vec3::from_array(arr))
+    for at in [[-0.2, 101.5, 1.0], [1.5, 126.5, 1.5], [-20.0, 250.0, -20.0]]
+        .map(|arr| Vec3::from_array(arr))
     {
         println!(
             "cube spawned: {:?}",
@@ -110,6 +95,7 @@ fn scene(
                 &mut commands,
                 &mut meshes,
                 &mut materials,
+                10.0,
                 // cube_mesh.clone(),
                 // cube_material.clone(),
                 // point_mesh.clone(),
@@ -124,12 +110,13 @@ fn spawn_cube(
     commands: &mut Commands<'_, '_>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
+    size: f32,
     // cube_mesh: Handle<Mesh>,
     // cube_material: Handle<StandardMaterial>,
     // point_mesh: Handle<Mesh>,
     // point_material: Handle<StandardMaterial>,
 ) -> Entity {
-    let cube_mesh = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
+    let cube_mesh = meshes.add(Cuboid::new(size, size, size));
     let cube_material = materials.add(StandardMaterial {
         base_color: Color::srgba_u8(124, 144, 255, 140),
         alpha_mode: AlphaMode::Blend,
@@ -156,19 +143,19 @@ fn spawn_cube(
             [0.0, -0.5, 0.0],
             [0.0, 0.0, -0.5],
         ]
-        .map(|arr| PhysPoint::from_pos(at + Vec3::from(arr)))
+        .map(|arr| PhysPoint::from_pos(at + Vec3::from(arr) * size))
         .into_iter(),
     );
 
     let spring_mode = SpringMode::Normal(NormalSpring { stiffness: 30.0 });
     let springs = points.make_radially_connected_springs(
         spring_mode,
-        1.5, /* max spring auto-connection range */
+        1.5 * size, /* max spring auto-connection range */
     );
     let volumes = VolumeCollection::at_every_point(
         &points,
         VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef {
-            radius: std::f32::consts::SQRT_2 / 2.0,
+            radius: size * std::f32::consts::SQRT_2 / 2.0,
         })),
     );
 
@@ -195,6 +182,17 @@ fn spawn_cube(
         })
         .collect::<Vec<_>>();
 
+    // create water plane
+    commands.spawn((
+        Mesh3d(meshes.add(Circle::new(1000.0))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgba_u8(190, 190, 255, 90),
+            ..Default::default()
+        })),
+        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2))
+            .with_translation(Vec3::new(0.0, -40.0, 0.0)),
+    ));
+
     // create cube entity
     let cube = commands
         .spawn((
@@ -207,11 +205,16 @@ fn spawn_cube(
             FloorPlaneCollision {
                 restitution: 0.2,
                 friction: 0.2,
-                intercept_y: -0.5,
+                intercept_y: -80.0,
             },
-            Gravity {
-                // low grav for development purposes
-                force: Vec3::Y * -3.0,
+            Gravity::default(),
+            WaterPhysics {
+                water_level: -60.0,
+
+                // exaggerated for demonstrative purposes
+                buoyancy_factor: 4.0,
+
+                ..Default::default()
             },
             SnapToPointNet,
             //CameraFocus::default(),
@@ -286,7 +289,7 @@ fn main() {
     apply_example(&mut app);
 
     // engine systems
-    app.add_plugins((FrameTimeDiagnosticsPlugin,));
+    app.add_plugins((CommonPlugin, FrameTimeDiagnosticsPlugin));
 
     // logger
     app.add_plugins(LogDiagnosticsPlugin::default());
