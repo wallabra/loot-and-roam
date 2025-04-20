@@ -200,14 +200,6 @@ fn spawn_cube(
     // point_mesh: Handle<Mesh>,
     // point_material: Handle<StandardMaterial>,
 ) -> Entity {
-    let mesh_size = size * (1.0 + std::f32::consts::SQRT_2 * 0.25);
-    let cube_mesh = meshes.add(Cuboid::new(mesh_size, mesh_size, mesh_size));
-    let cube_material = materials.add(StandardMaterial {
-        base_color: Color::srgba_u8(124, 144, 255, 140),
-        alpha_mode: AlphaMode::Blend,
-        ..Default::default()
-    });
-
     // create point & spring networks
     let points = PointNetwork::from(
         [
@@ -276,8 +268,7 @@ fn spawn_cube(
     // create cube entity
     let cube = commands
         .spawn((
-            Mesh3d(cube_mesh),
-            MeshMaterial3d(cube_material),
+            Visibility::default(),
             Transform::default(),
             points,
             springs,
