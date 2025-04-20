@@ -22,13 +22,13 @@ use crate::common::{
 
 use super::buffer::{TerrainBuffer, TerrainMarker};
 
-fn terrain_aabb(buffer: &TerrainBuffer, transf: &Transform) -> AABB {
+/// AABB of a given terrain, in its local coordinate space.
+fn terrain_aabb(buffer: &TerrainBuffer) -> AABB {
     AABB::new(
         -buffer.get_real_width() / 2.0..buffer.get_real_width() / 2.0,
         buffer.get_vertical_height_range(),
         -buffer.get_real_height() / 2.0..buffer.get_real_height() / 2.0,
     )
-    .translate(transf.translation)
 }
 
 /// Event emitted when a volumed object collides with a terrain entity.
@@ -92,7 +92,7 @@ fn terrain_volume_collision_system(
         // 'detect_loop:
         for (e2, terramark, terratransf) in terrain_query.iter() {
             let terrabuf = &terramark.buffer;
-            let terrabox = terrain_aabb(&terrabuf, &terratransf);
+            let terrabox = terrain_aabb(&terrabuf);
 
             if !volumes1.aabb(&points1).check(&terrabox) {
                 continue;
@@ -101,36 +101,37 @@ fn terrain_volume_collision_system(
             for vol in &volumes1.volumes {
                 let pos = points1.points[vol.point_idx].pos;
 
-                // Horizontal check
+                // Point pssition mapped to the terrain's local space.
+                let pos_mapped = terratransf.compute_matrix().inverse().transform_point3(pos);
+
+                // AABB check
                 if !terrabox.check_point(pos) {
                     continue;
                 }
 
-                // Vertical check
-                let terra_height = terrabuf.get_height_at(
-                    pos.x - terratransf.translation.x,
-                    pos.z - terratransf.translation.z,
-                ) + terratransf.translation.y;
+                // Terrain height check
+                let terra_height = terrabuf.get_height_at(pos_mapped.x, pos_mapped.z);
 
-                if pos.y > terra_height {
+                if pos_mapped.y > terra_height {
                     continue;
                 }
 
                 // Depth is how far into the ground the point is.
-                let depth = terra_height - pos.y;
+                let depth = terra_height - pos_mapped.y;
 
                 // Normal is based on the gradient, which is brute forced by
                 // interpolating terrain values at offset positions in a
                 // weighted manner.
                 // [TODO] Analytical Perlin noise differentiation
-                let normal = terrabuf.get_normal_at(pos.x, pos.z);
+                let normal = terrabuf.get_normal_at(pos_mapped.x, pos_mapped.z);
+                let normal_global = terratransf.transform_point(normal) - terratransf.translation;
 
                 let collision = CollisionInfo {
-                    pos: pos + Vec3::Z * (depth / 2.0),
-                    normal,
+                    pos: terratransf.transform_point(pos_mapped + Vec3::Z * (depth / 2.0)),
+                    normal: normal_global,
                 };
 
-                points1.points[vol.point_idx].vel += normal * depth;
+                points1.points[vol.point_idx].vel += normal_global * depth;
 
                 ev_collision.send(TerrainVolumeCollisionDetectionEvent {
                     entity_ref: e1,
