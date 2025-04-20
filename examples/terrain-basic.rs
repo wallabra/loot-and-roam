@@ -54,12 +54,6 @@ fn scene(
 ) {
     // get terrain mesh
     let terrain = generate_terrain();
-    println!(
-        "Terrain buffer has dimensions {}x{} and {} tris",
-        terrain.get_vert_width(),
-        terrain.get_vert_height(),
-        terrain.get_num_tris()
-    );
 
     // spawn camera
     commands.spawn((

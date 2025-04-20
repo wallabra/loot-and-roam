@@ -49,8 +49,11 @@ order of release:
   drag.  
   `cargo run --example soft-cube-buoyancy`
 
-* **Terrain mesh demo** - a basic 3D terrain demo.
-  `cargo run --example terramesh`
+* **Terrain mesh demo** - a basic 3D terrain generation and rendering demo.
+  `cargo run --example terrain-basic`
+
+* **Terrain collision demo** - an object-terrain collision demo.
+  `cargo run --example terrain-collision`
 
 ## Contributing
 
