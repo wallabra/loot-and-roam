@@ -331,8 +331,6 @@ impl Plugin for SnapToPointNetPlugin {
 
                         transform.translation = avg;
                         transform.look_at(front, up);
-
-                        // the cube is facing the 'front' vertex now; we need to
                     }
                 }
             },

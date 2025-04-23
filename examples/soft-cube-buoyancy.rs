@@ -70,14 +70,6 @@ fn apply_example_systems(app: &mut App) {
 
                     transform.translation = avg;
                     transform.look_at(front, up);
-
-                    // the cube is facing the 'front' vertex now; we need to
-                    // rotate it slightly so it aligns corner-wise rather than
-                    // face-wise. (so it... "corners" the vertex? badum-tss!)
-                    transform.rotate_local_x(TAU * 0.125);
-                    transform.rotate_local_y(TAU * 0.125);
-                } else {
-                    panic!("Tried to reflect empty PointNetwork onto a Transform!");
                 }
             }
         },
