@@ -216,7 +216,7 @@ fn spawn_cube(
         ..Default::default()
     });
 
-    let mass = std::f32::consts::FRAC_PI_3 * size.powi(3);
+    let mass = 0.6 * std::f32::consts::FRAC_PI_3 * size.powi(3);
 
     // create point & spring networks
     let points = PointNetwork::from(
