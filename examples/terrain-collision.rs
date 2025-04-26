@@ -216,7 +216,8 @@ fn spawn_cube(
         ..Default::default()
     });
 
-    let mass = 0.6 * std::f32::consts::FRAC_PI_3 * size.powi(3);
+    let radius = size * std::f32::consts::SQRT_2 / 2.0;
+    let mass = 0.3 * std::f32::consts::FRAC_PI_3 * radius.powi(3);
 
     // create point & spring networks
     let points = PointNetwork::from(
@@ -251,9 +252,7 @@ fn spawn_cube(
     );
     let volumes = VolumeCollection::at_every_point(
         &points,
-        VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef {
-            radius: size * std::f32::consts::SQRT_2 / 2.0,
-        })),
+        VolumeCloneSpawner::new(VolumeType::Sphere(SphereDef { radius })),
     );
 
     // generate point network visualization as little children balls
