@@ -88,10 +88,10 @@ fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork, &Sp
             // If positive, dist must decrease (inward  force)
             // If negative, dist must increase (outward force)
             let dist_diff = dist - spring.rest_dist;
+            let offset = unit_inward * dist_diff;
 
             match spring.mode {
                 SpringMode::Instant => {
-                    let offset = unit_inward * dist_diff;
                     let half_offset = offset * 0.5;
 
                     points.points[spring.points.0].pos += half_offset;
@@ -99,7 +99,7 @@ fn point_spring_forces(time: Res<Time>, mut query: Query<(&mut PointNetwork, &Sp
                 }
 
                 SpringMode::Normal(mode) => {
-                    let force = unit_inward * dist_diff * mode.stiffness;
+                    let force = offset * mode.stiffness;
                     let half_force = force * 0.5;
 
                     points.points[spring.points.0].apply_force_over_time(half_force, delta_secs);

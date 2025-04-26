@@ -219,6 +219,8 @@ fn spawn_cube(
         ..Default::default()
     });
 
+    let mass = 4.0 * std::f32::consts::FRAC_PI_3 * size.powi(3);
+
     // create point & spring networks
     let points = PointNetwork::from(
         [
@@ -239,20 +241,16 @@ fn spawn_cube(
             [0.0, -0.5, 0.0],
             [0.0, 0.0, -0.5],
         ]
-        .map(|arr| {
-            PhysPoint::new(
-                at + (Vec3::from(arr) * size),
-                Vec3::ZERO,
-                4.0 * std::f32::consts::FRAC_PI_3 * size.powi(3),
-            )
-        })
+        .map(|arr| PhysPoint::new(at + (Vec3::from(arr) * size), Vec3::ZERO, mass))
         .into_iter(),
     );
 
-    let spring_mode = SpringMode::Instant;
+    let spring_mode = SpringMode::Normal(NormalSpring {
+        stiffness: 30.0 * mass,
+    });
     let springs = points.make_radially_connected_springs(
         spring_mode,
-        3.0 * size, /* max spring auto-connection range */
+        1.5 * size, /* max spring auto-connection range */
     );
     let volumes = VolumeCollection::at_every_point(
         &points,
