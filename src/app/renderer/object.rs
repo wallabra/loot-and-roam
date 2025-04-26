@@ -85,7 +85,7 @@ pub struct DevCamera {
     pub enabled: bool,
 }
 
-pub fn camera_controller_system(
+pub fn dev_camera_controller_system(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
@@ -155,6 +155,13 @@ pub struct ObjectRendererPlugin;
 
 impl Plugin for ObjectRendererPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (point_attach_snap, camera_focus_system));
+        app.add_systems(
+            Update,
+            (
+                point_attach_snap,
+                camera_focus_system,
+                dev_camera_control_system,
+            ),
+        );
     }
 }

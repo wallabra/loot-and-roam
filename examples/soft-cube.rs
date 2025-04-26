@@ -29,7 +29,7 @@ use bevy::{
 };
 use loot_and_roam::{
     app::renderer::object::{
-        camera_controller_system, CameraFocus, DevCamera, ObjectRenderPlugin, ObjectRendererPlugin,
+        CameraFocus, DevCamera, ObjectRenderPlugin, ObjectRendererPlugin,
         PointAttach,
     },
     common::physics::prelude::*,
@@ -79,7 +79,6 @@ pub fn apply_example_systems(app: &mut App) {
         },
     );
 
-    app.add_systems(Update, camera_controller_system);
     app.add_systems(Startup, setup);
 }
 
