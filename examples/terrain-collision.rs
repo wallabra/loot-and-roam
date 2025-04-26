@@ -27,7 +27,10 @@ use bevy::{
     window::PresentMode,
 };
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
-use loot_and_roam::app::{renderer::object::PointAttach, AppPlugin};
+use loot_and_roam::app::{
+    renderer::object::{DevCamera, PointAttach},
+    AppPlugin,
+};
 use loot_and_roam::common::physics::volume::VolumeCloneSpawner;
 use loot_and_roam::common::prelude::*;
 use loot_and_roam::common::terrain::buffer::TerrainBuffer;
@@ -109,6 +112,7 @@ fn scene(
     commands
         .spawn((
             Camera3d::default(),
+            DevCamera,
             Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
         ))
         .with_child((
