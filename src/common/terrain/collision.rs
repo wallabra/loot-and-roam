@@ -133,7 +133,7 @@ fn terrain_volume_collision_system(
 
                 points1.points[vol.point_idx].vel += normal_global * depth;
 
-                ev_collision.send(TerrainVolumeCollisionDetectionEvent {
+                ev_collision.write(TerrainVolumeCollisionDetectionEvent {
                     entity_ref: e1,
                     entity_terrain: e2,
                     info: collision,

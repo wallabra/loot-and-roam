@@ -15,9 +15,10 @@
 
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    math::FloatOrd,
     prelude::*,
     render::{
-        camera::RenderTarget,
+        camera::{ImageRenderTarget, RenderTarget},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
@@ -114,7 +115,10 @@ fn scene(
             Camera3d::default(),
             Camera {
                 // Connect the output texture to a camera as a RenderTarget.
-                target: RenderTarget::Image(output_texture_handle.clone()),
+                target: RenderTarget::Image(ImageRenderTarget {
+                    handle: output_texture_handle.clone(),
+                    scale_factor: FloatOrd(1.0),
+                }),
                 ..default()
             },
         ));
@@ -176,7 +180,7 @@ fn scene(
     // start image exportation
     if let Some(mut export_sources) = export_sources {
         commands.spawn((
-            ImageExport(export_sources.add(output_texture_handle)),
+            ImageExport(export_sources.add(ImageExportSource(output_texture_handle.clone()))),
             ImageExportSettings {
                 // Frames will be saved to "./out/terrain-collision/[#####].png"
                 // [NOTE] update output dir when grafting this code onto other examples
@@ -380,7 +384,11 @@ fn main() {
     apply_example(&mut app);
 
     // engine systems
-    app.add_plugins((CommonPlugin, AppPlugin, FrameTimeDiagnosticsPlugin));
+    app.add_plugins((
+        CommonPlugin,
+        AppPlugin,
+        FrameTimeDiagnosticsPlugin::default(),
+    ));
 
     // logger
     app.add_plugins(LogDiagnosticsPlugin::default());

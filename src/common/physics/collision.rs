@@ -196,7 +196,7 @@ fn volume_volume_collision_system(
                     // points2.points[vol2.point_idx].pos += collision.normal * depth;
                     points2.points[vol2.point_idx].vel += collision.normal * depth;
 
-                    ev_collision.send(VolumeVolumeCollisionDetectionEvent {
+                    ev_collision.write(VolumeVolumeCollisionDetectionEvent {
                         entity_ref: e1,
                         entity_other: e2,
                         info: collision,

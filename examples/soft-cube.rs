@@ -28,10 +28,7 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::renderer::object::{
-        CameraFocus, DevCamera, ObjectRenderPlugin, ObjectRendererPlugin,
-        PointAttach,
-    },
+    app::renderer::object::{DevCamera, ObjectRendererPlugin, PointAttach},
     common::physics::prelude::*,
 };
 
@@ -224,7 +221,7 @@ fn main() {
 
     // engine systems
     app.add_plugins((
-        FrameTimeDiagnosticsPlugin,
+        FrameTimeDiagnosticsPlugin::default(),
         BasicPhysicsPlugin,
         CollisionPlugin,
         ObjectRendererPlugin,

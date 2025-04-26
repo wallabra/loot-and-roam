@@ -24,9 +24,10 @@ use std::f32::consts::{SQRT_2, TAU};
 
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    math::FloatOrd,
     prelude::*,
     render::{
-        camera::RenderTarget,
+        camera::{ImageRenderTarget, RenderTarget},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
@@ -157,7 +158,10 @@ fn setup(
             Camera3d::default(),
             Camera {
                 // Connect the output texture to a camera as a RenderTarget.
-                target: RenderTarget::Image(output_texture_handle.clone()),
+                target: RenderTarget::Image(ImageRenderTarget {
+                    handle: output_texture_handle.clone(),
+                    scale_factor: FloatOrd(1.0),
+                }),
                 ..default()
             },
         ));
@@ -188,7 +192,7 @@ fn setup(
 
     // start image exportation
     commands.spawn((
-        ImageExport(export_sources.add(output_texture_handle)),
+        ImageExport(export_sources.add(ImageExportSource(output_texture_handle.clone()))),
         ImageExportSettings {
             // Frames will be saved to "./out/soft-cube-collision/[#####].png"
             // [NOTE] update output dir when grafting this code onto other examples
@@ -339,7 +343,7 @@ fn main() {
 
     // engine systems
     app.add_plugins((
-        FrameTimeDiagnosticsPlugin,
+        FrameTimeDiagnosticsPlugin::default(),
         BasicPhysicsPlugin,
         CollisionPlugin,
         ObjectRendererPlugin,

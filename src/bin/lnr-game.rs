@@ -42,7 +42,7 @@ fn main() {
     }));
 
     // framerate
-    app.add_plugins(FrameTimeDiagnosticsPlugin);
+    app.add_plugins(FrameTimeDiagnosticsPlugin::default());
 
     // engine
     //app.add_plugins(LootAndRoamEnginePlugin)

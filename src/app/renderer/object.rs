@@ -36,12 +36,12 @@ pub struct PointAttach {
 }
 
 fn point_attach_snap(
-    mut query_child: Query<(&Parent, &mut Transform, &PointAttach)>,
+    mut query_child: Query<(&ChildOf, &mut Transform, &PointAttach)>,
     query_parent: Query<(&PointNetwork, &GlobalTransform, &Transform), Without<PointAttach>>,
 ) {
-    for (parent, mut transform, attachment) in query_child.iter_mut() {
+    for (child_of, mut transform, attachment) in query_child.iter_mut() {
         let (parent_points, parent_global_transform, parent_transform) =
-            query_parent.get(parent.get()).unwrap();
+            query_parent.get(child_of.parent()).unwrap();
 
         assert!(attachment.point_idx < parent_points.points.len());
 
@@ -88,17 +88,17 @@ pub struct DevCamera {
 pub fn dev_camera_controller_system(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
+    _mouse_buttons: Res<ButtonInput<MouseButton>>,
     mut mouse_motion_events: EventReader<MouseMotion>,
     mut query: Query<(&mut Transform, &mut DevCamera)>,
     mut q_windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    let mut primary_window = q_windows.single_mut();
+    let mut primary_window = q_windows.single_mut().unwrap();
 
     primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
     primary_window.cursor_options.visible = false;
 
-    if let Ok((mut transform, mut controller)) = query.get_single_mut() {
+    if let Ok((mut transform, mut controller)) = query.single_mut() {
         if !controller.enabled {
             return;
         }
@@ -160,7 +160,7 @@ impl Plugin for ObjectRendererPlugin {
             (
                 point_attach_snap,
                 camera_focus_system,
-                dev_camera_control_system,
+                dev_camera_controller_system,
             ),
         );
     }

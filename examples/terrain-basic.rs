@@ -112,7 +112,7 @@ fn main() {
     apply_example(&mut app);
 
     // engine systems
-    app.add_plugins((FrameTimeDiagnosticsPlugin,));
+    app.add_plugins((FrameTimeDiagnosticsPlugin::default(),));
 
     // logger
     app.add_plugins(LogDiagnosticsPlugin::default());
