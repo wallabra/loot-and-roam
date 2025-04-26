@@ -216,8 +216,9 @@ fn spawn_cube(
         ..Default::default()
     });
 
-    let radius = size * std::f32::consts::SQRT_2 / 2.0;
-    let mass = 0.3 * std::f32::consts::FRAC_PI_3 * radius.powi(3);
+    let radius = size * std::f32::consts::SQRT_2 * 0.333;
+    let volume = 4.0 * std::f32::consts::FRAC_PI_3 * radius.powi(3);
+    let mass = 0.9 * volume;
 
     // create point & spring networks
     let points = PointNetwork::from(
@@ -289,7 +290,7 @@ fn spawn_cube(
             volumes,
             Gravity::default(),
             WaterPhysics {
-                water_level: -60.0,
+                water_level: -40.0,
 
                 // exaggerated for demonstrative purposes
                 buoyancy_factor: 4.0,
