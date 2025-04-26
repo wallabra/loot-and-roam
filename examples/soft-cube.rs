@@ -28,8 +28,8 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::renderer::object::{DevCamera, ObjectRendererPlugin, PointAttach},
-    common::physics::prelude::*,
+    app::{prelude::*, renderer::object::PointAttach, AppPlugin},
+    common::{prelude::*, CommonPlugin},
 };
 
 /// Point netowrk snapping market component.
@@ -216,9 +216,8 @@ fn main() {
     // engine systems
     app.add_plugins((
         FrameTimeDiagnosticsPlugin::default(),
-        BasicPhysicsPlugin,
-        CollisionPlugin,
-        ObjectRendererPlugin,
+        CommonPlugin,
+        AppPlugin,
     ));
 
     // system registration

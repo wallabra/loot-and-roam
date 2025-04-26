@@ -20,7 +20,8 @@
 // pub mod audio;
 // pub mod resource;
 // pub mod input;
-pub mod renderer;
+pub mod camera; // Camera controls & updates
+pub mod renderer; // Rendering code
 
 /// Loot & Roam app plugin.
 ///
@@ -30,10 +31,12 @@ pub struct AppPlugin;
 
 impl bevy::prelude::Plugin for AppPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_plugins((renderer::RendererPlugin,));
+        app.add_plugins((renderer::RendererPlugin, camera::CameraControlPlugin));
     }
 }
 
 pub mod prelude {
+    pub use super::camera::prelude::*;
     pub use super::renderer::prelude::*;
+    pub use super::AppPlugin;
 }

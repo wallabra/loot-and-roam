@@ -18,11 +18,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use bevy::{
-    input::mouse::MouseMotion,
-    prelude::*,
-    window::{CursorGrabMode, PrimaryWindow},
-};
+use bevy::prelude::*;
 
 use crate::common::physics::base::PointNetwork;
 
@@ -76,104 +72,10 @@ fn camera_focus_system(
     }
 }
 
-#[derive(Component)]
-pub struct DevCamera {
-    pub move_speed: f32,
-    pub rotate_sensitivity: f32,
-    pub pitch: f32,
-    pub yaw: f32,
-    pub enabled: bool,
-}
-
-impl Default for DevCamera {
-    fn default() -> Self {
-        Self {
-            move_speed: 5.0,
-            rotate_sensitivity: 0.1,
-            pitch: 0.0,
-            yaw: 0.0,
-            enabled: true,
-        }
-    }
-}
-
-pub fn dev_camera_controller_system(
-    time: Res<Time>,
-    keys: Res<ButtonInput<KeyCode>>,
-    _mouse_buttons: Res<ButtonInput<MouseButton>>,
-    mut mouse_motion_events: EventReader<MouseMotion>,
-    mut query: Query<(&mut Transform, &mut DevCamera)>,
-    mut q_windows: Query<&mut Window, With<PrimaryWindow>>,
-) {
-    let mut primary_window = q_windows.single_mut().unwrap();
-
-    primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
-    primary_window.cursor_options.visible = false;
-
-    if let Ok((mut transform, mut controller)) = query.single_mut() {
-        if !controller.enabled {
-            return;
-        }
-
-        // Rotation via mouse
-        let mut delta = Vec2::ZERO;
-        for ev in mouse_motion_events.read() {
-            delta += ev.delta;
-        }
-
-        controller.yaw -= delta.x * controller.rotate_sensitivity * time.delta_secs();
-        controller.pitch -= delta.y * controller.rotate_sensitivity * time.delta_secs();
-        controller.pitch = controller
-            .pitch
-            .clamp(-89.9f32.to_radians(), 89.9f32.to_radians());
-
-        let yaw = Quat::from_rotation_y(controller.yaw);
-        let pitch = Quat::from_rotation_x(controller.pitch);
-        transform.rotation = yaw * pitch;
-
-        // Movement via WASD
-        let mut direction = Vec3::ZERO;
-        let forward = transform.forward();
-        let right = transform.right();
-
-        if keys.pressed(KeyCode::KeyW) {
-            direction += *forward;
-        }
-        if keys.pressed(KeyCode::KeyS) {
-            direction -= *forward;
-        }
-        if keys.pressed(KeyCode::KeyD) {
-            direction += *right;
-        }
-        if keys.pressed(KeyCode::KeyA) {
-            direction -= *right;
-        }
-        if keys.pressed(KeyCode::KeyE) || keys.pressed(KeyCode::Space) {
-            direction += Vec3::Y;
-        }
-        if keys.pressed(KeyCode::KeyQ) || keys.pressed(KeyCode::ShiftLeft) {
-            direction -= Vec3::Y;
-        }
-
-        if direction != Vec3::ZERO {
-            direction = direction.normalize();
-        }
-
-        transform.translation += direction * controller.move_speed * time.delta_secs();
-    }
-}
-
 pub struct ObjectRendererPlugin;
 
 impl Plugin for ObjectRendererPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (
-                point_attach_snap,
-                camera_focus_system,
-                dev_camera_controller_system,
-            ),
-        );
+        app.add_systems(Update, (point_attach_snap, camera_focus_system));
     }
 }
