@@ -19,6 +19,7 @@
 
 // [TODO] Please uncomment *only* implemented modules.
 // pub mod lighting;  // Scene lighting definitions
+pub mod camera; // Camera code
 pub mod object; // Common object rendering code
 pub mod sky; // Sky/background
 pub mod terrain; // Terrain renderer

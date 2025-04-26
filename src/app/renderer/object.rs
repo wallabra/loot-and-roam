@@ -85,6 +85,18 @@ pub struct DevCamera {
     pub enabled: bool,
 }
 
+impl Default for DevCamera {
+    fn default() -> Self {
+        Self {
+            move_speed: 5.0,
+            rotate_sensitivity: 0.1,
+            pitch: 0.0,
+            yaw: 0.0,
+            enabled: true,
+        }
+    }
+}
+
 pub fn dev_camera_controller_system(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,

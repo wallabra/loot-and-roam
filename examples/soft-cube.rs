@@ -110,13 +110,7 @@ pub fn setup(
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
-        DevCamera {
-            move_speed: 5.0,
-            rotate_sensitivity: 0.1,
-            pitch: 0.0,
-            yaw: 0.0,
-            enabled: true,
-        },
+        DevCamera::default(),
     ));
     // -- cube
 

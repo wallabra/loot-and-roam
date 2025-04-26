@@ -112,7 +112,10 @@ fn scene(
     commands
         .spawn((
             Camera3d::default(),
-            DevCamera,
+            DevCamera {
+                move_speed: 80.0,
+                ..Default::default()
+            },
             Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
         ))
         .with_child((
