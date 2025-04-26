@@ -4,7 +4,7 @@ cargo-features = ["codegen-backend"]
 name = "loot-and-roam"
 version = "0.1.0"
 edition = "2021"
-authors = ["GameCircular team"]
+authors = ["GameCircular team"] # Please see AUTHORS.md
 
 [dependencies]
 bevy = "0.15.2"
