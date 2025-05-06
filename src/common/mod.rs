@@ -36,6 +36,17 @@
 
 use bevy::prelude::Plugin;
 
+<<<<<<< Updated upstream
+=======
+pub mod intermission; // Intermission state definitions
+pub mod inventory; // Inventory items and related operations
+pub mod makeup; // Ship makeup and parts
+pub mod math; // Mathematical utility functions
+pub mod physics; // Object physics and collision detection
+pub mod state; // Ingame state handling
+pub mod terrain; // Terrain generation, caching, and lookup
+
+>>>>>>> Stashed changes
 // [TODO] Please uncomment *only* implemented modules.
 pub mod inventory; // Inventory items and related operations
 pub mod makeup;
