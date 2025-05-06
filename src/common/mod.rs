@@ -38,20 +38,22 @@ use bevy::prelude::Plugin;
 
 // [TODO] Please uncomment *only* implemented modules.
 pub mod inventory; // Inventory items and related operations
-pub mod makeup;
-pub mod physics; // Object physics and collision detection // Ship makeup and parts
-                 // pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
-                 // pub mod namegen;   // Localizable name generation for NPC ships
-pub mod terrain; // Terrain generation, caching, and lookup
-                 // pub mod ai;        // NPC ship controller
-                 // pub mod player;    // Player state tracking
-                 // pub mod spawner;   // NPC ship spawning
-                 // pub mod props;     // Static props (decorative, buildings, etc) and their spawning
-                 // pub mod town;      // Economic mechanisms, and town state tracking
-                 // pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
-                 // pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
-                 // ṕub mod util;      // Miscellaneous utility functions
+pub mod makeup; // Ship makeup and parts
 pub mod math; // Mathematical utility functions
+pub mod physics; // Object physics and collision detection
+pub mod scene; // Scene management and initializatoin
+pub mod terrain; // Terrain generation, caching, and lookup
+
+// pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
+// pub mod namegen;   // Localizable name generation for NPC ships
+// pub mod ai;        // NPC ship controller
+// pub mod player;    // Player state tracking
+// pub mod spawner;   // NPC ship spawning
+// pub mod props;     // Static props (decorative, buildings, etc) and their spawning
+// pub mod town;      // Economic mechanisms, and town state tracking
+// pub mod meta;      // Simulation meta-state, including game name, difficulty level, etc
+// pub mod event;     // Top-level events (player creation, login, death, mooring, etc.)
+// ṕub mod util;      // Miscellaneous utility functions
 
 /// Main game plugin, groups all the important Loot & Roam systems together.
 ///

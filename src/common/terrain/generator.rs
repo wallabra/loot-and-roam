@@ -27,6 +27,41 @@ use crate::common::math::smootherstep;
 
 use super::noise::FractalNoise;
 
+/// Some of the parameters used when modulating terrain height.
+///
+/// Omits the inteprolator, which can be added in later.
+#[derive(Clone, Debug, Builder)]
+pub struct BaseModulationParams {
+    /// The distance around center points outside of which should be
+    /// underwater.
+    pub max_shore_distance: f32,
+
+    /// The radius away from a center point which should be guaranteed to be
+    /// above the water.
+    pub min_shore_distance: f32,
+
+    /// The amount by which to conform terrain into the island forms.
+    ///
+    /// Smaller amounts let in more Perlin noise, higher amounts conform it
+    /// more; too high and you get blobs!
+    pub islandification: f32,
+}
+
+impl BaseModulationParams {
+    /// Completes into a [ModulationParams] by adding the interpolator.
+    pub fn with_interpolator<'fn_interp>(
+        self,
+        interpolator: &'fn_interp fn(f32, f32, f32) -> f32,
+    ) -> ModulationParams<'fn_interp> {
+        ModulationParams {
+            max_shore_distance: self.max_shore_distance,
+            min_shore_distance: self.min_shore_distance,
+            islandification: self.islandification,
+            interpolator,
+        }
+    }
+}
+
 /// The parameters used when modulating terrain height.
 #[derive(Clone, Debug, Builder)]
 pub struct ModulationParams<'fn_interp> {
