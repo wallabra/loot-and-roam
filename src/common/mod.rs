@@ -40,10 +40,10 @@ pub mod inventory; // Inventory items and related operations
 pub mod makeup; // Ship makeup and parts
 pub mod math; // Mathematical utility functions
 pub mod physics; // Object physics and collision detection
+pub mod scene; // Scene management and initializatoin
 pub mod state; // Ingame state handling
 pub mod terrain; // Terrain generation, caching, and lookup
 
-// [TODO] Please uncomment *only* implemented modules.
 // pub mod defs;      // Definitions for ship parts, makes, NPC templates, etc
 // pub mod namegen;   // Localizable name generation for NPC ships
 // pub mod ai;        // NPC ship controller
