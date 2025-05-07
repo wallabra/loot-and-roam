@@ -175,9 +175,6 @@ fn dev_camera_controller(
         }
 
         transform.translation += direction * controller.move_speed * time.delta_secs();
-    } else {
-        primary_window.cursor_options.grab_mode = CursorGrabMode::None;
-        primary_window.cursor_options.visible = true;
     }
 }
 
