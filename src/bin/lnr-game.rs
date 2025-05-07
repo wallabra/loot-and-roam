@@ -26,6 +26,7 @@
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use loot_and_roam::LootAndRoamEnginePlugin;
 
 fn main() {
     let mut app = App::new();
@@ -45,7 +46,7 @@ fn main() {
     app.add_plugins(FrameTimeDiagnosticsPlugin::default());
 
     // engine
-    //app.add_plugins(LootAndRoamEnginePlugin)
+    app.add_plugins(LootAndRoamEnginePlugin);
 
     // logger
     app.add_plugins(LogDiagnosticsPlugin::default());

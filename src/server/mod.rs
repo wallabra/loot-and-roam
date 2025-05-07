@@ -31,6 +31,10 @@ pub struct ServerPlugin;
 
 impl bevy::prelude::Plugin for ServerPlugin {
     fn build(&self, _app: &mut App) {
-        todo!("server functionality not yet implemented");
+        // [TODO] server functionality
     }
+}
+
+pub mod prelude {
+    pub use super::ServerPlugin;
 }

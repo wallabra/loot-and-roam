@@ -13,6 +13,26 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
+use bevy::prelude::Plugin;
+
 pub mod app;
 pub mod common;
 pub mod server;
+
+/// The main Loot & Roam plugin.
+///
+/// Enables every mandatory engine plugin.
+pub struct LootAndRoamEnginePlugin;
+
+impl Plugin for LootAndRoamEnginePlugin {
+    fn build(&self, app: &mut bevy::app::App) {
+        app.add_plugins((common::CommonPlugin, app::AppPlugin, server::ServerPlugin));
+    }
+}
+
+pub mod prelude {
+    pub use super::app::prelude::*;
+    pub use super::common::prelude::*;
+    pub use super::server::prelude::*;
+    pub use super::LootAndRoamEnginePlugin;
+}
