@@ -19,7 +19,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 
 /// The current superstate of the game.
 ///
@@ -51,19 +51,84 @@ pub enum GameState {
     Intermission,
 }
 
-fn setup_start() {}
+#[derive(Component, Clone, Debug, Copy, Default)]
+pub struct SceneTree;
 
-fn setup_overworld() {}
+#[derive(Clone, Debug, Event, Copy)]
+pub struct SceneSetupEvent {
+    pub scene_tree: Entity,
+}
 
-fn setup_intermission() {}
+impl SceneSetupEvent {
+    pub fn new(scene_tree: Entity) -> Self {
+        Self { scene_tree }
+    }
+}
 
-fn cleanup_start() {}
+#[derive(Clone, Debug, Event, Default, Copy)]
+pub struct SceneCleanup;
 
-fn cleanup_overworld() {}
+fn setup_start(mut commands: Commands, mut setup_event: EventWriter<SceneSetupEvent>) {
+    let tree: Entity = commands.spawn(SceneTree).id();
+    setup_event.write(SceneSetupEvent::new(tree));
+}
 
-fn cleanup_intermission() {}
+fn setup_overworld(mut commands: Commands, mut setup_event: EventWriter<SceneSetupEvent>) {
+    let tree: Entity = commands.spawn(SceneTree).id();
+    setup_event.write(SceneSetupEvent::new(tree));
+}
 
-/// Activates the superstate transition handling.
+fn setup_intermission(mut commands: Commands, mut setup_event: EventWriter<SceneSetupEvent>) {
+    let tree: Entity = commands.spawn(SceneTree).id();
+    setup_event.write(SceneSetupEvent::new(tree));
+}
+
+fn cleanup_start(mut commands: Commands, q_tree: Query<(Entity, &SceneTree)>) {
+    commands.entity(q_tree.single().unwrap().0).despawn();
+}
+
+fn cleanup_overworld(mut commands: Commands, q_tree: Query<(Entity, &SceneTree)>) {
+    commands.entity(q_tree.single().unwrap().0).despawn();
+}
+
+fn cleanup_intermission(mut commands: Commands, q_tree: Query<(Entity, &SceneTree)>) {
+    commands.entity(q_tree.single().unwrap().0).despawn();
+}
+
+fn input_handler_start(
+    keys: Res<ButtonInput<KeyCode>>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        next_state.set(GameState::Overworld);
+    }
+}
+
+fn input_handler_overworld(
+    keys: Res<ButtonInput<KeyCode>>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if keys.just_pressed(KeyCode::KeyL) {
+        next_state.set(GameState::Intermission);
+    }
+}
+
+fn input_handler_intermission(
+    keys: Res<ButtonInput<KeyCode>>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if keys.just_pressed(KeyCode::KeyL) {
+        next_state.set(GameState::Overworld);
+    }
+}
+
+/// Activates the main superstate systems.
 ///
 /// This component is essential in Loot & Roam game execution.
 pub struct BaseStatePlugin;
@@ -77,5 +142,16 @@ impl Plugin for BaseStatePlugin {
         app.add_systems(OnExit(GameState::Start), cleanup_start);
         app.add_systems(OnExit(GameState::Overworld), cleanup_overworld);
         app.add_systems(OnExit(GameState::Intermission), cleanup_intermission);
+
+        app.add_systems(
+            Update,
+            (
+                input_handler_start.run_if(in_state(GameState::Start)),
+                input_handler_overworld.run_if(in_state(GameState::Overworld)),
+                input_handler_intermission.run_if(in_state(GameState::Intermission)),
+            ),
+        );
+
+        app.add_event::<SceneSetupEvent>();
     }
 }
