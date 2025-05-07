@@ -84,11 +84,10 @@ pub struct DevCamera {
     /// Mouse sensitivity.
     pub rotate_sensitivity: f32,
 
-    /// Current rotation's pitch component.
-    pub pitch: f32,
-
-    /// Current rotation's yaw component.
-    pub yaw: f32,
+    /// Current rotation's pitch and yaw components.
+    ///
+    /// None if not yet initialized.
+    pub rotation: Option<(f32, f32)>,
 
     /// Whether the dev camera is enabled.
     ///
@@ -101,8 +100,7 @@ impl Default for DevCamera {
         Self {
             move_speed: 5.0,
             rotate_sensitivity: 0.1,
-            pitch: 0.0,
-            yaw: 0.0,
+            rotation: None,
             enabled: true,
         }
     }
@@ -118,13 +116,20 @@ fn dev_camera_controller(
 ) {
     let mut primary_window = q_windows.single_mut().unwrap();
 
-    primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
-    primary_window.cursor_options.visible = false;
-
     if let Ok((mut transform, mut controller)) = query.single_mut() {
+        primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
+        primary_window.cursor_options.visible = false;
+
         if !controller.enabled {
             return;
         }
+
+        if controller.rotation.is_none() {
+            let quat = transform.rotation;
+            controller.rotation = Some((quat.x, quat.y));
+        }
+
+        let (mut pitch, mut yaw) = controller.rotation.unwrap();
 
         // Rotation via mouse
         let mut delta = Vec2::ZERO;
@@ -132,14 +137,13 @@ fn dev_camera_controller(
             delta += ev.delta;
         }
 
-        controller.yaw -= delta.x * controller.rotate_sensitivity * time.delta_secs();
-        controller.pitch -= delta.y * controller.rotate_sensitivity * time.delta_secs();
-        controller.pitch = controller
-            .pitch
-            .clamp(-89.9f32.to_radians(), 89.9f32.to_radians());
+        yaw -= delta.x * controller.rotate_sensitivity * time.delta_secs();
+        pitch -= delta.y * controller.rotate_sensitivity * time.delta_secs();
+        pitch = pitch.clamp(-89.9f32.to_radians(), 89.9f32.to_radians());
 
-        let yaw = Quat::from_rotation_y(controller.yaw);
-        let pitch = Quat::from_rotation_x(controller.pitch);
+        controller.rotation = Some((pitch, yaw));
+        let yaw = Quat::from_rotation_y(yaw);
+        let pitch = Quat::from_rotation_x(pitch);
         transform.rotation = yaw * pitch;
 
         // Movement via WASD
