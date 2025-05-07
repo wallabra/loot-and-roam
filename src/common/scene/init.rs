@@ -159,6 +159,9 @@ pub struct OverworldSceneInitializer {
     pub params: OverworldSceneParams,
 }
 
+#[derive(Component)]
+pub struct OverworldCamera;
+
 impl OverworldSceneInitializer {
     fn setup_overworld_island(
         &self,
@@ -248,12 +251,18 @@ impl OverworldSceneInitializer {
     fn setup_overworld_camera(&self, scene_tree: Entity, commands: &mut Commands) {
         let camera_entity = commands
             .spawn((
-                Camera3d::default(),
+                Camera {
+                    order: 5,
+                    ..default()
+                },
+                OverworldCamera,
                 DevCamera {
                     move_speed: 80.0,
+                    enabled: true,
                     ..Default::default()
                 },
                 Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
+                Camera3d::default(),
             ))
             .id();
         commands.entity(scene_tree).add_child(camera_entity);

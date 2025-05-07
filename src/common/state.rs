@@ -68,20 +68,26 @@ impl SceneSetupEvent {
 #[derive(Clone, Debug, Event, Default, Copy)]
 pub struct SceneCleanup;
 
+fn make_scene_tree(commands: &mut Commands) -> Entity {
+    commands
+        .spawn((SceneTree, Visibility::Visible, Transform::default()))
+        .id()
+}
+
 fn setup_start(mut commands: Commands, mut ev_scene_setup: EventWriter<SceneSetupEvent>) {
-    let tree: Entity = commands.spawn(SceneTree).id();
+    let tree = make_scene_tree(&mut commands);
     info!("Sending SceneSetup event for the Start state");
     ev_scene_setup.write(SceneSetupEvent::new(tree));
 }
 
 fn setup_overworld(mut commands: Commands, mut ev_scene_setup: EventWriter<SceneSetupEvent>) {
-    let tree: Entity = commands.spawn(SceneTree).id();
+    let tree = make_scene_tree(&mut commands);
     info!("Sending SceneSetup event for the Overworld state");
     ev_scene_setup.write(SceneSetupEvent::new(tree));
 }
 
 fn setup_intermission(mut commands: Commands, mut ev_scene_setup: EventWriter<SceneSetupEvent>) {
-    let tree: Entity = commands.spawn(SceneTree).id();
+    let tree = make_scene_tree(&mut commands);
     info!("Sending SceneSetup event for the Intermission state");
     ev_scene_setup.write(SceneSetupEvent::new(tree));
 }
