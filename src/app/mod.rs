@@ -19,9 +19,10 @@
 // [TODO] Please uncomment *only* implemented modules.
 // pub mod audio;
 // pub mod resource;
-// pub mod input;
+// pub mod input; [NOTE] a lot of input code is in common, maybe we should move it into the app tree?
 pub mod camera; // Camera controls & updates
 pub mod renderer; // Rendering code
+pub mod state;
 
 /// Loot & Roam app plugin.
 ///
@@ -31,12 +32,17 @@ pub struct AppPlugin;
 
 impl bevy::prelude::Plugin for AppPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_plugins((renderer::RendererPlugin, camera::CameraControlPlugin));
+        app.add_plugins((
+            renderer::RendererPlugin,
+            camera::CameraControlPlugin,
+            state::AppStatePlugin,
+        ));
     }
 }
 
 pub mod prelude {
     pub use super::camera::prelude::*;
     pub use super::renderer::prelude::*;
+    pub use super::state::prelude::*;
     pub use super::AppPlugin;
 }
