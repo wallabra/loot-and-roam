@@ -114,6 +114,6 @@ pub struct WaterPhysicsPlugin;
 
 impl Plugin for WaterPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (water_drag_system, water_buoyancy_system));
+        app.add_systems(FixedUpdate, (water_drag_system, water_buoyancy_system));
     }
 }

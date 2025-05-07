@@ -41,8 +41,7 @@ pub struct BasicPhysicsPlugin;
 
 impl Plugin for BasicPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_systems(Update, (point_base_physics, point_spring_forces, gravity));
-        app.add_systems(Update, (point_base_physics,));
+        app.add_systems(FixedUpdate, (point_base_physics,));
         app.add_plugins((SpringForcesPlugin, BasicForcesPlugin, WaterPhysicsPlugin));
     }
 }

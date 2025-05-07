@@ -159,7 +159,7 @@ pub struct TerrainCollisionPlugin;
 
 impl Plugin for TerrainCollisionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (terrain_volume_collision_system,));
+        app.add_systems(FixedUpdate, (terrain_volume_collision_system,));
         app.add_event::<TerrainVolumeCollisionDetectionEvent>();
     }
 }

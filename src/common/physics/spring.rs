@@ -115,6 +115,6 @@ pub struct SpringForcesPlugin;
 
 impl Plugin for SpringForcesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (point_spring_forces,));
+        app.add_systems(FixedUpdate, (point_spring_forces,));
     }
 }

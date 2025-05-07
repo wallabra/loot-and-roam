@@ -97,6 +97,6 @@ pub struct BasicForcesPlugin;
 
 impl Plugin for BasicForcesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (gravity, air_drag));
+        app.add_systems(FixedUpdate, (gravity, air_drag));
     }
 }

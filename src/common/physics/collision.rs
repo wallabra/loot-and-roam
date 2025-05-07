@@ -225,7 +225,7 @@ pub struct CollisionPlugin;
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            Update,
+            FixedUpdate,
             (floor_plane_collision_system, volume_volume_collision_system),
         );
         app.add_event::<VolumeVolumeCollisionDetectionEvent>();
