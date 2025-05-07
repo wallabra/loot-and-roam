@@ -111,7 +111,7 @@ impl OverworldSceneParams {
     pub fn terrain_num_seeds<R: Rng + Sized>(&self, rng: &mut R) -> u8 {
         let choice: u8 = rng.random_range(3..16);
 
-        ((self.island_size as u16 * choice as u16).isqrt() / 80) as u8
+        1_u8 + ((self.island_size as u16 * choice as u16).isqrt() / 80) as u8
     }
 
     /// Samples a random terrain seed [CenterPoint] from the island size parameter.
