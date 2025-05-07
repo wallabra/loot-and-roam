@@ -66,6 +66,8 @@ impl Plugin for CommonPlugin {
         app.add_plugins((
             physics::BasicPhysicsPlugin,
             terrain::collision::TerrainCollisionPlugin,
+            state::BaseStatePlugin,
+            scene::SceneManagementPlugin,
         ));
     }
 }

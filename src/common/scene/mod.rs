@@ -26,7 +26,9 @@ use bevy::prelude::Plugin;
 pub struct SceneManagementPlugin;
 
 impl Plugin for SceneManagementPlugin {
-    fn build(&self, app: &mut bevy::app::App) {}
+    fn build(&self, app: &mut bevy::app::App) {
+        app.add_plugins((init::OverworldSceneSetupPlugin,));
+    }
 }
 
 pub mod prelude {
