@@ -31,6 +31,13 @@ use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 ///   like the Shop.
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
+    /// Not in-game.
+    ///
+    /// This is the GameState for Bevy Apps that are not currently running a
+    /// game, such as clients in the main menu.
+    #[default]
+    None,
+
     /// The very beginning of the game, before any island raid or intermission.
     ///
     /// The player can setup their character here, along with other optional
@@ -38,7 +45,6 @@ pub enum GameState {
     /// before setting sail for the very first time.
     ///
     // [NOTE] We should consider adding an intro cutscene here :D
-    #[default]
     Start,
 
     /// The overworld state. THe meat and potatoes of the game, all the
