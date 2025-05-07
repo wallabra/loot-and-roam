@@ -19,7 +19,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
 /// The current superstate of the game.
 ///
@@ -68,19 +68,22 @@ impl SceneSetupEvent {
 #[derive(Clone, Debug, Event, Default, Copy)]
 pub struct SceneCleanup;
 
-fn setup_start(mut commands: Commands, mut setup_event: EventWriter<SceneSetupEvent>) {
+fn setup_start(mut commands: Commands, mut ev_scene_setup: EventWriter<SceneSetupEvent>) {
     let tree: Entity = commands.spawn(SceneTree).id();
-    setup_event.write(SceneSetupEvent::new(tree));
+    info!("Sending SceneSetup event for the Start state");
+    ev_scene_setup.write(SceneSetupEvent::new(tree));
 }
 
-fn setup_overworld(mut commands: Commands, mut setup_event: EventWriter<SceneSetupEvent>) {
+fn setup_overworld(mut commands: Commands, mut ev_scene_setup: EventWriter<SceneSetupEvent>) {
     let tree: Entity = commands.spawn(SceneTree).id();
-    setup_event.write(SceneSetupEvent::new(tree));
+    info!("Sending SceneSetup event for the Overworld state");
+    ev_scene_setup.write(SceneSetupEvent::new(tree));
 }
 
-fn setup_intermission(mut commands: Commands, mut setup_event: EventWriter<SceneSetupEvent>) {
+fn setup_intermission(mut commands: Commands, mut ev_scene_setup: EventWriter<SceneSetupEvent>) {
     let tree: Entity = commands.spawn(SceneTree).id();
-    setup_event.write(SceneSetupEvent::new(tree));
+    info!("Sending SceneSetup event for the Intermission state");
+    ev_scene_setup.write(SceneSetupEvent::new(tree));
 }
 
 fn cleanup_start(mut commands: Commands, q_tree: Query<(Entity, &SceneTree)>) {
@@ -102,7 +105,9 @@ fn input_handler_start(
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::Space) {
+        info!("Start state received request to transition to Overworld");
         next_state.set(GameState::Overworld);
+        return;
     }
 }
 
@@ -110,10 +115,13 @@ fn input_handler_overworld(
     keys: Res<ButtonInput<KeyCode>>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut mouse_motion_events: EventReader<MouseMotion>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::KeyL) {
+        info!("Overworld state received request to transition to Intermission");
         next_state.set(GameState::Intermission);
+        return;
     }
 }
 
@@ -124,7 +132,9 @@ fn input_handler_intermission(
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::KeyL) {
+        info!("Intermission state received request to transition to Overworld");
         next_state.set(GameState::Overworld);
+        return;
     }
 }
 
@@ -151,6 +161,8 @@ impl Plugin for BaseStatePlugin {
                 input_handler_intermission.run_if(in_state(GameState::Intermission)),
             ),
         );
+
+        app.init_state::<GameState>();
 
         app.add_event::<SceneSetupEvent>();
     }

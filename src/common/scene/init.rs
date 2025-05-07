@@ -25,14 +25,17 @@ use bevy::prelude::*;
 use std::time::Duration;
 
 use derive_builder::Builder;
-use rand::{thread_rng, Rng};
+use rand::Rng;
 
-use crate::common::{
-    prelude::{
-        default_modulator, CenterPoint, FractalNoise, ModulationParams, TerrainGeneratorBuilder,
+use crate::{
+    app::camera::DevCamera,
+    common::{
+        prelude::{
+            default_modulator, CenterPoint, FractalNoise, ModulationParams, TerrainGeneratorBuilder,
+        },
+        state::{GameState, SceneSetupEvent},
+        terrain::buffer::TerrainBuffer,
     },
-    state::{GameState, SceneSetupEvent},
-    terrain::buffer::TerrainBuffer,
 };
 
 /// Parameters used to construct a new overworld scene.
@@ -169,6 +172,8 @@ impl OverworldSceneInitializer {
 
         let num_seeds = self.params.terrain_num_seeds(&mut rng);
 
+        info!("Generating {} terrain seeds", num_seeds);
+
         let center_points = vec![(); num_seeds as usize]
             .iter()
             .map(|_| self.params.terrain_next_center_point(&mut rng))
@@ -192,7 +197,7 @@ impl OverworldSceneInitializer {
             .build()
             .unwrap();
 
-        let terrain = TerrainBuffer::generate(terragen, 0.3, 3.0, 80.0);
+        let terrain = TerrainBuffer::generate(terragen, 0.2, 3.0, 80.0);
 
         let terrain_entity = commands
             .spawn((
@@ -204,6 +209,56 @@ impl OverworldSceneInitializer {
         commands.entity(scene_tree).add_child(terrain_entity);
     }
 
+    fn setup_overworld_water(
+        &self,
+        scene_tree: Entity,
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<StandardMaterial>>,
+    ) {
+        let water_entity = commands
+            .spawn((
+                Mesh3d(meshes.add(Circle::new(1000.0))),
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color: Color::srgba_u8(190, 190, 255, 90),
+                    ..Default::default()
+                })),
+                Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2))
+                    .with_translation(Vec3::new(0.0, -40.0, 0.0)),
+            ))
+            .id();
+        commands.entity(scene_tree).add_child(water_entity);
+    }
+
+    fn setup_overworld_lighting(&self, scene_tree: Entity, commands: &mut Commands) {
+        let light_entity = commands
+            .spawn((
+                PointLight {
+                    shadows_enabled: true,
+                    intensity: 5000.0,
+                    range: 2000.0,
+                    ..default()
+                },
+                Transform::from_xyz(100.0, 300.0, -150.0),
+            ))
+            .id();
+        commands.entity(scene_tree).add_child(light_entity);
+    }
+
+    fn setup_overworld_camera(&self, scene_tree: Entity, commands: &mut Commands) {
+        let camera_entity = commands
+            .spawn((
+                Camera3d::default(),
+                DevCamera {
+                    move_speed: 80.0,
+                    ..Default::default()
+                },
+                Transform::from_xyz(200.0, 110.0, 200.0).looking_at(Vec3::Y * 10.0, Vec3::Y),
+            ))
+            .id();
+        commands.entity(scene_tree).add_child(camera_entity);
+    }
+
     /// Initializes an overworld scene.
     pub(crate) fn setup_overworld(
         &self,
@@ -212,18 +267,26 @@ impl OverworldSceneInitializer {
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
     ) {
+        info!(
+            "Setting up Overworld scene for parameters: {:?}",
+            self.params
+        );
         self.setup_overworld_island(scene_tree, commands, meshes, materials);
+        self.setup_overworld_water(scene_tree, commands, meshes, materials);
+        self.setup_overworld_lighting(scene_tree, commands);
+        self.setup_overworld_camera(scene_tree, commands);
     }
 }
 
 fn setup_overworld_scene(
     mut commands: Commands,
-    mut setup_event: EventReader<SceneSetupEvent>,
+    mut ev_scene_setup: EventReader<SceneSetupEvent>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     initializer: Res<OverworldSceneInitializer>,
 ) {
-    for ev in setup_event.read() {
+    for ev in ev_scene_setup.read() {
+        info!("Received SceneSetup event for the Overworld scene");
         initializer.setup_overworld(ev.scene_tree, &mut commands, &mut meshes, &mut materials);
     }
 }
