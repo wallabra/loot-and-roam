@@ -23,12 +23,12 @@ use bevy::prelude::*;
 
 /// The current superstate of the game.
 ///
-/// A game is either:
+/// A game typically cycles between:
 ///
-/// * On an **island raid**. This is internally known as the 'overworld'.
+/// * **Island raids**. These are internally known as the 'overworld'.
 ///
-/// * In an **intermission** - managing the fleet and accessing external
-/// interfaces like the Shop.
+/// * The **intermission**, to manage the fleet and access external interfaces
+///   like the Shop.
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
     /// The very beginning of the game, before any island raid or intermission.
@@ -49,4 +49,33 @@ pub enum GameState {
     /// that can't be managed on high water (such as replacing parts), and
     /// access the broader economy (such as through the Shop screen).
     Intermission,
+}
+
+fn setup_start() {}
+
+fn setup_overworld() {}
+
+fn setup_intermission() {}
+
+fn cleanup_start() {}
+
+fn cleanup_overworld() {}
+
+fn cleanup_intermission() {}
+
+/// Activates the superstate transition handling.
+///
+/// This component is essential in Loot & Roam game execution.
+pub struct BaseStatePlugin;
+
+impl Plugin for BaseStatePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameState::Start), setup_start);
+        app.add_systems(OnEnter(GameState::Overworld), setup_overworld);
+        app.add_systems(OnEnter(GameState::Intermission), setup_intermission);
+
+        app.add_systems(OnExit(GameState::Start), cleanup_start);
+        app.add_systems(OnExit(GameState::Overworld), cleanup_overworld);
+        app.add_systems(OnExit(GameState::Intermission), cleanup_intermission);
+    }
 }
