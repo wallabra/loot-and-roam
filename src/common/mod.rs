@@ -36,6 +36,7 @@
 
 use bevy::prelude::Plugin;
 
+pub mod construct; // Constructs (genrealized part holders)
 pub mod inventory; // Inventory items and related operations
 pub mod makeup; // Ship makeup and parts
 pub mod math; // Mathematical utility functions
@@ -68,6 +69,7 @@ impl Plugin for CommonPlugin {
             terrain::collision::TerrainCollisionPlugin,
             state::BaseStatePlugin,
             scene::SceneManagementPlugin,
+            construct::ConstructPlugin,
         ));
     }
 }
