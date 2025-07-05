@@ -1,0 +1,2 @@
+- Shows a single island area and its surroundings
+- Main view of the game, where you can interact with the simulation

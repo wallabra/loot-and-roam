@@ -1,0 +1,1 @@
+- Information which can be added to the [[Gameplay/Play scopes/World map]] and retrieved at places like the [[Tavern]]

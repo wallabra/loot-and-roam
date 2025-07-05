@@ -1,0 +1,8 @@
+- Behavior of a NPC towards another entity
+	- **Aggressive:** proactively attacks on sight and chases down
+	- **Defensive:** proactively attacks if approached, does not chase or doesn't chase as much
+	- **Ignore:** disregards completely, retaliates or flees when attacked
+	- **Amiable:** avoids crashing into or taking same pickups
+	- **Subordinate:** follows and shares same enemies
+- Affects interactions like [[NPC/Chase]], [[NPC/Engage]]
+- Composes with [[Personality Traits]]

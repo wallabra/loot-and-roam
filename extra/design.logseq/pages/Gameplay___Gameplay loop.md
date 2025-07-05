@@ -1,0 +1,6 @@
+-
+- **Base loop**
+	- [[Gameplay/Gameplay loop/Island raid]]
+	- [[Intermission]]
+- Extensions
+	- **[[Gamemodes/Campaign mode]]** narrative insertions

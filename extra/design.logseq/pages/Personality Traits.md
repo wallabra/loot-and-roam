@@ -1,0 +1,4 @@
+- Influences NPC behavior scalarly
+	- **Confidence:** how likely to retaliate vs fleeing
+	- **Focus:** how far to chase down targets
+	- **Amicability:** resistance against [attitude](Attitude Mode) degradation

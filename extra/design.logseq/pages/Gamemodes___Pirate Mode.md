@@ -1,0 +1,3 @@
+- **Quest-oriented** gamemode, with **procedurally generated quests**
+- **No** central questline
+- **[[Affiliation]]s**, such as the warring factions and pirates

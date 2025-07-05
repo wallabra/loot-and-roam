@@ -1,0 +1,3 @@
+- **Central questline mode**
+- Has a final quest, eligible for speedrunning
+- Official [[Narrative]]

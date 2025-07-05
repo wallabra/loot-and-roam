@@ -1,0 +1,3 @@
+- No set goals, no quests, no [[Affiliation]]s
+- All NPCs are passive until aggroed
+- GTA-like gameplay

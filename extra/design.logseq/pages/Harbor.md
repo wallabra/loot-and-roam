@@ -1,0 +1,2 @@
+- Buy new [[Ship]]s to add to the fleet, or replace the hull of existing ships
+- Sell stolen [[Ship]]s

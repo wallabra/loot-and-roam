@@ -1,0 +1,9 @@
+- [[NPC/AI]] task activated when chasing after another entity
+- **Decision tree:**
+	- Can reach for engagement?
+		- *Yes* -> **switch** to [[NPC/Engage]]
+		- *No* -> can see?
+			- *Yes* -> **approach** + **set last seen**
+			- *No* -> has a last seen?
+				- *Yes* -> approach last seen
+				- *No* -> **switch** to [[NPC/Stakeout]]

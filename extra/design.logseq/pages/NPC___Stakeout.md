@@ -1,0 +1,4 @@
+- [[NPC/AI]] fallback task
+- Reconsiders immediate goals
+	- Can look for surrounding pickups to grab
+	- Can look for nearby [cross-aligned](Affiliation) entities to aggro

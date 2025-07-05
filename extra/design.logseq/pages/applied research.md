@@ -1,0 +1,6 @@
+- [ ] Message passing
+	-
+- [ ] Data structure
+	- https:/...
+- [ ] Content promotion algorithms
+- [ ] Authorization strategies

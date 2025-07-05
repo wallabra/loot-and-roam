@@ -1,0 +1,2 @@
+- Hire low-level [crew](Crew mechanics)
+- Gather [[Rumor]]s

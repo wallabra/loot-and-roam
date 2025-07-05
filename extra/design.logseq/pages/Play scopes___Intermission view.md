@@ -1,0 +1,8 @@
+- View between island raids
+- Lets you access intermission buildings:
+	- [[Tavern]]
+	- [[Harbor]]
+	- [[Drydock]]
+	- [[Shop]]
+	- [[Guild]]
+	- [[Observatory]]

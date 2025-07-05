@@ -1,0 +1,5 @@
+- **Not available** in [[Gamemodes/Free Play Mode]].
+- Shows nearby explored and unexplored *islands* and *points-of-interest* in the world
+- Infinite world
+	- Maximum visible area beyond explored areas
+	- Can know about unexplored islands through [[Rumor]]s

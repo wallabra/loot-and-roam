@@ -1,0 +1,4 @@
+- Alignment of an affiliable entity, like a [[Ship]] or [[Turret Tower]]
+- Can be affiliated to a specific faction, or only to itself
+	- Other entities with conflicting affiliations are known as **cross-aligned**
+- Can have varying levels of [[Attitude Mode]] depending on its affiliation

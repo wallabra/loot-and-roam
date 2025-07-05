@@ -1,0 +1,3 @@
+- Entities controlled by the game, as opposed to the [[Player]]
+- May have [[Affiliation]] and [[Personality Traits]], and have [[Attitude Mode]] towards [[Player]]s and other NPCs
+- Controlled by the [[NPC/AI]]

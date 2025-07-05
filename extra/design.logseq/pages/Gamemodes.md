@@ -1,0 +1,2 @@
+- Selectable when starting a new game
+- Affect various mechanics, such as NPC spawning and behavior
