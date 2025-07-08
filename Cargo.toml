@@ -7,7 +7,7 @@ edition = "2021"
 authors = ["GameCircular team"] # Please see AUTHORS.md
 
 [dependencies.bevy]
-version = "^0.16.0"
+version = "^0.16.1"
 # Disable the default features if there are any that you do not want
 default-features = false
 features = [
@@ -149,16 +149,16 @@ features = [
 derive_builder = "0.20.2"
 enum_dispatch = "0.3.13"
 itertools = "0.14.0"
-rand = "0.9.0"
+rand = "0.9.1"
 range-ext = "0.3.0"
-serde = "1.0.218"
+serde = "1.0.219"
 slotmap = { version = "1.0.7", features = ["serde"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dev-dependencies]
-assertables = "9.5.0"
+assertables = "9.8.0"
 bevy_image_export = "^0.13.0"
 
 # --- Bevy-recommended tweaks
