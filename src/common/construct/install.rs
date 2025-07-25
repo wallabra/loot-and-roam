@@ -28,6 +28,12 @@ pub struct TryInstallPartOnSlot {
     which_slot: Entity,
 }
 
+impl TryInstallPartOnSlot {
+    pub fn on(which_slot: Entity) -> Self {
+        Self { which_slot }
+    }
+}
+
 pub fn ev_try_install_part_on_slot(
     trigger: Trigger<TryInstallPartOnSlot>,
     mut commands: Commands,
@@ -91,6 +97,12 @@ pub struct TryInstallPartOnConstruct {
     /// [`PartSlotInfo`] which is compatible with the targeted part and vacant
     /// (lacks children with are parts, i.e. bear [`PartInfo`]).
     which_construct: Entity,
+}
+
+impl TryInstallPartOnConstruct {
+    pub fn on(which_construct: Entity) -> Self {
+        Self { which_construct }
+    }
 }
 
 pub fn ev_try_install_part_on_construct(
