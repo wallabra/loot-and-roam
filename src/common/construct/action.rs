@@ -1,6 +1,6 @@
 //! Part action events
 
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 
 use bevy::{
     ecs::{
@@ -9,8 +9,8 @@ use bevy::{
         observer::Trigger,
         system::{Commands, In, Query},
     },
-    log::info,
-    reflect::{FromReflect, Reflect},
+    log::{debug, info, warn},
+    reflect::Reflect,
 };
 
 use crate::common::construct::{part::ConstructParts, slot::PartInfo};
@@ -30,6 +30,9 @@ pub struct PartAction {
     /// * `"thrust"`
     /// * `"steer"`
     pub action_tag: String,
+
+    /// Random ID used to trace an action event for debugging.
+    pub trace_id: u64,
 
     /// Any data passed to the action handler.
     ///
@@ -52,7 +55,18 @@ pub struct PartAction {
     ///     modifiers first, and fires a vanilla round if not found.
     ///   * Ammunition that is incompatible is ignored (e.g. cannon and
     ///     cannonball with mismatching callibers)
-    pub data: Arc<dyn Reflect>,
+    pub data: Arc<Box<dyn Reflect>>,
+}
+
+impl Debug for PartAction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "PartAction(id={}, tag={:?}, data={:?})",
+            self.trace_id, self.action_tag, self.data
+        )?;
+        Ok(())
+    }
 }
 
 impl Clone for PartAction {
@@ -60,6 +74,7 @@ impl Clone for PartAction {
         PartAction {
             action_tag: self.action_tag.clone(),
             data: self.data.clone(),
+            trace_id: self.trace_id,
         }
     }
 }
@@ -91,41 +106,61 @@ pub fn ev_dispatch_part_actions(
 ) {
     for construct_event in all_events.read() {
         let target = construct_event.construct_ref;
+        let action = &construct_event.action;
+        debug!(
+            "Construct event dispatched: {:?} (selectors {:?}) (construct entity-id {:?})",
+            action, construct_event.part_tag_selectors, target
+        );
         if let Ok(parts) = list_parts_query.get(target) {
             for &part_id in parts.iter() {
+                let part_info = part_info_query.get(part_id).unwrap();
                 // If the part tag selector is empty, skip matching check
                 if !construct_event.part_tag_selectors.is_empty() {
-                    let part_info = part_info_query.get(part_id).unwrap();
                     // Skip parts that don't match any part tag selector
                     if !construct_event
                         .part_tag_selectors
                         .iter()
                         .any(|tag| part_info.tags.contains(&tag))
                     {
+                        debug!(
+                            "Skipping part with tags {:?}: does not match selectors (part entity-id {:?})",
+                            part_info.tags, part_id
+                        );
                         continue;
                     }
                 }
 
-                commands
-                    .entity(part_id)
-                    .trigger(construct_event.action.clone());
+                debug!(
+                    "Dispatching to part with tags {:?} (part entity-id {:?})",
+                    part_info.tags, part_id
+                );
+                commands.entity(part_id).trigger(action.clone());
             }
         }
     }
 }
 
-#[derive(Reflect)]
+#[derive(Reflect, Default, Debug, Clone)]
 pub struct DebugPrintPart {
     extra_message: Option<String>,
 }
 
+impl DebugPrintPart {
+    pub fn with_message(message: &str) -> Self {
+        Self {
+            extra_message: Some(message.into()),
+        }
+    }
+}
+
 pub fn dispatch_action(
-    construct_ref: Entity,
     commands: &mut Commands,
+    construct_ref: Entity,
     action_tag: String,
     part_tag_selectors: Vec<String>,
     data: Box<dyn Reflect>,
 ) {
+    debug!("Action dispatch requested: {}", action_tag);
     fn _inner(
         In((construct_ref, part_tag_selectors, action)): In<(Entity, Vec<String>, PartAction)>,
         mut writer: EventWriter<PartActionDispatchRequest>,
@@ -144,15 +179,16 @@ pub fn dispatch_action(
             PartAction {
                 action_tag,
                 data: Arc::from(data),
+                trace_id: rand::random(),
             },
         ),
     );
 }
 
 // Observer
-pub fn obs_debug_part_action(trigger: Trigger<PartAction, PartInfo>, query: Query<&PartInfo>) {
+pub fn obs_debug_part_action(trigger: Trigger<PartAction>, query: Query<&PartInfo>) {
     let part_info = query.get(trigger.target()).unwrap();
-    if let Some(data) = trigger.data.downcast_ref::<DebugPrintPart>() {
+    if let Some(data) = trigger.data.as_reflect().downcast_ref::<DebugPrintPart>() {
         info!(
             "Part with tags {:?} received debug action: {}",
             part_info.tags,
