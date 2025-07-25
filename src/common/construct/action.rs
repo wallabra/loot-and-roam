@@ -1,14 +1,16 @@
 //! Part action events
 
+use std::sync::Arc;
+
 use bevy::{
     ecs::{
         entity::Entity,
         event::{Event, EventReader, EventWriter},
         observer::Trigger,
-        system::{Commands, In, IntoSystem, Query},
+        system::{Commands, In, Query},
     },
     log::info,
-    reflect::Reflect,
+    reflect::{FromReflect, Reflect},
 };
 
 use crate::common::construct::{part::ConstructParts, slot::PartInfo};
@@ -50,14 +52,14 @@ pub struct PartAction {
     ///     modifiers first, and fires a vanilla round if not found.
     ///   * Ammunition that is incompatible is ignored (e.g. cannon and
     ///     cannonball with mismatching callibers)
-    pub data: Box<dyn Reflect>,
+    pub data: Arc<dyn Reflect>,
 }
 
 impl Clone for PartAction {
     fn clone(&self) -> Self {
         PartAction {
             action_tag: self.action_tag.clone(),
-            data: self.data.reflect_clone().unwrap(),
+            data: self.data.clone(),
         }
     }
 }
@@ -120,8 +122,9 @@ pub struct DebugPrintPart {
 pub fn dispatch_action(
     construct_ref: Entity,
     commands: &mut Commands,
+    action_tag: String,
     part_tag_selectors: Vec<String>,
-    action: PartAction,
+    data: Box<dyn Reflect>,
 ) {
     fn _inner(
         In((construct_ref, part_tag_selectors, action)): In<(Entity, Vec<String>, PartAction)>,
@@ -133,7 +136,17 @@ pub fn dispatch_action(
             action,
         });
     }
-    commands.run_system_cached_with(_inner, (construct_ref, part_tag_selectors, action));
+    commands.run_system_cached_with(
+        _inner,
+        (
+            construct_ref,
+            part_tag_selectors,
+            PartAction {
+                action_tag,
+                data: Arc::from(data),
+            },
+        ),
+    );
 }
 
 // Observer
