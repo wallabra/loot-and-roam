@@ -1,5 +1,7 @@
 //! Construct-part relationship.
 
+use std::ops::Deref;
+
 use bevy::ecs::{component::Component, entity::Entity};
 
 /// Component present in all installed construct parts.
@@ -14,8 +16,16 @@ impl PartInstalledOn {
         self.0
     }
 
-    pub(crate) fn new(construct_id: Entity) -> Self {
+    pub fn new(construct_id: Entity) -> Self {
         Self(construct_id)
+    }
+}
+
+impl Deref for PartInstalledOn {
+    type Target = Entity;
+
+    fn deref(&self) -> &Entity {
+        &self.0
     }
 }
 
@@ -29,5 +39,9 @@ pub struct ConstructParts(Vec<Entity>);
 impl ConstructParts {
     pub fn iter(&self) -> std::slice::Iter<'_, bevy::prelude::Entity> {
         self.0.iter()
+    }
+
+    pub fn new(slot_ids: &[Entity]) -> Self {
+        Self(Vec::from(slot_ids))
     }
 }

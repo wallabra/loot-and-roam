@@ -13,7 +13,8 @@ fn setup(mut commands: Commands) {
     let slot3 = commands.spawn(part_slot("noisy".into())).id();
     commands
         .entity(construct)
-        .add_children(&[slot1, slot2, slot3]);
+        .add_related::<SlotOfConstruct>(&[slot1, slot2, slot3]);
+    // .insert(ConstructSlots::new(&[slot1, slot2, slot3]));
 
     // Install parts
     let part1 = commands

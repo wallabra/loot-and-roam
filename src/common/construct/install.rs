@@ -3,14 +3,13 @@
 use bevy::ecs::{
     entity::Entity,
     event::Event,
-    hierarchy::{ChildOf, Children},
     observer::Trigger,
     system::{Commands, Query},
 };
 
 use crate::common::construct::{
     part::PartInstalledOn,
-    slot::{PartInfo, PartSlotInfo},
+    slot::{ConstructSlots, PartInfo, PartSlotInfo, SlotOfConstruct},
 };
 
 /// Event request to install a part onto a Construct on a givne slot.
@@ -37,7 +36,7 @@ impl TryInstallPartOnSlot {
 pub fn ev_try_install_part_on_slot(
     trigger: Trigger<TryInstallPartOnSlot>,
     mut commands: Commands,
-    parent_query: Query<&ChildOf>,
+    parent_query: Query<&SlotOfConstruct>,
     installation_query: Query<&PartInstalledOn>,
     part_query: Query<&PartInfo>,
     slot_query: Query<&PartSlotInfo>,
@@ -51,11 +50,11 @@ pub fn ev_try_install_part_on_slot(
     let construct_id = match parent_query.get(slot_id) {
         Err(slot_query_err) => {
             panic!(
-                "TryInstallPart triggered for a part slot with no or corrupted parent: {}",
+                "TryInstallPart triggered for a part slot with no or corrupted construct reference: {}",
                 slot_query_err
             );
         }
-        Ok(child_of) => child_of.0,
+        Ok(child_of) => child_of.get(),
     };
     let part_info = part_query.get(part_id).unwrap();
     let slot_info = slot_query.get(slot_id).unwrap();
@@ -111,7 +110,7 @@ pub fn ev_try_install_part_on_construct(
     installation_query: Query<&PartInstalledOn>,
     part_query: Query<&PartInfo>,
     slot_query: Query<&PartSlotInfo>,
-    children_query: Query<&Children>,
+    children_query: Query<&ConstructSlots>,
 ) {
     let part_id = trigger.target();
     let mut part = commands.entity(part_id);
@@ -171,7 +170,7 @@ pub struct TryUninstallPart;
 pub fn ev_try_uninstall_part(
     trigger: Trigger<TryUninstallPart>,
     mut commands: Commands,
-    parent_query: Query<&ChildOf>,
+    parent_query: Query<&SlotOfConstruct>,
     part_query: Query<&PartInfo>,
     slot_query: Query<&PartSlotInfo>,
     installation_query: Query<&PartInstalledOn>,
@@ -185,12 +184,12 @@ pub fn ev_try_uninstall_part(
     }
 
     {
-        let slot_id = parent_query.get(part_id).unwrap().0;
+        let slot_id = parent_query.get(part_id).unwrap().get();
         assert!(slot_query.contains(slot_id));
         let mut slot = commands.entity(slot_id);
 
         let construct_id = installation_query.get(part_id).unwrap().get();
-        assert_eq!(parent_query.get(slot_id).unwrap().0, construct_id);
+        assert_eq!(parent_query.get(slot_id).unwrap().get(), construct_id);
 
         slot.remove_children(&[part_id]);
     }

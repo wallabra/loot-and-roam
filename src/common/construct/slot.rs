@@ -2,7 +2,50 @@
 // Part slots and slot matching.
 // --------
 
-use bevy::ecs::component::Component;
+use std::ops::Deref;
+
+use bevy::ecs::{component::Component, entity::Entity};
+
+/// Refers to a construct entity, of which this one is a part slot.
+///
+/// This logical relationship is used as opposed to direct parenting, to
+/// decouple the physics and logical hierarchies.
+#[derive(Component)]
+#[relationship(relationship_target = ConstructSlots)]
+pub struct SlotOfConstruct(Entity);
+
+impl SlotOfConstruct {
+    pub fn get(&self) -> Entity {
+        self.0
+    }
+
+    pub fn new(construct_id: Entity) -> Self {
+        Self(construct_id)
+    }
+}
+
+impl Deref for SlotOfConstruct {
+    type Target = Entity;
+
+    fn deref(&self) -> &Entity {
+        &self.0
+    }
+}
+
+/// Lists the part slots this construct entity has.
+#[derive(Component)]
+#[relationship_target(relationship = SlotOfConstruct)]
+pub struct ConstructSlots(Vec<Entity>);
+
+impl ConstructSlots {
+    pub fn iter(&self) -> std::slice::Iter<'_, bevy::prelude::Entity> {
+        self.0.iter()
+    }
+
+    pub fn new(slot_ids: &[Entity]) -> Self {
+        Self(Vec::from(slot_ids))
+    }
+}
 
 /// Entity which can serve as a part slot.
 ///

@@ -18,7 +18,9 @@ pub mod prelude {
     };
     pub use super::install::{TryInstallPartOnConstruct, TryInstallPartOnSlot, TryUninstallPart};
     pub use super::part::{ConstructParts, PartInstalledOn};
-    pub use super::slot::{PartInfo, PartSlotInfo, part_slot, part_tag, part_tags};
+    pub use super::slot::{
+        ConstructSlots, PartInfo, PartSlotInfo, SlotOfConstruct, part_slot, part_tag, part_tags,
+    };
 }
 
 /// Enables all generalized construct and construct part related behavior.
