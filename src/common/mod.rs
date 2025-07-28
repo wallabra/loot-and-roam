@@ -75,8 +75,9 @@ impl Plugin for CommonPlugin {
 }
 
 pub mod prelude {
+    pub use super::CommonPlugin;
+    pub use super::construct::prelude::*;
     pub use super::math::*;
     pub use super::physics::prelude::*;
     pub use super::terrain::prelude::*;
-    pub use super::CommonPlugin;
 }
