@@ -17,7 +17,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use base::point_base_physics;
+use base::{point_attach_snap, point_base_physics};
 use bevy::prelude::*;
 use forces::BasicForcesPlugin;
 use spring::SpringForcesPlugin;
@@ -41,12 +41,19 @@ pub struct BasicPhysicsPlugin;
 
 impl Plugin for BasicPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, (point_base_physics,));
+        app.add_systems(
+            FixedUpdate,
+            (
+                point_base_physics,
+                point_attach_snap.after(point_base_physics),
+            ),
+        );
         app.add_plugins((SpringForcesPlugin, BasicForcesPlugin, WaterPhysicsPlugin));
     }
 }
 
 pub mod prelude {
+    pub use super::BasicPhysicsPlugin;
     pub use super::base::{PhysPoint, PointNetwork};
     pub use super::collision::{
         CollisionPlugin, FloorPlaneCollision, VolumeVolumeCollisionDetectionEvent,
@@ -54,9 +61,8 @@ pub mod prelude {
     pub use super::forces::{AirDrag, Gravity};
     pub use super::spring::{NormalSpring, Spring, SpringMode, SpringNetwork};
     pub use super::volume::{
-        CollisionInfo, PhysicsVolume, SphereDef, VolumeCollection, VolumeCollision, VolumeInfo,
-        VolumeType, AABB,
+        AABB, CollisionInfo, PhysicsVolume, SphereDef, VolumeCollection, VolumeCollision,
+        VolumeInfo, VolumeType,
     };
     pub use super::water::WaterPhysics;
-    pub use super::BasicPhysicsPlugin;
 }

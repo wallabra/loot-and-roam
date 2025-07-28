@@ -155,7 +155,7 @@ impl PointNetwork {
     }
 }
 
-/// The system repsonsible for the inertia of physics points.
+/// The system responsible for the inertia of physics points.
 pub fn point_base_physics(time: Res<Time>, mut query_points: Query<(&mut PointNetwork,)>) {
     let delta_secs = time.delta_secs();
 
@@ -163,5 +163,31 @@ pub fn point_base_physics(time: Res<Time>, mut query_points: Query<(&mut PointNe
         for point in network.points.iter_mut() {
             point.pos += point.vel * delta_secs;
         }
+    }
+}
+
+/// Use this component on a child entity to attach it to a physics point of its parent.
+///
+/// The parent must have a [PointNetwork] component.
+#[derive(Component)]
+pub struct PointAttach {
+    /// The index of the physics point on the parent's [PointNetwork].
+    pub point_idx: usize,
+}
+
+// Always runs after point_base_physics.
+fn point_attach_snap(
+    mut query_child: Query<(&ChildOf, &mut Transform, &PointAttach)>,
+    query_parent: Query<(&PointNetwork, &GlobalTransform, &Transform), Without<PointAttach>>,
+) {
+    for (child_of, mut transform, attachment) in query_child.iter_mut() {
+        let (parent_points, parent_global_transform, parent_transform) =
+            query_parent.get(child_of.parent()).unwrap();
+
+        assert!(attachment.point_idx < parent_points.points.len());
+
+        transform.translation =
+            parent_points.points[attachment.point_idx].pos - parent_global_transform.translation();
+        transform.rotate_around(Vec3::ZERO, parent_transform.rotation.inverse());
     }
 }
