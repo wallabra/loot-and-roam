@@ -31,7 +31,7 @@ use crate::{
     app::camera::DevCamera,
     common::{
         prelude::{
-            default_modulator, CenterPoint, FractalNoise, ModulationParams, TerrainGeneratorBuilder,
+            CenterPoint, FractalNoise, ModulationParams, TerrainGeneratorBuilder, default_modulator,
         },
         state::{GameState, SceneSetupEvent},
         terrain::buffer::TerrainBuffer,

@@ -17,7 +17,7 @@ use bevy::prelude::*;
 
 use crate::common::{
     physics::collision::CollisionDetectionEvent,
-    prelude::{CollisionInfo, PhysicsVolume, PointNetwork, VolumeCollection, AABB},
+    prelude::{AABB, CollisionInfo, PhysicsVolume, PointNetwork, VolumeCollection},
 };
 
 use super::buffer::{TerrainBuffer, TerrainMarker};

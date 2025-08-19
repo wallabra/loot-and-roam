@@ -18,16 +18,16 @@ use bevy::{
     math::FloatOrd,
     prelude::*,
     render::{
+        RenderPlugin,
         camera::{ImageRenderTarget, RenderTarget},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        RenderPlugin,
     },
     window::PresentMode,
 };
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
-use loot_and_roam::app::{prelude::*, renderer::object::PointAttach, AppPlugin};
+use loot_and_roam::app::{AppPlugin, prelude::*, renderer::object::PointAttach};
 use loot_and_roam::common::physics::volume::VolumeCloneSpawner;
 use loot_and_roam::common::prelude::*;
 use loot_and_roam::common::terrain::buffer::TerrainBuffer;
