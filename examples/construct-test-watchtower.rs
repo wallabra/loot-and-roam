@@ -25,11 +25,11 @@ use bevy::{
     math::FloatOrd,
     prelude::*,
     render::{
+        RenderPlugin,
         camera::{ImageRenderTarget, RenderTarget},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        RenderPlugin,
     },
     window::PresentMode,
 };
@@ -46,8 +46,6 @@ pub struct CubeSpitter {
     interval: f32,
     spawn_offset: Vec3,
 }
-
-impl 
 
 impl Default for CubeSpitter {
     fn default() -> Self {
