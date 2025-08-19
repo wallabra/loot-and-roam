@@ -25,11 +25,11 @@ use bevy::{
     math::FloatOrd,
     prelude::*,
     render::{
+        RenderPlugin,
         camera::{ImageRenderTarget, RenderTarget},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        RenderPlugin,
     },
     window::PresentMode,
 };
@@ -45,15 +45,55 @@ use loot_and_roam::{
 pub struct CubeSpitter {
     interval: f32,
     spawn_offset: Vec3,
+    cooldown: f32,
 }
 
-impl 
+impl CubeSpitter {
+    fn spit_cube(
+        &self,
+        pos: Vec3,
+        vel: Vec3,
+        commands: &mut Commands<'_, '_>,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<StandardMaterial>>,
+    ) -> Entity {
+        if self.cooldown > 0.0 {
+            return;
+        }
+        let cube = spawn_cube(pos + self.spawn_offset, commands, meshes, materials);
+        // TODO: apply velocity to cube
+
+        self.cooldown = self.interval;
+        return cube;
+    }
+
+    pub fn tick_cooldown(&mut self, delta_time_secs: f32) -> Self {
+        self.cooldown = (self.cooldown - delta_time_secs).max(0.0_f32);
+    }
+
+    pub fn new(interval: f32) {
+        Self {
+            interval,
+            spawn_offset: Vec3::ZERO,
+            cooldown: 0.0,
+        }
+    }
+
+    pub fn new_with_spawn_offset(interval: f32, spawn_offset: Vec3) -> Self {
+        Self {
+            interval,
+            spawn_offset,
+            cooldown: 0.0,
+        }
+    }
+}
 
 impl Default for CubeSpitter {
     fn default() -> Self {
         Self {
             interval: 2.0,
             spawn_offset: Vec3::ZERO,
+            cooldown: 0.0,
         }
     }
 }
