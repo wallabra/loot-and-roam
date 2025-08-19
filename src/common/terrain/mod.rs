@@ -25,12 +25,12 @@ pub mod noise;
 pub mod prelude {
     pub use super::collision::TerrainCollisionPlugin;
     pub use super::generator::{
-        default_modulator, BaseModulationParams, BaseModulationParamsBuilder,
-        BaseModulationParamsBuilderError, CenterPoint, DefaultTerrainGenerator,
-        DefaultTerrainGeneratorBuilder, DefaultTerrainModulatorAlgorithm, DistanceCollector,
-        MinDistance, ModulationParams, ModulationParamsBuilderError, SmoothminDistance,
-        TerrainGenerator, TerrainGeneratorBuilder, TerrainGeneratorBuilderError, TerrainModulator,
-        TerrainModulatorAlgorithm,
+        BaseModulationParams, BaseModulationParamsBuilder, BaseModulationParamsBuilderError,
+        CenterPoint, DefaultTerrainGenerator, DefaultTerrainGeneratorBuilder,
+        DefaultTerrainModulatorAlgorithm, DistanceCollector, MinDistance, ModulationParams,
+        ModulationParamsBuilderError, SmoothminDistance, TerrainGenerator, TerrainGeneratorBuilder,
+        TerrainGeneratorBuilderError, TerrainModulator, TerrainModulatorAlgorithm,
+        default_modulator,
     };
     pub use super::noise::{FractalNoise, NoiseLattice};
 }

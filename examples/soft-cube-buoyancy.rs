@@ -25,11 +25,11 @@ use bevy::{
     math::FloatOrd,
     prelude::*,
     render::{
+        RenderPlugin,
         camera::{ImageRenderTarget, RenderTarget},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        RenderPlugin,
     },
     window::PresentMode,
 };

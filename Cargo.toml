@@ -158,7 +158,7 @@ slotmap = { version = "1.0.7", features = ["serde"] }
 crate-type = ["cdylib", "rlib"]
 
 [dev-dependencies]
-assertables = "9.8.1"
+assertables = "9.8.2"
 bevy_image_export = "^0.13.0"
 
 # --- Bevy-recommended tweaks

@@ -31,8 +31,8 @@ impl Plugin for LootAndRoamEnginePlugin {
 }
 
 pub mod prelude {
+    pub use super::LootAndRoamEnginePlugin;
     pub use super::app::prelude::*;
     pub use super::common::prelude::*;
     pub use super::server::prelude::*;
-    pub use super::LootAndRoamEnginePlugin;
 }

@@ -22,31 +22,6 @@ use bevy::prelude::*;
 
 use crate::common::physics::base::PointNetwork;
 
-/// Use this component on a child entity to attach it to a physics point of its parent.
-///
-/// The parent must have a [PointNetwork] component.
-#[derive(Component)]
-pub struct PointAttach {
-    /// The index of the physics point on the parent's [PointNetwork].
-    pub point_idx: usize,
-}
-
-fn point_attach_snap(
-    mut query_child: Query<(&ChildOf, &mut Transform, &PointAttach)>,
-    query_parent: Query<(&PointNetwork, &GlobalTransform, &Transform), Without<PointAttach>>,
-) {
-    for (child_of, mut transform, attachment) in query_child.iter_mut() {
-        let (parent_points, parent_global_transform, parent_transform) =
-            query_parent.get(child_of.parent()).unwrap();
-
-        assert!(attachment.point_idx < parent_points.points.len());
-
-        transform.translation =
-            parent_points.points[attachment.point_idx].pos - parent_global_transform.translation();
-        transform.rotate_around(Vec3::ZERO, parent_transform.rotation.inverse());
-    }
-}
-
 /// Camera target component.
 #[derive(Component, Default)]
 pub struct CameraFocus {
@@ -76,6 +51,6 @@ pub struct ObjectRendererPlugin;
 
 impl Plugin for ObjectRendererPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (point_attach_snap, camera_focus_system));
+        app.add_systems(Update, (camera_focus_system,));
     }
 }

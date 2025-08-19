@@ -28,8 +28,8 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::{prelude::*, renderer::object::PointAttach, AppPlugin},
-    common::{prelude::*, CommonPlugin},
+    app::{AppPlugin, prelude::*, renderer::object::PointAttach},
+    common::{CommonPlugin, prelude::*},
 };
 
 /// Point netowrk snapping market component.

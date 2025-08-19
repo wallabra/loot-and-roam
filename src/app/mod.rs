@@ -41,8 +41,8 @@ impl bevy::prelude::Plugin for AppPlugin {
 }
 
 pub mod prelude {
+    pub use super::AppPlugin;
     pub use super::camera::prelude::*;
     pub use super::renderer::prelude::*;
     pub use super::state::prelude::*;
-    pub use super::AppPlugin;
 }
