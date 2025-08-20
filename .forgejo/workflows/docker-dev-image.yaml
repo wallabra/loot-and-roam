@@ -23,9 +23,6 @@ jobs:
       - name: Install Actions dependencies
         run: "apk add --no-cache nodejs docker openrc"
 
-      - name: Start Docker daemon
-        run: "rc-service docker start"
-
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v4
 
