@@ -21,7 +21,7 @@ jobs:
         run: "apk add --no-cache ca-certificates"
 
       - name: Install Actions dependencies
-        run: "apk add --no-cache nodejs docker"
+        run: "apk add --no-cache nodejs docker openrc"
 
       - name: Start Docker daemon
         run: "rc-service docker start"
