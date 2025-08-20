@@ -15,13 +15,19 @@ jobs:
     runs-on: codeberg-small-lazy
     container:
       image: docker.io/alpine
+      options: --privileged
+
+    services:
+      docker:
+        image: docker.io/docker:dind
+        options: --privileged --network host
 
     steps:
       - name: Update Alpine ca-certificates
         run: "apk add --no-cache ca-certificates"
 
       - name: Install Actions dependencies
-        run: "apk add --no-cache nodejs docker openrc"
+        run: "apk add --no-cache nodejs"
 
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v4
