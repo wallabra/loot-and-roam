@@ -45,10 +45,10 @@ features = [
   # "custom_cursor",  # Support custom cursors [TODO]
 
   # Platform-Specific
-  "x11",                   # Linux: Support X11 windowing system
-  "android_shared_stdcxx", # Android: use shared C++ library
-  "android-game-activity", # Android: use GameActivity instead of NativeActivity
-  "webgl2",                # Web: use WebGL2 instead of WebGPU
+  #"x11",                   # Linux: Support X11 windowing system (NOTE: set in 'loot-and-roam/x11')
+  #"android_shared_stdcxx", # Android: use shared C++ library
+  #"android-game-activity", # Android: use GameActivity instead of NativeActivity
+  #"webgl2",                # Web: use WebGL2 instead of WebGPU (NOTE: set in 'loot-and-roam/web')
 
   # Built-in Data
   "default_font",       # Built-in default font for UI (Fira Mono)
@@ -76,7 +76,7 @@ features = [
   # "reflect_functions",    # Function reflection support
 
   # Platform-Specific
-  "wayland",                  # Linux: Support Wayland windowing system
+  #"wayland",                  # Linux: Support Wayland windowing system (NOTE: set in 'loot-and-roam/wayland')
   # "accesskit_unix",           # UNIX-like: AccessKit Accessibility Framework support
   # "android-native-activity",  # Android: Use NativeActivity instead of GameActivity
   # "spirv_shader_passthrough", # Vulkan: allow direct loading of SPIR-V shader blobs without validation
@@ -194,3 +194,6 @@ strip = "debuginfo"
 
 [features]
 dynamic_linking = ["bevy/dynamic_linking"]
+x11 = ["bevy/x11"]
+wayland = ['bevy/wayland']
+web = ["bevy/webgl2", "bevy/"]
