@@ -27,6 +27,9 @@ jobs:
           # add to PATH
           echo "$HOME/.cargo/bin" >>$GITHUB_PATH
 
+      - name: Install checkout dependencies
+        run: "apk add --no-cache nodejs"
+
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v4
 
