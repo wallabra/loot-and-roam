@@ -30,7 +30,8 @@ jobs:
             libxi-dev \
             libxrandr-dev \
             libxkbcommon-dev \
-            vulkan-loader-dev
+            vulkan-loader-dev \
+            alsa-lib-dev
 
       - name: Install rustup
         run: "apk add --no-cache rustup"
