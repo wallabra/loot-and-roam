@@ -9,7 +9,7 @@ jobs:
     name: Cargo check
     runs-on: codeberg-small-lazy
     container:
-      image: alpine
+      image: frolvlad/alpine-glibc
 
     steps:
       - name: Update Alpine ca-certificates
