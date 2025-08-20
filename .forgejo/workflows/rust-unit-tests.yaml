@@ -21,6 +21,17 @@ jobs:
       - name: Install pkgconf (pkg-config)
         run: "apk add --no-cache pkgconf"
 
+      - name: Install required development libraries
+        run: |
+          apk add --no-cache
+            wayland-dev
+            libx11-dev
+            libxcursor-dev
+            libxi-dev
+            libxrandr-dev
+            libxkbcommon-dev
+            vulkan-loader-dev
+
       - name: Install rustup
         run: "apk add --no-cache rustup"
 
@@ -46,6 +57,9 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+
+      - name: Install dependencies
+        run: "cargo install"
 
       - name: Run basic cargo linter
         run: "cargo check"
