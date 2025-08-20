@@ -96,7 +96,7 @@ features = [
   # "pbr_transmission_textures", # Support textures for light transimssion (translucency)
 
   # Development features
-  "dynamic_linking",     # Dynamic linking for faster compile-times
+  # "dynamic_linking",     # Dynamic linking for faster compile-times (NOTE: set in loot-and-roam/dynamic_linking)
   # "asset_processor",     # Enable asset processing support [TODO]
   # "bevy_dev_tools",      # Extra dev functionality (like FPS overlay)
   # "bevy_remote",         # Enable BRP (Bevy Remote Protocol) for integration with editors and external dev tools
@@ -192,3 +192,5 @@ opt-level = "s"
 # Strip all debugging information from the binary to slightly reduce file size.
 strip = "debuginfo"
 
+[features]
+dynamic_linking = ["bevy/dynamic_linking"]
