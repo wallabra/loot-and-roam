@@ -17,9 +17,6 @@
 // permitted by applicable law.  See the CNPL for details.
 
 use bevy::prelude::*;
-use itertools::iproduct;
-
-use super::spring::{Spring, SpringMode, SpringNetwork};
 
 #[derive(Debug, Clone, Copy)]
 pub struct PhysPoint {
@@ -110,48 +107,18 @@ where
 }
 
 impl PointNetwork {
-    // [TODO] Find way to move spring network creation functions onto the spring module
+    pub fn center_of_mass(&self) -> Vec3 {
+        let total_mass: f32 = self.points.iter().map(|point| point.mass).sum();
+        if total_mass == 0.0 {
+            return Vec3::ZERO;
+        }
 
-    /// Produces a SpringNetwork connected according to some criterion.
-    pub fn make_connected_springs_whenever<F>(
-        &self,
-        mode: SpringMode,
-        predicate: F,
-    ) -> SpringNetwork
-    where
-        F: Fn(&PhysPoint, &PhysPoint) -> bool,
-    {
-        let springs: Vec<Spring> = iproduct!(
-            self.points.iter().enumerate(),
-            self.points.iter().enumerate()
-        )
-        .filter_map(|(point_1, point_2)| {
-            if point_1.0 != point_2.0 && predicate(point_1.1, point_2.1) {
-                Some(Spring {
-                    points: (point_1.0, point_2.0),
-                    rest_dist: (point_1.1.pos - point_2.1.pos).length(),
-                    mode,
-                })
-            } else {
-                None
-            }
-        })
-        .collect();
-
-        SpringNetwork { springs }
-    }
-
-    /// Produces a SpringNetwork that is fully connected.
-    pub fn make_fully_connected_springs(&self, mode: SpringMode) -> SpringNetwork {
-        self.make_connected_springs_whenever(mode, |_, _| true)
-    }
-
-    /// Produces a SpringNetwork that connects points within a max radius.
-    pub fn make_radially_connected_springs(&self, mode: SpringMode, max_rad: f32) -> SpringNetwork {
-        let max_rad_sq = max_rad * max_rad;
-        self.make_connected_springs_whenever(mode, |point_1, point_2| {
-            (point_1.pos - point_2.pos).length_squared() <= max_rad_sq
-        })
+        self.points
+            .iter()
+            .map(|point| point.pos * point.mass)
+            .reduce(|a, b| a + b)
+            .map(|com| com / total_mass)
+            .unwrap_or(Vec3::ZERO)
     }
 }
 
