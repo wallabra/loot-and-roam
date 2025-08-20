@@ -27,6 +27,7 @@ pub mod base; // Basic point network definitions and systems
 pub mod collision; // Advanced collision handling for objects
 pub mod forces; // Basic forces
 pub mod spring; // Spring based soft body implementation
+pub mod torque; // User rotational forces
 pub mod volume; // Volumes, their intersection, and volume/surface forces
 pub mod water; // Water physics
 
