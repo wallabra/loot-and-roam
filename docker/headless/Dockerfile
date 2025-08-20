@@ -19,8 +19,9 @@ RUN apk update && apk add --no-cache ca-certificates && apk add --no-cache \
 
 # Install Rustup, Rust's nightly toolchain, and the Cranelift codegen (good for Bevy development)
 RUN rustup-init -y --no-modify-path --default-toolchain nightly --component rustc-codegen-cranelift-preview \
-    && echo "/root/.cargo/bin" >> /etc/profile.d/cargo.sh \
-    && cargo install cargo-build-deps # Used when precompiling deps
+    && echo "/root/.cargo/bin" >> /etc/profile.d/cargo.sh
+
+RUN cargo install cargo-build-deps # Used when precompiling deps
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
