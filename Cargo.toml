@@ -199,6 +199,4 @@ dynamic_linking = ["bevy/dynamic_linking"]
 x11 = ["bevy/x11"]
 wayland = ['bevy/wayland']
 web = ["bevy/web", "bevy/webgl2"]
-
-# Default feature, disable when headless
-window = ["bevy/window", "bevy/winit"]
+window = ["bevy/bevy_window", "bevy/bevy_winit"]
