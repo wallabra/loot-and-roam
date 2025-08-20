@@ -35,3 +35,5 @@ jobs:
             docker.io/${{ secrets.DOCKER_USERNAME }}/loot-and-roam-ci:${{ forge.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
