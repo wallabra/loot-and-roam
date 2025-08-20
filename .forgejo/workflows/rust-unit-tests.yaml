@@ -23,13 +23,13 @@ jobs:
 
       - name: Install required development libraries
         run: |
-          apk add --no-cache
-            wayland-dev
-            libx11-dev
-            libxcursor-dev
-            libxi-dev
-            libxrandr-dev
-            libxkbcommon-dev
+          apk add --no-cache \
+            wayland-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libxrandr-dev \
+            libxkbcommon-dev \
             vulkan-loader-dev
 
       - name: Install rustup
