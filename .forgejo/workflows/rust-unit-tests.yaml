@@ -58,9 +58,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Install dependencies
-        run: "cargo install"
-
       - name: Run basic cargo linter
         run: "cargo check"
 
