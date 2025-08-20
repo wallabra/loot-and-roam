@@ -21,16 +21,18 @@ RUN apk update && apk add --no-cache ca-certificates && apk add --no-cache \
 RUN rustup-init -y --no-modify-path --default-toolchain nightly --component rustc-codegen-cranelift-preview
 
 # Add Rust toolchain to PATH
-RUN echo "source /root/.cargo/env" >> /etc/profile.d/cargo.sh
-
-RUN cargo install cargo-build-deps # Used when precompiling deps
+ENV PATH="${PATH}:/root/.cargo/bin"
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Precompile dependencies
 COPY Cargo.toml Cargo.lock ./
 
-RUN cargo build-deps --no-default-features
+RUN \
+    mkdir src && \
+    echo 'fn main() {}' >src/main.rs && \
+    echo '' >src/lib.rs && \
+    cargo build --no-default-features
 
 # Clean up Alpine package cache
 RUN rm -rf /var/cache/apk/*
