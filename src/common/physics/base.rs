@@ -176,7 +176,7 @@ pub struct PointAttach {
 }
 
 // Always runs after point_base_physics.
-fn point_attach_snap(
+pub fn point_attach_snap(
     mut query_child: Query<(&ChildOf, &mut Transform, &PointAttach)>,
     query_parent: Query<(&PointNetwork, &GlobalTransform, &Transform), Without<PointAttach>>,
 ) {
