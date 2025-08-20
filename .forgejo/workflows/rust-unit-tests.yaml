@@ -54,10 +54,10 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Run basic cargo linter
-        run: "cargo check"
+        run: "cargo check --no-default-features"
 
       - name: Run clippy linter
-        run: "cargo clippy"
+        run: "cargo clippy --no-default-features"
 
       - name: Run tests
-        run: "cargo test"
+        run: "cargo test --no-default-features"

@@ -34,8 +34,8 @@ features = [
   "bevy_text",                   # Text rendering
   # "bevy_ui",                     # UI toolkit [TODO]
   # "bevy_ui_picking_backend",     # UI node picking (selection by cursor) [TODO]
-  "bevy_window",                 # Window management
-  "bevy_winit",                  # Cross-platform window management support
+  #"bevy_window",                 # Window management
+  #"bevy_winit",                  # Cross-platform window management support
 
   # Low-level tunables
   "std",            # Use the Rust standard library (important!)
@@ -193,7 +193,12 @@ opt-level = "s"
 strip = "debuginfo"
 
 [features]
+default = ["window", "x11", "wayland", "dynamic_linking"]
+
 dynamic_linking = ["bevy/dynamic_linking"]
 x11 = ["bevy/x11"]
 wayland = ['bevy/wayland']
 web = ["bevy/web", "bevy/webgl2"]
+
+# Default feature, disable when headless
+window = ["bevy/window", "bevy/winit"]
