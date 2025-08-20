@@ -11,55 +11,15 @@ on:
       - ".forgejo/workflows/docker-dev-image.yaml"
   pull_request:
   workflow_dispatch:
+
 jobs:
   test:
     name: Cargo check
     runs-on: codeberg-small-lazy
     container:
-      image: docker.io/alpine
+      image: "docker.io/${{ secrets.DOCKER_USERNAME }}/loot-and-roam-ci:latest"
 
     steps:
-      - name: Update Alpine ca-certificates
-        run: "apk add --no-cache ca-certificates"
-
-      - name: Install clang & linker
-        run: "apk add --no-cache clang lld"
-
-      - name: Install pkgconf (pkg-config)
-        run: "apk add --no-cache pkgconf"
-
-      - name: Install required development libraries
-        run: |
-          apk add --no-cache \
-            vulkan-loader-dev \
-            alsa-lib-dev
-
-      - name: Install rustup
-        run: "apk add --no-cache rustup"
-
-      - name: Run rustup-init
-        run: |
-          rustup-init -y --no-modify-path --default-toolchain nightly --component rustc-codegen-cranelift-preview
-          # add to PATH
-          echo "$HOME/.cargo/bin" >>$GITHUB_PATH
-
-      - name: Install checkout dependencies
-        run: "apk add --no-cache nodejs"
-
-      - name: Checkout
-        uses: https://code.forgejo.org/actions/checkout@v4
-
-      - name: Cache Cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
-
       - name: Run basic cargo linter
         run: "cargo check --no-default-features"
 
