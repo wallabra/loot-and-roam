@@ -155,6 +155,22 @@ impl PointNetwork {
     }
 }
 
+impl PointNetwork {
+    pub fn center_of_mass(&self) -> Vec3 {
+        let total_mass: f32 = self.points.iter().map(|point| point.mass).sum();
+        if total_mass == 0.0 {
+            return Vec3::ZERO;
+        }
+
+        self.points
+            .iter()
+            .map(|point| point.pos * point.mass)
+            .reduce(|a, b| a + b)
+            .map(|com| com / total_mass)
+            .unwrap_or(Vec3::ZERO)
+    }
+}
+
 /// The system responsible for the inertia of physics points.
 pub fn point_base_physics(time: Res<Time>, mut query_points: Query<(&mut PointNetwork,)>) {
     let delta_secs = time.delta_secs();
