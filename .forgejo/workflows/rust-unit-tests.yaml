@@ -18,6 +18,9 @@ jobs:
       - name: Install clang & linker
         run: "apk add --no-cache clang lld"
 
+      - name: Install pkgconf (pkg-config)
+        run: "apk add --no-cache pkgconf"
+
       - name: Install rustup
         run: "apk add --no-cache rustup"
 
