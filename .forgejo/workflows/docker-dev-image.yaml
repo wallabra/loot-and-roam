@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "docker/Dockerfile"
+      - ".forgejo/actions/docker-dev-image.yaml"
   workflow_dispatch:
 
 jobs:
