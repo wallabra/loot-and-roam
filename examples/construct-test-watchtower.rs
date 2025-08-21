@@ -18,6 +18,7 @@
 // Demo is a modified variant of Bevy's 3D cube example '3d/3d_scene':
 // https://github.com/bevyengine/bevy/blob/latest/examples/3d/3d_scene.rs
 
+use itertools::Itertools;
 use rand::distr::Distribution;
 use std::f32::consts::SQRT_2;
 
@@ -148,9 +149,9 @@ pub fn obs_spitter_spit_action(
 
 fn watchtower_request_spit_system(
     mut commands: Commands,
-    watchtowers: Query<(Entity, &WatchtowerMarker)>,
+    watchtowers: Query<(Entity, &Name, &WatchtowerMarker)>,
 ) {
-    for (entity, _) in watchtowers {
+    for (entity, _name, _wm) in watchtowers {
         dispatch_action(
             &mut commands,
             entity,
@@ -288,6 +289,20 @@ fn spawn_watchtower(
             materials,
         );
     }
+
+    commands.run_system_cached(
+        move |part_query: Query<&ConstructParts>, name_query: Query<&Name>| {
+            info!(
+                "Parts spawned on watchtower: {}",
+                part_query
+                    .get(watchtower)
+                    .unwrap()
+                    .iter()
+                    .map(|&part_entity| name_query.get(part_entity).unwrap().as_str().to_owned())
+                    .join(", ")
+            );
+        },
+    );
 }
 
 /// Point netowrk snapping market component.
