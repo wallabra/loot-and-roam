@@ -112,41 +112,45 @@ fn cleanup_intermission(mut commands: Commands, q_tree: Query<(Entity, &SceneTre
 
 fn input_handler_start(
     keys: Res<ButtonInput<KeyCode>>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    q_windows: Query<&Window, With<PrimaryWindow>>,
+    // TODO: use when implementing menus
+    _mouse_buttons: Res<ButtonInput<MouseButton>>,
+    // TODO: use when implementing menus
+    _q_windows: Query<&Window, With<PrimaryWindow>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::Space) {
         info!("Start state received request to transition to Overworld");
         next_state.set(GameState::Overworld);
-        return;
     }
 }
 
 fn input_handler_overworld(
     keys: Res<ButtonInput<KeyCode>>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    q_windows: Query<&Window, With<PrimaryWindow>>,
-    mut mouse_motion_events: EventReader<MouseMotion>,
+    // TODO: use when implementing overworld inputs
+    _mouse_buttons: Res<ButtonInput<MouseButton>>,
+    // TODO: use when implementing overworld inputs
+    _q_windows: Query<&Window, With<PrimaryWindow>>,
+    // TODO: use when implementing overworld inputs
+    _mouse_motion_events: EventReader<MouseMotion>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::KeyL) {
         info!("Overworld state received request to transition to Intermission");
         next_state.set(GameState::Intermission);
-        return;
     }
 }
 
 fn input_handler_intermission(
     keys: Res<ButtonInput<KeyCode>>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    q_windows: Query<&Window, With<PrimaryWindow>>,
+    // TODO: use when implementing overworld inputs
+    _mouse_buttons: Res<ButtonInput<MouseButton>>,
+    // TODO: use when implementing overworld inputs
+    _q_windows: Query<&Window, With<PrimaryWindow>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::KeyL) {
         info!("Intermission state received request to transition to Overworld");
         next_state.set(GameState::Overworld);
-        return;
     }
 }
 

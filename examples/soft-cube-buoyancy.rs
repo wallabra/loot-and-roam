@@ -36,7 +36,7 @@ use bevy::{
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
 use derive_builder::Builder;
 use loot_and_roam::{
-    app::renderer::object::{ObjectRendererPlugin, PointAttach},
+    app::renderer::object::ObjectRendererPlugin,
     common::physics::{prelude::*, volume::VolumeCloneSpawner, water::WaterPhysics},
 };
 
@@ -65,8 +65,8 @@ fn apply_example_systems(app: &mut App) {
                     // arbitrary pick within these bounds will allow for
                     // sufficient reorientation of the snapped cube mesh.
 
-                    let front = network.points[0].pos.clone();
-                    let up = network.points[2].pos.clone();
+                    let front = network.points[0].pos;
+                    let up = network.points[2].pos;
                     let up = (up - avg).normalize();
 
                     transform.translation = avg;
@@ -164,7 +164,7 @@ fn setup(
         [0.5, 6.25, 0.5],
         [1.5, 12.5, 1.5],
     ]
-    .map(|arr| Vec3::from_array(arr))
+    .map(Vec3::from_array)
     {
         println!(
             "cube spawned: {:?}",
@@ -300,16 +300,15 @@ fn spawn_cube(
                 ..Default::default()
             });
 
-            let child_point = commands
+            // child point
+            commands
                 .spawn((
                     PointAttach { point_idx },
                     Mesh3d(point_mesh),
                     MeshMaterial3d(point_material),
                     Transform::default(),
                 ))
-                .id();
-
-            child_point
+                .id()
         })
         .collect::<Vec<_>>();
 

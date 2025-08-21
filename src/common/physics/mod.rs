@@ -55,7 +55,7 @@ impl Plugin for BasicPhysicsPlugin {
 
 pub mod prelude {
     pub use super::BasicPhysicsPlugin;
-    pub use super::base::{PhysPoint, PointNetwork};
+    pub use super::base::{PhysPoint, PointNetwork, PointAttach};
     pub use super::collision::{
         CollisionPlugin, FloorPlaneCollision, VolumeVolumeCollisionDetectionEvent,
     };

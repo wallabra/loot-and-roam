@@ -92,7 +92,7 @@ fn terrain_volume_collision_system(
         // 'detect_loop:
         for (e2, terramark, terratransf) in terrain_query.iter() {
             let terrabuf = &terramark.buffer;
-            let terrabox = terrain_aabb(&terrabuf);
+            let terrabox = terrain_aabb(terrabuf);
 
             if !volumes1.aabb(&points1).check(&terrabox) {
                 continue;
@@ -138,7 +138,7 @@ fn terrain_volume_collision_system(
                     entity_terrain: e2,
                     info: collision,
                     depth,
-                    volume: vol.clone(),
+                    volume: *vol,
                 });
 
                 // [NOTE] Uncomment the following to handle only one

@@ -23,7 +23,7 @@
 // Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
 // permitted by applicable law.  See the CNPL for details.
 
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::diagnostic::LogDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
 use loot_and_roam::LootAndRoamEnginePlugin;

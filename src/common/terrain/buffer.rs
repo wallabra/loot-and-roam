@@ -269,7 +269,7 @@ impl TerrainBuffer {
     /// Create an entity bundle from this Terrain.
     pub fn as_bundle(self, meshes: &mut ResMut<Assets<Mesh>>) -> impl Bundle {
         let mesh = self.to_mesh();
-        return (Mesh3d(meshes.add(mesh)), TerrainMarker::new(self));
+        (Mesh3d(meshes.add(mesh)), TerrainMarker::new(self))
     }
 }
 

@@ -27,7 +27,7 @@ use bevy::{
     window::PresentMode,
 };
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
-use loot_and_roam::app::{AppPlugin, prelude::*, renderer::object::PointAttach};
+use loot_and_roam::app::{AppPlugin, prelude::*};
 use loot_and_roam::common::physics::volume::VolumeCloneSpawner;
 use loot_and_roam::common::prelude::*;
 use loot_and_roam::common::terrain::buffer::TerrainBuffer;
@@ -163,7 +163,7 @@ fn scene(
         [-20.0, 60.0, -20.0],
         [-5.0, 80.0, 10.0],
     ]
-    .map(|arr| Vec3::from_array(arr))
+    .map(Vec3::from_array)
     {
         println!(
             "cube spawned: {:?}",
@@ -268,16 +268,15 @@ fn spawn_cube(
                 ..Default::default()
             });
 
-            let child_point = commands
+            // child point
+            commands
                 .spawn((
                     PointAttach { point_idx },
                     Mesh3d(point_mesh),
                     MeshMaterial3d(point_material),
                     Transform::default(),
                 ))
-                .id();
-
-            child_point
+                .id()
         })
         .collect::<Vec<_>>();
 
@@ -333,8 +332,8 @@ impl Plugin for SnapToPointNetPlugin {
                         // arbitrary pick within these bounds will allow for
                         // sufficient reorientation of the snapped cube mesh.
 
-                        let front = network.points[0].pos.clone();
-                        let up = network.points[2].pos.clone();
+                        let front = network.points[0].pos;
+                        let up = network.points[2].pos;
                         let up = (up - avg).normalize();
 
                         transform.translation = avg;
