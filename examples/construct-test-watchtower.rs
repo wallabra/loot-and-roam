@@ -192,7 +192,7 @@ fn spawn_cube_spitter_on_slot(
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
 ) -> Entity {
-    let mesh = Mesh3d(meshes.add(Sphere::new(1.8)));
+    let mesh = Mesh3d(meshes.add(Sphere::new(0.3)));
 
     let material = MeshMaterial3d(materials.add(StandardMaterial {
         base_color: Color::srgba_u8(255, 30, 0, 80),
