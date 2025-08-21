@@ -18,6 +18,7 @@
 // Demo is a modified variant of Bevy's 3D cube example '3d/3d_scene':
 // https://github.com/bevyengine/bevy/blob/latest/examples/3d/3d_scene.rs
 
+use rand::distr::Distribution;
 use std::f32::consts::SQRT_2;
 
 use bevy::{
@@ -35,56 +36,108 @@ use bevy::{
 };
 use bevy_image_export::{ImageExport, ImageExportPlugin, ImageExportSettings, ImageExportSource};
 use derive_builder::Builder;
-use loot_and_roam::{
-    app::renderer::object::ObjectRendererPlugin,
-    common::physics::{prelude::*, volume::VolumeCloneSpawner, water::WaterPhysics},
-};
+use loot_and_roam::prelude::*;
+use rand::distr::Uniform;
 
 /// Cube spitter part component.
 #[derive(Component, Debug)]
 pub struct CubeSpitter {
     interval: f32,
+    vel: Vec3,
     spawn_offset: Vec3,
     cooldown: f32,
 }
 
 impl CubeSpitter {
     fn spit_cube(
-        &self,
+        &mut self,
         pos: Vec3,
-        vel: Vec3,
         commands: &mut Commands<'_, '_>,
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
-    ) -> Entity {
+    ) -> Option<Entity> {
         if self.cooldown > 0.0 {
-            return;
+            return None;
         }
         let cube = spawn_cube(pos + self.spawn_offset, commands, meshes, materials);
-        // TODO: apply velocity to cube
+        let vel = self.vel;
+
+        commands
+            .entity(cube)
+            .entry::<PointNetwork>()
+            .and_modify(move |mut points| points.apply_instant_force(vel));
+
+        // TODO: make cube spin randomly, for dramatic effect!
 
         self.cooldown = self.interval;
-        return cube;
+        return Some(cube);
     }
 
-    pub fn tick_cooldown(&mut self, delta_time_secs: f32) -> Self {
+    pub fn tick_cooldown(&mut self, delta_time_secs: f32) {
         self.cooldown = (self.cooldown - delta_time_secs).max(0.0_f32);
     }
 
-    pub fn new(interval: f32) {
+    pub fn auto_spit(
+        &mut self,
+        this_entity: Entity,
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<StandardMaterial>>,
+        transform_query: Query<&Transform>,
+    ) {
+        let pos = transform_query.get(this_entity).unwrap().translation;
+        self.spit_cube(pos, commands, meshes, materials);
+    }
+
+    pub fn check_auto_spit(
+        &mut self,
+        this_entity: Entity,
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<StandardMaterial>>,
+        transform_query: Query<&Transform>,
+    ) {
+        if self.cooldown <= 0.0 {
+            self.auto_spit(this_entity, commands, meshes, materials, transform_query);
+        }
+    }
+
+    pub fn new(interval: f32, vel: Vec3) -> Self {
         Self {
             interval,
+            vel,
             spawn_offset: Vec3::ZERO,
             cooldown: 0.0,
         }
     }
 
-    pub fn new_with_spawn_offset(interval: f32, spawn_offset: Vec3) -> Self {
+    pub fn new_with_spawn_offset(interval: f32, vel: Vec3, spawn_offset: Vec3) -> Self {
         Self {
             interval,
+            vel,
             spawn_offset,
             cooldown: 0.0,
         }
+    }
+}
+
+fn cube_spitter_update_system(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    spitters: Query<(Entity, &mut CubeSpitter)>,
+    tick: Res<Time>,
+    transform_query: Query<&Transform>,
+) {
+    for (entity, mut spitter) in spitters {
+        spitter.tick_cooldown(tick.delta_secs());
+        spitter.check_auto_spit(
+            entity,
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            transform_query,
+        );
     }
 }
 
@@ -92,9 +145,121 @@ impl Default for CubeSpitter {
     fn default() -> Self {
         Self {
             interval: 2.0,
+            vel: Vec3::ZERO,
             spawn_offset: Vec3::ZERO,
             cooldown: 0.0,
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct WatchtowerSpawnRequest {
+    pub name: Option<String>,
+    pub at: Vec3,
+    pub thickness: f32,
+    pub height: f32,
+    pub num_spitters: u8,
+    pub min_interval: f32,
+    pub max_interval: f32,
+}
+
+// Cube spitter utility initializer.
+fn spawn_cube_spitter_on_slot(
+    slot: Entity,
+    interval: f32,
+    vel: Vec3,
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) -> Entity {
+    let mesh = Mesh3d(meshes.add(Sphere::new(1.8)));
+
+    let material = MeshMaterial3d(materials.add(StandardMaterial {
+        base_color: Color::srgba_u8(255, 30, 0, 80),
+        alpha_mode: AlphaMode::Blend,
+        ..Default::default()
+    }));
+
+    let spitter_entity = commands
+        .spawn((mesh, material, part_tag("spitter".into())))
+        .id();
+
+    commands
+        .entity(spitter_entity)
+        .insert(CubeSpitter::new(interval, vel));
+
+    install_part_on_slot(commands, spitter_entity, slot);
+
+    spitter_entity
+}
+
+/// Watchtower utility initializer.
+fn spawn_watchtower(
+    request: WatchtowerSpawnRequest,
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) {
+    let thickness = request.thickness;
+    let height = request.height;
+    let interval_distrib =
+        Uniform::new_inclusive(request.min_interval, request.max_interval).unwrap();
+
+    let name_string = if let Some(request_name) = request.name {
+        format!("watchtower {}", request_name)
+    } else {
+        "watchtower".to_owned()
+    };
+    let name = Name::new(name_string.clone());
+
+    // watchtower shape
+    let mesh = Mesh3d(meshes.add(Cuboid::new(thickness, height, thickness)));
+
+    // watchtower material
+    let material = MeshMaterial3d(materials.add(StandardMaterial {
+        base_color: Color::srgba_u8(190, 120, 10, 230),
+        alpha_mode: AlphaMode::Blend,
+        ..Default::default()
+    }));
+
+    // watchtower position
+    let transform = Transform::from_translation(request.at + Vec3::Y * request.height / 2.0);
+
+    // spawn watchtower
+    let watchtower = commands.spawn((name, mesh, material, transform)).id();
+
+    for i in 1..=request.num_spitters {
+        // calculate offset
+        let offset_vert = request.height * 0.8;
+        let offset_horz_mag = request.thickness * 1.15;
+        let offset_horz = Quat::from_rotation_y(
+            std::f32::consts::PI * 2.0 * ((i - 1) as f32) / request.num_spitters as f32,
+        ) * (Vec3::X * offset_horz_mag);
+        let offset = offset_horz.with_y(offset_vert);
+
+        let launch_vel = (offset_horz * 5.0).with_y(1.5);
+
+        // add spitter slot
+        let slot_entity = commands
+            .spawn((
+                Name::new(format!("slot {} of {}", i, name_string)),
+                part_slot("spitter".into()),
+                Transform::from_translation(offset),
+            ))
+            .id();
+
+        commands.entity(watchtower).add_child(slot_entity);
+
+        // spawn spitter and add it to slot
+        let this_interval = interval_distrib.sample(&mut rand::rng());
+        spawn_cube_spitter_on_slot(
+            slot_entity,
+            this_interval,
+            launch_vel,
+            commands,
+            meshes,
+            materials,
+        );
     }
 }
 
@@ -135,6 +300,8 @@ fn apply_example_systems(app: &mut App) {
     );
 
     app.add_systems(Startup, setup);
+
+    app.add_systems(Update, cube_spitter_update_system);
 }
 
 // Resolution for exporting demo images.
@@ -215,29 +382,17 @@ fn setup(
             },
         ));
 
-    // cubes
-    for at in [
-        [-0.2, 1.5, 1.0],
-        [-0.4, 3.5, -0.5],
-        [0.5, 6.25, 0.5],
-        [1.5, 12.5, 1.5],
-    ]
-    .map(Vec3::from_array)
-    {
-        println!(
-            "cube spawned: {:?}",
-            spawn_cube(
-                at,
-                &mut commands,
-                &mut meshes,
-                &mut materials,
-                // cube_mesh.clone(),
-                // cube_material.clone(),
-                // point_mesh.clone(),
-                // point_material.clone()
-            )
-        );
-    }
+    // watchtower
+    let request = WatchtowerSpawnRequest {
+        name: None,
+        at: Vec3::new(0.0, 0.0, 0.0),
+        thickness: 2.0,
+        height: 5.0,
+        num_spitters: 3,
+        min_interval: 0.8,
+        max_interval: 1.5,
+    };
+    spawn_watchtower(request, &mut commands, &mut meshes, &mut materials);
 
     // start image exportation
     if let Some(mut export_sources) = export_sources {
@@ -406,7 +561,7 @@ fn main() {
         FrameTimeDiagnosticsPlugin::default(),
         BasicPhysicsPlugin,
         CollisionPlugin,
-        ObjectRendererPlugin,
+        AppPlugin,
     ));
 
     // system registration
