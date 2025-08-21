@@ -201,8 +201,8 @@ fn volume_volume_collision_system(
                         entity_other: e2,
                         info: collision,
                         depth,
-                        volume_1: vol1.clone(),
-                        volume_2: vol2.clone(),
+                        volume_1: *vol1,
+                        volume_2: *vol2,
                     });
 
                     // [NOTE] Uncomment the following to handle only one

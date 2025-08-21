@@ -119,7 +119,6 @@ fn input_handler_start(
     if keys.just_pressed(KeyCode::Space) {
         info!("Start state received request to transition to Overworld");
         next_state.set(GameState::Overworld);
-        return;
     }
 }
 
@@ -127,13 +126,12 @@ fn input_handler_overworld(
     keys: Res<ButtonInput<KeyCode>>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
-    mut mouse_motion_events: EventReader<MouseMotion>,
+    mouse_motion_events: EventReader<MouseMotion>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if keys.just_pressed(KeyCode::KeyL) {
         info!("Overworld state received request to transition to Intermission");
         next_state.set(GameState::Intermission);
-        return;
     }
 }
 
@@ -146,7 +144,6 @@ fn input_handler_intermission(
     if keys.just_pressed(KeyCode::KeyL) {
         info!("Intermission state received request to transition to Overworld");
         next_state.set(GameState::Overworld);
-        return;
     }
 }
 

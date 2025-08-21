@@ -293,11 +293,10 @@ where
             .noise
             .get_influence_at(at.x / self.resolution, at.y / self.resolution);
 
-        let height =
-            self.modulator
-                .push_terrain(&self.modulation_params, &self.center_points, at, height);
+        
 
-        height
+        self.modulator
+                .push_terrain(&self.modulation_params, &self.center_points, at, height)
     }
 
     /// Get the bounding width of this terrain generator.

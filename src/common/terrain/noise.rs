@@ -48,7 +48,7 @@ impl NoiseLatticePoint {
     /// Returns the x and y coordinates of the 'gradient vector' at this
     /// lattice grid point.
     pub fn get_gradient_vector(&self) -> (f32, f32) {
-        return (self.inf_vec_x, self.inf_vec_y);
+        (self.inf_vec_x, self.inf_vec_y)
     }
 
     fn renormalize(&mut self) -> &mut Self {

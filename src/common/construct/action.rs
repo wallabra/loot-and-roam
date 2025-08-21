@@ -9,7 +9,7 @@ use bevy::{
         observer::Trigger,
         system::{Commands, In, Query},
     },
-    log::{debug, info, warn},
+    log::{debug, info},
     reflect::Reflect,
 };
 
@@ -120,7 +120,7 @@ pub fn ev_dispatch_part_actions(
                     if !construct_event
                         .part_tag_selectors
                         .iter()
-                        .any(|tag| part_info.tags.contains(&tag))
+                        .any(|tag| part_info.tags.contains(tag))
                     {
                         debug!(
                             "Skipping part with tags {:?}: does not match selectors (part entity-id {:?})",

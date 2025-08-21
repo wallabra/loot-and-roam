@@ -58,7 +58,6 @@ fn input_handler_main_menu(
         info!("Leaving main menu for GameState::Start");
         next_game_state.set(GameState::Start);
         next_app_state.set(AppState::InGame);
-        return;
     }
 }
 
