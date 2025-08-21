@@ -271,7 +271,7 @@ fn spawn_watchtower(
         ) * (Vec3::X * offset_horz_mag);
         let offset = offset_horz.with_y(offset_vert);
 
-        let launch_vel = (offset_horz * 5.0).with_y(1.5);
+        let launch_vel = (offset_horz * 30.0).with_y(5.0);
 
         // add spitter slot
         let slot_entity = commands
@@ -423,10 +423,11 @@ fn setup(
     // light
     commands.spawn((
         PointLight {
+            intensity: 20.0,
             shadows_enabled: true,
             ..default()
         },
-        Transform::from_xyz(4.0, 8.0, 4.0),
+        Transform::from_xyz(15.0, 6.0, -8.0),
     ));
 
     // camera
@@ -559,8 +560,30 @@ fn spawn_cube(
         })),
     );
 
+    // generate point network visualization as little children balls
+    let children = (0..points.points.len())
+        .map(|point_idx| {
+            let point_mesh = meshes.add(Sphere::new(0.05));
+            let point_material = materials.add(StandardMaterial {
+                base_color: Color::srgba_u8(255, 255, 48, 200),
+                alpha_mode: AlphaMode::Blend,
+                ..Default::default()
+            });
+
+            // child point
+            commands
+                .spawn((
+                    PointAttach { point_idx },
+                    Mesh3d(point_mesh),
+                    MeshMaterial3d(point_material),
+                    Transform::default(),
+                ))
+                .id()
+        })
+        .collect::<Vec<_>>();
+
     // create cube entity
-    commands
+    let cube = commands
         .spawn((CubeBundle::builder()
             .mesh(Mesh3d(cube_mesh))
             .material(MeshMaterial3d(cube_material))
@@ -582,7 +605,11 @@ fn spawn_cube(
             })
             .build()
             .unwrap(),))
-        .id()
+        .id();
+
+    commands.entity(cube).add_children(&children);
+
+    cube
 }
 
 fn main() {
@@ -594,8 +621,8 @@ fn main() {
     app.add_plugins((DefaultPlugins
         .set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Loot & Roam Tech Demo - Soft Body Cube".into(),
-                name: Some("bevy.loot-and-roam.techdemo.softbody".into()),
+                title: "Loot & Roam Tech Demo - Watchtower".into(),
+                name: Some("bevy.loot-and-roam.techdemo.watchtower".into()),
                 present_mode: PresentMode::AutoNoVsync,
                 ..default()
             }),
