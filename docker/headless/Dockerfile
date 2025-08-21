@@ -35,7 +35,7 @@ RUN \
     cargo build --no-default-features
 
 # Precompile dependencies (check mode)
-RUN cargo check || true
+RUN cargo check --no-default-features || true
 
 # Cleanup
 RUN rm -r src
