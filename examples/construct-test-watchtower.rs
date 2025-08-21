@@ -66,9 +66,10 @@ impl CubeSpitter {
         commands
             .entity(cube)
             .entry::<PointNetwork>()
-            .and_modify(move |mut points| points.apply_instant_force(vel));
-
-        // TODO: make cube spin randomly, for dramatic effect!
+            .and_modify(move |mut points| {
+                points.apply_instant_force(vel);
+                points.apply_angular_impulse(Vec3::Z * 8.0);
+            });
 
         self.cooldown = self.interval;
 
@@ -126,17 +127,15 @@ impl CubeSpitter {
 // Observer
 pub fn obs_spitter_spit_action(
     trigger: Trigger<PartAction>,
-    mut query: Query<(&Name, &mut CubeSpitter)>,
+    mut query: Query<(Option<&Name>, &mut CubeSpitter)>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     transform_query: Query<&GlobalTransform>,
 ) {
-    if let Ok((name, mut spitter)) = query.get_mut(trigger.target()) {
+    if let Ok((_maybe_name, mut spitter)) = query.get_mut(trigger.target()) {
         // action identity check
-        info!("spitter received action: {:?}", trigger.action_tag);
         if &trigger.action_tag == "spit" {
-            info!("Spitting cube at {:?}", name);
             spitter.check_auto_spit(
                 trigger.target(),
                 &mut commands,

@@ -221,7 +221,7 @@ fn spawn_cube(
     let mass = 0.9 * volume;
 
     // create point & spring networks
-    let points = PointNetwork::from(
+    let mut points = PointNetwork::from(
         [
             // cube corners
             [-0.5, -0.5, -0.5],
@@ -243,6 +243,8 @@ fn spawn_cube(
         .map(|arr| PhysPoint::new(at + (Vec3::from(arr) * size), Vec3::ZERO, mass))
         .into_iter(),
     );
+
+    points.apply_angular_impulse(Vec3::Z * 30.0); // spawn spinning cubes
 
     let spring_mode = SpringMode::Normal(NormalSpring {
         stiffness: 30.0 * mass,
