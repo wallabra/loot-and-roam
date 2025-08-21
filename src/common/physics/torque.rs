@@ -51,16 +51,19 @@ impl PointNetwork {
         let moment_of_inertia = self.moment_of_inertia_along_axis(impulse_axis);
 
         for point in self.points.iter_mut() {
+            let relative_pos = point.pos - center_of_mass;
+
             // -- physics note --
             // impulse_axis is a unit vector
             // multiplying it by the square of distance from rotational axis crossing COM makes it dist^2
+            // (the 'cross' call effectively multiplies by length of relative_pos once, so we multiply by it again)
             // multiplying it by the 'impulse strength' (magnitude of angular_impulse) makes it dist^4*mass
             //   (this is because unit vector has no mass or vel. information, simply giving a magnitude its direction)
             // dividing it by moment_of_inertia (which is dist^2*mass) makes it dist^2
             // delta velocities within a single tick are applied directly to velocity, therefore lack a time component
 
             let linear_delta_velocity =
-                impulse_axis.cross(point.pos - center_of_mass).powf(2.0) * impulse_strength;
+                impulse_axis.cross(relative_pos) * relative_pos.length() * impulse_strength;
 
             point.vel += linear_delta_velocity / moment_of_inertia;
         }
