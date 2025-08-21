@@ -3,11 +3,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "Cargo.*"
-      - "src/**"
-      - "tests/**"
-      - ".forgejo/workflows/rust-unit.tests.yaml"
   pull_request:
   workflow_dispatch:
 
