@@ -25,7 +25,7 @@ ENV PATH="${PATH}:/root/.cargo/bin"
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Precompile dependencies
+# Precompile dependencies (debug mode)
 COPY Cargo.toml Cargo.lock ./
 
 RUN \
@@ -33,6 +33,9 @@ RUN \
     echo 'fn main() {}' >src/main.rs && \
     echo '' >src/lib.rs && \
     cargo build --no-default-features
+
+# Precompile dependencies (check mode)
+RUN cargo check || true
 
 # Cleanup
 RUN rm -r src
