@@ -4,51 +4,27 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+
 jobs:
   test:
     name: Cargo check
     runs-on: codeberg-small-lazy
     container:
-      image: alpine
+      image: docker.io/gustavo6046/loot-and-roam-ci:latest
 
     steps:
-      - name: Update Alpine ca-certificates
-        run: "apk add --no-cache ca-certificates"
-
-      - name: Install clang & linker
-        run: "apk add --no-cache clang lld"
-
-      - name: Install rustup
-        run: "apk add --no-cache rustup"
-
-      - name: Run rustup-init
-        run: |
-          rustup-init -y --no-modify-path --default-toolchain nightly --component rustc-codegen-cranelift-preview
-          # add to PATH
-          echo "$HOME/.cargo/bin" >>$GITHUB_PATH
-
-      - name: Install checkout dependencies
-        run: "apk add --no-cache nodejs"
-
       - name: Checkout
-        uses: https://code.forgejo.org/actions/checkout@v4
-
-      - name: Cache Cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+        uses: actions/checkout@v4
 
       - name: Run basic cargo linter
-        run: "cargo check"
+        run: "cargo check --no-default-features"
+
+      - name: Run cargo-fmt linter
+        run: "cargo fmt --check --no-default-features"
 
       - name: Run clippy linter
-        run: "cargo clippy"
+        run: "cargo clippy --no-default-features"
 
       - name: Run tests
-        run: "cargo test"
+        run: "cargo test --no-default-features"
