@@ -134,7 +134,8 @@ pub fn obs_spitter_spit_action(
 ) {
     if let Ok((name, mut spitter)) = query.get_mut(trigger.target()) {
         // action identity check
-        if trigger.action_tag == "spit" {
+        info!("spitter received action: {:?}", trigger.action_tag);
+        if &trigger.action_tag == "spit" {
             info!("Spitting cube at {:?}", name);
             spitter.check_auto_spit(
                 trigger.target(),
@@ -144,6 +145,16 @@ pub fn obs_spitter_spit_action(
                 transform_query,
             );
         }
+    }
+}
+
+fn spitter_cooldown_system(
+    mut commands: Commands,
+    spitters: Query<&mut CubeSpitter>,
+    delta_time: Res<Time>,
+) {
+    for mut spitter in spitters {
+        spitter.tick_cooldown(delta_time.delta_secs());
     }
 }
 
@@ -186,6 +197,7 @@ struct WatchtowerSpawnRequest {
 
 // Cube spitter utility initializer.
 fn spawn_cube_spitter_on_slot(
+    name: String,
     slot: Entity,
     interval: f32,
     vel: Vec3,
@@ -202,7 +214,7 @@ fn spawn_cube_spitter_on_slot(
     }));
 
     let spitter_entity = commands
-        .spawn((mesh, material, part_tag("spitter".into())))
+        .spawn((mesh, material, Name::new(name), part_tag("spitter".into())))
         .id();
 
     commands
@@ -281,6 +293,7 @@ fn spawn_watchtower(
         // spawn spitter and add it to slot
         let this_interval = interval_distrib.sample(&mut rand::rng());
         spawn_cube_spitter_on_slot(
+            format!("spitter {} of {}", i, name_string),
             slot_entity,
             this_interval,
             launch_vel,
@@ -290,19 +303,28 @@ fn spawn_watchtower(
         );
     }
 
-    commands.run_system_cached(
-        move |part_query: Query<&ConstructParts>, name_query: Query<&Name>| {
-            info!(
-                "Parts spawned on watchtower: {}",
-                part_query
-                    .get(watchtower)
-                    .unwrap()
-                    .iter()
-                    .map(|&part_entity| name_query.get(part_entity).unwrap().as_str().to_owned())
-                    .join(", ")
-            );
-        },
-    );
+    fn _watchtower_part_printer(
+        In(watchtower): In<Entity>,
+        part_query: Query<&ConstructParts>,
+        partinfo_query: Query<&PartInfo>,
+    ) {
+        info!(
+            "Infos on parts spawned on watchtower: {}",
+            part_query
+                .get(watchtower)
+                .unwrap()
+                .iter()
+                .map(|&part_entity| -> String {
+                    partinfo_query.get(part_entity).map_or_else(
+                        |err| format!("({})", err),
+                        |info| format!("[tags: {}]", info.tags.iter().join(",")),
+                    )
+                })
+                .join(", ")
+        );
+    }
+
+    commands.run_system_cached_with(_watchtower_part_printer, watchtower);
 }
 
 /// Point netowrk snapping market component.
@@ -343,7 +365,10 @@ fn apply_example_systems(app: &mut App) {
 
     app.add_systems(Startup, setup);
 
-    app.add_systems(Update, watchtower_request_spit_system);
+    app.add_systems(
+        Update,
+        (watchtower_request_spit_system, spitter_cooldown_system),
+    );
 
     app.add_observer(obs_spitter_spit_action);
 }
