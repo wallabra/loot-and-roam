@@ -18,7 +18,7 @@
 
 use std::time::Duration;
 
-use bevy::math::Vec3;
+use bevy::{log::warn, math::Vec3};
 
 use crate::prelude::PointNetwork;
 
@@ -41,6 +41,7 @@ impl PointNetwork {
     /// Applies an instant rotational force (angular impulse).
     pub fn apply_angular_impulse(&mut self, angular_impulse: Vec3) {
         if angular_impulse == Vec3::ZERO {
+            warn!("Tried to impart angular impulse with a torque vector of zero!");
             return;
         }
 
