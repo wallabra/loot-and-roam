@@ -235,7 +235,7 @@ where
     pub fn push_terrain(
         &self,
         params: &ModulationParams,
-        center_points: &Vec<CenterPoint>,
+        center_points: &[CenterPoint],
         at: Vec2,
         curr_height: f32,
     ) -> f32 {
@@ -293,10 +293,8 @@ where
             .noise
             .get_influence_at(at.x / self.resolution, at.y / self.resolution);
 
-        
-
         self.modulator
-                .push_terrain(&self.modulation_params, &self.center_points, at, height)
+            .push_terrain(&self.modulation_params, &self.center_points, at, height)
     }
 
     /// Get the bounding width of this terrain generator.

@@ -28,7 +28,7 @@ use bevy::{
     window::PresentMode,
 };
 use loot_and_roam::{
-    app::{AppPlugin, prelude::*, renderer::object::PointAttach},
+    app::{AppPlugin, prelude::*},
     common::{CommonPlugin, prelude::*},
 };
 
@@ -57,8 +57,8 @@ pub fn apply_example_systems(app: &mut App) {
                     // arbitrary pick within these bounds will allow for
                     // sufficient reorientation of the snapped cube mesh.
 
-                    let front = network.points[0].pos.clone();
-                    let up = network.points[2].pos.clone();
+                    let front = network.points[0].pos;
+                    let up = network.points[2].pos;
                     let up = (up - avg).normalize();
 
                     transform.translation = avg;
@@ -157,16 +157,14 @@ pub fn setup(
     // generate point network visualization as little children balls
     let children = (0..points.points.len())
         .map(|point_idx| {
-            let child_point = commands
+            commands
                 .spawn((
                     PointAttach { point_idx },
                     Mesh3d(meshes.add(Sphere::new(0.04))),
                     MeshMaterial3d(materials.add(Color::srgb_u8(255, 255, 64))),
                     Transform::default(),
                 ))
-                .id();
-
-            child_point
+                .id()
         })
         .collect::<Vec<_>>();
 
