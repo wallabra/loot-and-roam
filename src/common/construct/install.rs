@@ -83,7 +83,9 @@ pub fn ev_try_install_part_on_slot(
     }
 
     {
-        commands.entity(construct_id).add_one_related::<PartInstalledOn>(part_id);
+        commands
+            .entity(construct_id)
+            .add_one_related::<PartInstalledOn>(part_id);
     }
 
     {
