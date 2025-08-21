@@ -11,7 +11,7 @@ jobs:
     name: Cargo check
     runs-on: codeberg-small-lazy
     container:
-      image: docker.io/${{ secrets.DOCKER_USERNAME }}/loot-and-roam-ci:latest
+      image: docker.io/gustavo6046/loot-and-roam-ci:latest
 
     steps:
       - name: Run basic cargo linter
