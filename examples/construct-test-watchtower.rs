@@ -122,22 +122,41 @@ impl CubeSpitter {
     }
 }
 
-fn cube_spitter_update_system(
+// Observer
+pub fn obs_spitter_spit_action(
+    trigger: Trigger<PartAction>,
+    mut query: Query<(&Name, &mut CubeSpitter)>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    spitters: Query<(Entity, &mut CubeSpitter)>,
-    tick: Res<Time>,
     transform_query: Query<&GlobalTransform>,
 ) {
-    for (entity, mut spitter) in spitters {
-        spitter.tick_cooldown(tick.delta_secs());
-        spitter.check_auto_spit(
-            entity,
+    if let Ok((name, mut spitter)) = query.get_mut(trigger.target()) {
+        // action identity check
+        if trigger.action_tag == "spit" {
+            info!("Spitting cube at {:?}", name);
+            spitter.check_auto_spit(
+                trigger.target(),
+                &mut commands,
+                &mut meshes,
+                &mut materials,
+                transform_query,
+            );
+        }
+    }
+}
+
+fn watchtower_request_spit_system(
+    mut commands: Commands,
+    watchtowers: Query<(Entity, &WatchtowerMarker)>,
+) {
+    for (entity, _) in watchtowers {
+        dispatch_action(
             &mut commands,
-            &mut meshes,
-            &mut materials,
-            transform_query,
+            entity,
+            "spit".into(),
+            vec!["spitter".into()],
+            Box::from(()),
         );
     }
 }
@@ -194,6 +213,9 @@ fn spawn_cube_spitter_on_slot(
     spitter_entity
 }
 
+#[derive(Component)]
+struct WatchtowerMarker;
+
 /// Watchtower utility initializer.
 fn spawn_watchtower(
     request: WatchtowerSpawnRequest,
@@ -227,7 +249,9 @@ fn spawn_watchtower(
     let transform = Transform::from_translation(request.at + Vec3::Y * request.height / 2.0);
 
     // spawn watchtower
-    let watchtower = commands.spawn((name, mesh, material, transform)).id();
+    let watchtower = commands
+        .spawn((name, mesh, material, transform, WatchtowerMarker))
+        .id();
 
     for i in 1..=request.num_spitters {
         // calculate offset
@@ -304,7 +328,9 @@ fn apply_example_systems(app: &mut App) {
 
     app.add_systems(Startup, setup);
 
-    app.add_systems(Update, cube_spitter_update_system);
+    app.add_systems(Update, watchtower_request_spit_system);
+
+    app.add_observer(obs_spitter_spit_action);
 }
 
 // Resolution for exporting demo images.
