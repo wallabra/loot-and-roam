@@ -207,3 +207,28 @@ pub fn ev_try_uninstall_part(
         slot.remove_children(&[part_id]);
     }
 }
+
+/// Request the installation of a part on a slot.
+///
+/// Wraps around [TryInstallPartOnSlot].
+pub fn install_part_on_slot(commands: &mut Commands, part: Entity, slot: Entity) {
+    commands
+        .entity(part)
+        .trigger(TryInstallPartOnSlot::on(slot));
+}
+
+/// Request the installation of a part on a construct.
+///
+/// Wraps around [TryInstallPartOnConstruct].
+pub fn install_part_on_construct(commands: &mut Commands, part: Entity, construct: Entity) {
+    commands
+        .entity(part)
+        .trigger(TryInstallPartOnConstruct::on(construct));
+}
+
+/// Request the uninstallation of a part.
+///
+/// Wraps around [TryUninstallPart].
+pub fn uninstall_part(commands: &mut Commands, part: Entity) {
+    commands.entity(part).trigger(TryUninstallPart);
+}
