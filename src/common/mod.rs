@@ -69,6 +69,7 @@ impl Plugin for CommonPlugin {
             terrain::collision::TerrainCollisionPlugin,
             state::BaseStatePlugin,
             scene::SceneManagementPlugin,
+            physics::collision::CollisionPlugin,
             construct::ConstructPlugin,
         ));
     }

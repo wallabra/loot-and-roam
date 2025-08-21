@@ -1,7 +1,7 @@
 //! A minimal construct action dispatch test, for debugging.
 
 use bevy::{diagnostic::LogDiagnosticsPlugin, prelude::*};
-use loot_and_roam::prelude::*;
+use loot_and_roam::{common::construct::install::install_part_on_construct, prelude::*};
 
 // Spawn a construct with 3 debug parts
 fn setup(mut commands: Commands) {
@@ -13,7 +13,8 @@ fn setup(mut commands: Commands) {
     let slot3 = commands.spawn(part_slot("noisy".into())).id();
     commands
         .entity(construct)
-        .add_children(&[slot1, slot2, slot3]);
+        .add_related::<SlotOfConstruct>(&[slot1, slot2, slot3]);
+    // .insert(ConstructSlots::new(&[slot1, slot2, slot3]));
 
     // Install parts
     let part1 = commands
@@ -23,15 +24,9 @@ fn setup(mut commands: Commands) {
     let part3 = commands.spawn(part_tag("noisy".into())).id();
 
     {
-        commands
-            .entity(part1)
-            .trigger(TryInstallPartOnSlot::on(slot1));
-        commands
-            .entity(part2)
-            .trigger(TryInstallPartOnSlot::on(slot2));
-        commands
-            .entity(part3)
-            .trigger(TryInstallPartOnSlot::on(slot3));
+        install_part_on_construct(&mut commands, part1, construct);
+        install_part_on_construct(&mut commands, part2, construct);
+        install_part_on_construct(&mut commands, part3, construct);
     }
 
     send_debug_action(construct, &mut commands);

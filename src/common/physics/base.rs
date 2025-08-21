@@ -120,6 +120,32 @@ impl PointNetwork {
             .map(|com| com / total_mass)
             .unwrap_or(Vec3::ZERO)
     }
+
+    /// Applies an instant force to the whole PointNetwork (without applying delta time).
+    ///
+    /// The force is automatically rescaled for each point so that the total delta velocity
+    /// is the same even with differing point masses.
+    pub fn apply_instant_force(&mut self, force: Vec3) {
+        let total_mass: f32 = self.points.iter().map(|point| point.mass).sum();
+        let force_for_unit_mass = force / total_mass;
+
+        for point in &mut self.points {
+            point.apply_instant_force(force_for_unit_mass * point.mass);
+        }
+    }
+
+    /// Applies a continuous force to the whole PointNetwork (taking delta time into account).
+    ///
+    /// The force is automatically rescaled for each point so that the total delta velocity
+    /// is the same even with differing point masses.
+    pub fn apply_force_over_time(&mut self, force: Vec3, delta_secs: f32) {
+        let total_mass: f32 = self.points.iter().map(|point| point.mass).sum();
+        let force_for_unit_mass = force / total_mass;
+
+        for point in &mut self.points {
+            point.apply_force_over_time(force_for_unit_mass * point.mass, delta_secs);
+        }
+    }
 }
 
 /// The system responsible for the inertia of physics points.

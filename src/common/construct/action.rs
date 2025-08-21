@@ -1,5 +1,18 @@
 //! Part action events
 
+// Written by:
+// * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
+//
+// (c)2025 GameCircular. Under the Cooperative Non-Violent Public License.
+//
+// Loot & Roam is non-violent software: you can use, redistribute,
+// and/or modify it under the terms of the CNPLv6+ as found
+// in the LICENSE file in the source code root directory or
+// at <https://git.pixie.town/thufie/CNPL>.
+//
+// Loot & Roam comes with ABSOLUTELY NO WARRANTY, to the extent
+// permitted by applicable law.  See the CNPL for details.
+
 use std::{fmt::Debug, sync::Arc};
 
 use bevy::{
@@ -140,19 +153,6 @@ pub fn ev_dispatch_part_actions(
     }
 }
 
-#[derive(Reflect, Default, Debug, Clone)]
-pub struct DebugPrintPart {
-    extra_message: Option<String>,
-}
-
-impl DebugPrintPart {
-    pub fn with_message(message: &str) -> Self {
-        Self {
-            extra_message: Some(message.into()),
-        }
-    }
-}
-
 pub fn dispatch_action(
     commands: &mut Commands,
     construct_ref: Entity,
@@ -183,6 +183,19 @@ pub fn dispatch_action(
             },
         ),
     );
+}
+
+#[derive(Reflect, Default, Debug, Clone)]
+pub struct DebugPrintPart {
+    extra_message: Option<String>,
+}
+
+impl DebugPrintPart {
+    pub fn with_message(message: &str) -> Self {
+        Self {
+            extra_message: Some(message.into()),
+        }
+    }
 }
 
 // Observer

@@ -16,9 +16,14 @@ pub mod prelude {
     pub use super::action::{
         DebugPrintPart, PartAction, PartActionDispatchRequest, dispatch_action,
     };
-    pub use super::install::{TryInstallPartOnConstruct, TryInstallPartOnSlot, TryUninstallPart};
+    pub use super::install::{
+        TryInstallPartOnConstruct, TryInstallPartOnSlot, TryUninstallPart,
+        install_part_on_construct, install_part_on_slot, uninstall_part,
+    };
     pub use super::part::{ConstructParts, PartInstalledOn};
-    pub use super::slot::{PartInfo, PartSlotInfo, part_slot, part_tag, part_tags};
+    pub use super::slot::{
+        ConstructSlots, PartInfo, PartSlotInfo, SlotOfConstruct, part_slot, part_tag, part_tags,
+    };
 }
 
 /// Enables all generalized construct and construct part related behavior.
