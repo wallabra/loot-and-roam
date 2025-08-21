@@ -74,7 +74,7 @@ pub struct PartSlotInfo {
 /// A part which can be installed on a construct via one of its [`PartSlot`]s.
 #[derive(Component)]
 pub struct PartInfo {
-    /// WHich [`PartSlot.slot_type`]s are compatible with this part.
+    /// Which [`PartSlot.slot_type`]s are compatible with this part.
     pub tags: Vec<String>,
 }
 
