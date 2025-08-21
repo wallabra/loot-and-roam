@@ -153,19 +153,6 @@ pub fn ev_dispatch_part_actions(
     }
 }
 
-#[derive(Reflect, Default, Debug, Clone)]
-pub struct DebugPrintPart {
-    extra_message: Option<String>,
-}
-
-impl DebugPrintPart {
-    pub fn with_message(message: &str) -> Self {
-        Self {
-            extra_message: Some(message.into()),
-        }
-    }
-}
-
 pub fn dispatch_action(
     commands: &mut Commands,
     construct_ref: Entity,
@@ -196,6 +183,20 @@ pub fn dispatch_action(
             },
         ),
     );
+}
+
+
+#[derive(Reflect, Default, Debug, Clone)]
+pub struct DebugPrintPart {
+    extra_message: Option<String>,
+}
+
+impl DebugPrintPart {
+    pub fn with_message(message: &str) -> Self {
+        Self {
+            extra_message: Some(message.into()),
+        }
+    }
 }
 
 // Observer

@@ -84,9 +84,9 @@ impl CubeSpitter {
         commands: &mut Commands,
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
-        transform_query: Query<&Transform>,
+        transform_query: Query<&GlobalTransform>,
     ) {
-        let pos = transform_query.get(this_entity).unwrap().translation;
+        let pos = transform_query.get(this_entity).unwrap().translation();
         self.spit_cube(pos, commands, meshes, materials);
     }
 
@@ -96,7 +96,7 @@ impl CubeSpitter {
         commands: &mut Commands,
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<StandardMaterial>>,
-        transform_query: Query<&Transform>,
+        transform_query: Query<&GlobalTransform>,
     ) {
         if self.cooldown <= 0.0 {
             self.auto_spit(this_entity, commands, meshes, materials, transform_query);
@@ -128,7 +128,7 @@ fn cube_spitter_update_system(
     mut materials: ResMut<Assets<StandardMaterial>>,
     spitters: Query<(Entity, &mut CubeSpitter)>,
     tick: Res<Time>,
-    transform_query: Query<&Transform>,
+    transform_query: Query<&GlobalTransform>,
 ) {
     for (entity, mut spitter) in spitters {
         spitter.tick_cooldown(tick.delta_secs());
