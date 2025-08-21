@@ -70,7 +70,8 @@ impl CubeSpitter {
         // TODO: make cube spin randomly, for dramatic effect!
 
         self.cooldown = self.interval;
-        return Some(cube);
+
+        Some(cube)
     }
 
     pub fn tick_cooldown(&mut self, delta_time_secs: f32) {
