@@ -127,13 +127,13 @@ impl CubeSpitter {
 // Observer
 pub fn obs_spitter_spit_action(
     trigger: Trigger<PartAction>,
-    mut query: Query<(&Name, &mut CubeSpitter)>,
+    mut query: Query<(Option<&Name>, &mut CubeSpitter)>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     transform_query: Query<&GlobalTransform>,
 ) {
-    if let Ok((name, mut spitter)) = query.get_mut(trigger.target()) {
+    if let Ok((_maybe_name, mut spitter)) = query.get_mut(trigger.target()) {
         // action identity check
         if &trigger.action_tag == "spit" {
             spitter.check_auto_spit(
