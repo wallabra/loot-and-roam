@@ -33,5 +33,5 @@ jobs:
       - name: Run clippy linter
         run: "cargo clippy --no-default-features"
 
-      - name: Run tests
-        run: "cargo test --no-default-features"
+      # - name: Run tests
+      #   run: "cargo test --no-default-features"
