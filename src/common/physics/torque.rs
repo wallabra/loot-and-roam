@@ -38,23 +38,35 @@ impl PointNetwork {
             .sum()
     }
 
-    pub fn apply_torque_instant(&mut self, torque: Vec3) {
-        if torque == Vec3::ZERO {
+    /// Applies an instant rotational force (angular impulse).
+    pub fn apply_angular_impulse(&mut self, angular_impulse: Vec3) {
+        if angular_impulse == Vec3::ZERO {
             return;
         }
 
-        let com = self.center_of_mass();
-        let strength = torque.length();
-        let axis = torque.normalize();
-        let moi = self.moment_of_inertia_along_axis(axis);
+        let center_of_mass = self.center_of_mass();
+        let impulse_strength = angular_impulse.length();
+        let impulse_axis = angular_impulse.normalize();
+        let moment_of_inertia = self.moment_of_inertia_along_axis(impulse_axis);
 
         for point in self.points.iter_mut() {
-            let linear_dir = axis.cross(point.pos - com);
-            point.vel += linear_dir * strength / moi;
+            // -- physics note --
+            // impulse_axis is a unit vector
+            // multiplying it by the square of distance from rotational axis crossing COM makes it dist^2
+            // multiplying it by the 'impulse strength' (magnitude of angular_impulse) makes it dist^4*mass
+            //   (this is because unit vector has no mass or vel. information, simply giving a magnitude its direction)
+            // dividing it by moment_of_inertia (which is dist^2*mass) makes it dist^2 (an acceleration)
+            // accelerations within a single tick are applied directly to velocity in the Loot & Roam physics engine
+
+            let linear_delta_velocity =
+                impulse_axis.cross((point.pos - center_of_mass).powf(2.0)) * impulse_strength;
+
+            point.vel += linear_delta_velocity / moment_of_inertia;
         }
     }
 
-    pub fn apply_torque_continuous(&mut self, torque: Vec3, delta_time: Duration) {
-        self.apply_torque_instant(torque * delta_time.as_secs_f32());
+    /// Applies a rotational force (torque) spread over a tick's duration.
+    pub fn apply_torque(&mut self, torque: Vec3, delta_time: Duration) {
+        self.apply_angular_impulse(torque * delta_time.as_secs_f32());
     }
 }
