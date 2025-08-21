@@ -559,10 +559,9 @@ fn main() {
 
     // engine systems
     app.add_plugins((
-        FrameTimeDiagnosticsPlugin::default(),
-        BasicPhysicsPlugin,
-        CollisionPlugin,
+        CommonPlugin,
         AppPlugin,
+        FrameTimeDiagnosticsPlugin::default(),
     ));
 
     // system registration
