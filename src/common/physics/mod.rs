@@ -61,8 +61,8 @@ pub mod prelude {
     pub use super::forces::{AirDrag, Gravity};
     pub use super::spring::{NormalSpring, Spring, SpringMode, SpringNetwork};
     pub use super::volume::{
-        AABB, CollisionInfo, PhysicsVolume, SphereDef, VolumeCollection, VolumeCollision,
-        VolumeInfo, VolumeType,
+        AABB, CollisionInfo, PhysicsVolume, SphereDef, VolumeCloneSpawner, VolumeCollection,
+        VolumeCollision, VolumeInfo, VolumeType,
     };
     pub use super::water::WaterPhysics;
 }
