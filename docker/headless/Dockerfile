@@ -34,5 +34,6 @@ RUN \
     echo '' >src/lib.rs && \
     cargo build --no-default-features
 
-# Clean up Alpine package cache
+# Cleanup
+RUN rm -r src
 RUN rm -rf /var/cache/apk/*
