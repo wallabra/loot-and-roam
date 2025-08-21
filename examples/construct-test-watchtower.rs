@@ -148,11 +148,7 @@ pub fn obs_spitter_spit_action(
     }
 }
 
-fn spitter_cooldown_system(
-    mut commands: Commands,
-    spitters: Query<&mut CubeSpitter>,
-    delta_time: Res<Time>,
-) {
+fn spitter_cooldown_system(spitters: Query<&mut CubeSpitter>, delta_time: Res<Time>) {
     for mut spitter in spitters {
         spitter.tick_cooldown(delta_time.delta_secs());
     }
