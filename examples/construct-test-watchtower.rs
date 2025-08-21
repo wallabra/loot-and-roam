@@ -249,7 +249,9 @@ fn spawn_watchtower(
             ))
             .id();
 
-        commands.entity(watchtower).add_child(slot_entity);
+        commands
+            .entity(watchtower)
+            .add_one_related::<SlotOfConstruct>(slot_entity);
 
         // spawn spitter and add it to slot
         let this_interval = interval_distrib.sample(&mut rand::rng());
