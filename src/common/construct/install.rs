@@ -83,8 +83,7 @@ pub fn ev_try_install_part_on_slot(
     }
 
     {
-        let mut part = commands.entity(part_id);
-        part.insert(PartInstalledOn::new(construct_id));
+        commands.entity(construct_id).add_one_related::<PartInstalledOn>(part_id);
     }
 
     {
