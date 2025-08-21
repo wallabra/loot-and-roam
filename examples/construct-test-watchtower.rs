@@ -577,30 +577,8 @@ fn spawn_cube(
         })),
     );
 
-    // generate point network visualization as little children balls
-    let children = (0..points.points.len())
-        .map(|point_idx| {
-            let point_mesh = meshes.add(Sphere::new(0.05));
-            let point_material = materials.add(StandardMaterial {
-                base_color: Color::srgba_u8(255, 255, 48, 200),
-                alpha_mode: AlphaMode::Blend,
-                ..Default::default()
-            });
-
-            // child point
-            commands
-                .spawn((
-                    PointAttach { point_idx },
-                    Mesh3d(point_mesh),
-                    MeshMaterial3d(point_material),
-                    Transform::default(),
-                ))
-                .id()
-        })
-        .collect::<Vec<_>>();
-
     // create cube entity
-    let cube = commands
+    commands
         .spawn((
             CubeBundle::builder()
                 .mesh(Mesh3d(cube_mesh))
@@ -625,11 +603,7 @@ fn spawn_cube(
                 .unwrap(),
             Lifetime(6.0),
         ))
-        .id();
-
-    commands.entity(cube).add_children(&children);
-
-    cube
+        .id()
 }
 
 fn main() {
