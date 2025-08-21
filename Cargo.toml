@@ -35,7 +35,7 @@ features = [
   # "bevy_ui",                     # UI toolkit [TODO]
   # "bevy_ui_picking_backend",     # UI node picking (selection by cursor) [TODO]
   "bevy_window",                 # Window management
-  "bevy_winit",                  # Cross-platform window management support
+  #"bevy_winit",                  # Cross-platform window management support
 
   # Low-level tunables
   "std",            # Use the Rust standard library (important!)
@@ -45,10 +45,10 @@ features = [
   # "custom_cursor",  # Support custom cursors [TODO]
 
   # Platform-Specific
-  "x11",                   # Linux: Support X11 windowing system
-  "android_shared_stdcxx", # Android: use shared C++ library
-  "android-game-activity", # Android: use GameActivity instead of NativeActivity
-  "webgl2",                # Web: use WebGL2 instead of WebGPU
+  #"x11",                   # Linux: Support X11 windowing system (NOTE: set in 'loot-and-roam/x11')
+  #"android_shared_stdcxx", # Android: use shared C++ library
+  #"android-game-activity", # Android: use GameActivity instead of NativeActivity
+  #"webgl2",                # Web: use WebGL2 instead of WebGPU (NOTE: set in 'loot-and-roam/web')
 
   # Built-in Data
   "default_font",       # Built-in default font for UI (Fira Mono)
@@ -76,7 +76,7 @@ features = [
   # "reflect_functions",    # Function reflection support
 
   # Platform-Specific
-  "wayland",                  # Linux: Support Wayland windowing system
+  #"wayland",                  # Linux: Support Wayland windowing system (NOTE: set in 'loot-and-roam/wayland')
   # "accesskit_unix",           # UNIX-like: AccessKit Accessibility Framework support
   # "android-native-activity",  # Android: Use NativeActivity instead of GameActivity
   # "spirv_shader_passthrough", # Vulkan: allow direct loading of SPIR-V shader blobs without validation
@@ -96,7 +96,7 @@ features = [
   # "pbr_transmission_textures", # Support textures for light transimssion (translucency)
 
   # Development features
-  "dynamic_linking",     # Dynamic linking for faster compile-times
+  # "dynamic_linking",     # Dynamic linking for faster compile-times (NOTE: set in loot-and-roam/dynamic_linking)
   # "asset_processor",     # Enable asset processing support [TODO]
   # "bevy_dev_tools",      # Extra dev functionality (like FPS overlay)
   # "bevy_remote",         # Enable BRP (Bevy Remote Protocol) for integration with editors and external dev tools
@@ -192,3 +192,11 @@ opt-level = "s"
 # Strip all debugging information from the binary to slightly reduce file size.
 strip = "debuginfo"
 
+[features]
+default = ["winit", "x11", "wayland", "dynamic_linking"]
+
+dynamic_linking = ["bevy/dynamic_linking"]
+x11 = ["bevy/x11"]
+wayland = ['bevy/wayland']
+web = ["bevy/web", "bevy/webgl2"]
+winit = ["bevy/bevy_winit"]
