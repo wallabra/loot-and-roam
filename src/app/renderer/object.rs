@@ -20,7 +20,6 @@
 
 use bevy::prelude::*;
 
-use crate::common::physics::base::PointNetwork;
 
 /// Camera target component.
 #[derive(Component, Default)]

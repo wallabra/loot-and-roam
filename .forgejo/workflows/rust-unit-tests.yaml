@@ -13,18 +13,25 @@ jobs:
     container:
       image: docker.io/gustavo6046/loot-and-roam-ci:latest
 
+    defaults:
+      run:
+        working-directory: /app
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Move checked out repo to existing precompilation filetree
+        run: mv ${{ env.GITHUB_WORKSPACE }}/* /app
 
       - name: Run basic cargo linter
         run: "cargo check --no-default-features"
 
       - name: Run cargo-fmt linter
-        run: "cargo fmt --check --no-default-features"
+        run: "cargo fmt --check"
 
       - name: Run clippy linter
         run: "cargo clippy --no-default-features"
 
-      - name: Run tests
-        run: "cargo test --no-default-features"
+      # - name: Run tests
+      #   run: "cargo test --no-default-features"

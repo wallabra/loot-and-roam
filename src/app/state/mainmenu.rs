@@ -49,8 +49,10 @@ fn main_menu_cleanup(
 
 fn input_handler_main_menu(
     keys: Res<ButtonInput<KeyCode>>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    q_windows: Query<&Window, With<PrimaryWindow>>,
+    // TODO: use when implementing main menu
+    _mouse_buttons: Res<ButtonInput<MouseButton>>,
+    // TODO: use when implementing main menu
+    _q_windows: Query<&Window, With<PrimaryWindow>>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
@@ -58,7 +60,6 @@ fn input_handler_main_menu(
         info!("Leaving main menu for GameState::Start");
         next_game_state.set(GameState::Start);
         next_app_state.set(AppState::InGame);
-        return;
     }
 }
 

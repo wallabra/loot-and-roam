@@ -1,6 +1,7 @@
 //! # Water physics
 //!
-//! Buoyancy, drag, and .
+//! Water-related forces, such as buoyancy and drag, arguably important in a
+//! naval combat game (don't quote me on that).
 
 // Written by:
 // * Gustavo Ramos Rehermann <rehermann6046@gmail.com>
@@ -27,7 +28,7 @@ use super::{
 ///
 /// This includes both drag and buoyancy.
 ///
-/// Requires ]PointNetwork] and [VolumeCollection].
+/// Requires [PointNetwork] and [VolumeCollection].
 #[derive(Component, Clone)]
 pub struct WaterPhysics {
     /// Drag force factor.
