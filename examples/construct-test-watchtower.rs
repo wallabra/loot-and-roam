@@ -601,7 +601,7 @@ fn spawn_cube(
                 })
                 .build()
                 .unwrap(),
-            Lifetime(6.0),
+            Lifetime(9.0),
         ))
         .id()
 }
