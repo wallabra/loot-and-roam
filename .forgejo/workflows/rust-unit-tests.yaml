@@ -14,6 +14,9 @@ jobs:
       image: docker.io/gustavo6046/loot-and-roam-ci:latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Run basic cargo linter
         run: "cargo check --no-default-features"
 
