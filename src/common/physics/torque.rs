@@ -60,7 +60,7 @@ impl PointNetwork {
             // delta velocities within a single tick are applied directly to velocity, therefore lack a time component
 
             let linear_delta_velocity =
-                impulse_axis.cross((point.pos - center_of_mass).powf(2.0)) * impulse_strength;
+                impulse_axis.cross(point.pos - center_of_mass).powf(2.0) * impulse_strength;
 
             point.vel += linear_delta_velocity / moment_of_inertia;
         }
