@@ -468,9 +468,9 @@ fn setup(
         commands.spawn((
             ImageExport(export_sources.add(ImageExportSource(output_texture_handle.clone()))),
             ImageExportSettings {
-                // Frames will be saved to "./out/soft-cube-buoyancy/[#####].png"
+                // Frames will be saved to "./out/construct-test-watchtower/[#####].png"
                 // [NOTE] update output dir when grafting this code onto other examples
-                output_dir: "out/soft-cube-buoyancy/".into(),
+                output_dir: "out/construct-test-watchtower/".into(),
 
                 // Choose "exr" for HDR renders (requires feature on crate bevy_image_export)
                 extension: "png".into(),
@@ -689,7 +689,7 @@ fn main() {
     }
 
     // command to render to video:
-    // $ ffmpeg -r 60 -i out/soft-cube-buoyancy/%05d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out/soft-cube-buoyancy.mp4
+    // $ ffmpeg -r 60 -i out/construct-test-watchtower/%05d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out/construct-test-watchtower.mp4
     // command to reset demo recordings:
     // $ rm -r out/
 }
