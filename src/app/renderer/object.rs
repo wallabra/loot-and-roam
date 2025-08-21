@@ -20,7 +20,6 @@
 
 use bevy::prelude::*;
 
-
 /// Camera target component.
 #[derive(Component, Default)]
 pub struct CameraFocus {
