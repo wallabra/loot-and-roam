@@ -21,7 +21,7 @@ jobs:
         run: "cargo check --no-default-features"
 
       - name: Run cargo-fmt linter
-        run: "cargo fmt --check --no-default-features"
+        run: "cargo fmt --check"
 
       - name: Run clippy linter
         run: "cargo clippy --no-default-features"
