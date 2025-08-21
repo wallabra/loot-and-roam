@@ -363,7 +363,11 @@ fn apply_example_systems(app: &mut App) {
 
     app.add_systems(
         Update,
-        (watchtower_request_spit_system, spitter_cooldown_system),
+        (
+            watchtower_request_spit_system,
+            spitter_cooldown_system,
+            lifetime_system,
+        ),
     );
 
     app.add_observer(obs_spitter_spit_action);
@@ -507,6 +511,20 @@ impl<M: Material> CubeBundle<M> {
     }
 }
 
+// limited lifetime entities
+#[derive(Component)]
+struct Lifetime(pub f32);
+
+fn lifetime_system(mut commands: Commands, query: Query<(Entity, &mut Lifetime)>, time: Res<Time>) {
+    for (entity, mut lifetime) in query {
+        lifetime.0 -= time.delta_secs();
+
+        if lifetime.0 <= 0.0 {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
 fn spawn_cube(
     at: Vec3,
     commands: &mut Commands<'_, '_>,
@@ -584,27 +602,30 @@ fn spawn_cube(
 
     // create cube entity
     let cube = commands
-        .spawn((CubeBundle::builder()
-            .mesh(Mesh3d(cube_mesh))
-            .material(MeshMaterial3d(cube_material))
-            .transform(Transform::default())
-            .points(points)
-            .springs(springs)
-            .volumes(volumes)
-            .water_physics(WaterPhysics {
-                water_level: -1.5,
+        .spawn((
+            CubeBundle::builder()
+                .mesh(Mesh3d(cube_mesh))
+                .material(MeshMaterial3d(cube_material))
+                .transform(Transform::default())
+                .points(points)
+                .springs(springs)
+                .volumes(volumes)
+                .water_physics(WaterPhysics {
+                    water_level: -1.5,
 
-                // exaggerated for demonstrative purposes
-                buoyancy_factor: 4.0,
+                    // exaggerated for demonstrative purposes
+                    buoyancy_factor: 4.0,
 
-                ..Default::default()
-            })
-            .gravity(Gravity {
-                // low grav for development purposes
-                force: Vec3::Y * -3.0,
-            })
-            .build()
-            .unwrap(),))
+                    ..Default::default()
+                })
+                .gravity(Gravity {
+                    // low grav for development purposes
+                    force: Vec3::Y * -3.0,
+                })
+                .build()
+                .unwrap(),
+            Lifetime(6.0),
+        ))
         .id();
 
     commands.entity(cube).add_children(&children);
